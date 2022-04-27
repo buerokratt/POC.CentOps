@@ -6,7 +6,7 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["CentOps.Api/DMR.Api.csproj", "CentOps.Api/"]
+COPY ["CentOps.Api/CentOps.Api.csproj", "CentOps.Api/"]
 RUN dotnet restore "CentOps.Api/CentOps.Api.csproj"
 COPY . .
 WORKDIR "/src/CentOps.Api"
