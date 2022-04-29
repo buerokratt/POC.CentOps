@@ -17,31 +17,30 @@ APIs will exist to allow Administrators of the Bürokratt platform to add a Chat
 These APIs will maintain a data structure for each Chatbot:
 
 | Property         |                  Description                                |                   Possible Values                    |
-|------------------|------------------------------------------------------------:|------------------------------------------------------|
+|------------------|-------------------------------------------------------------|------------------------------------------------------|
 | uri              | The endpoint for the specified chatbot                      | 'https://chatbot1:9000', 'https://chatbot2:9000/api' |
-| ministry         | The Id of the Ministry the chatbot is handling traffic for  | interior, culture, justice                           |
-| status           | The current status of the chatbot                           | 0 (Unknown), 1 (Online), 2 (Offline)                 |
-| version          | The current version of the chatbot                          | 1.0.0, 2.1.0, 3.2.1                                  |
-
-* [?]Is this supporting Institution chatbots too - or is that the Ministry chatbots only?
-* [?]Instances - we spoke about monitoring individual instances of a ministry chatbot here.  Do you see *uri* being a load balancer address for the ministry endpoint or the address of each individual chatbot for that ministry?)
-* [?]Statuses are a 'straw man' here and don't need to be numeric in nature.
+| name             | name of the chatbot handling traffic                        | interior, education, education-kesklinna-kool        |
+| status           | The current status of the chatbot                           | 'Unknown', 'Online', 'Offline'                       |
+| versions         | A collection of chatbot components and their versions       | ```[{ 'name': 'component1', 'version': '1.0.0'}]```  |
+| type             | Indication whether this is a ministry bot or institution bot| 'ministry', 'institution'                            |
 
 ### Authentication
 
+For service to service communication 
+
 CRUD APIs will require authentication to allow them to be contacted.  Likely certain APIs will have separate roles to others...
 
-* For instance enrolment and updating of Chatbot data
-* Querying the chatbot store.
+APIs which are called by other services will rely on mTLS as a means of authentication.  e.g. DMR calling CentOps to determine the endpoint for a particular Chatbot name.
 
-* [?]What exactly is this OAuth? Something else?. MTLS? 
-* [?]Where are users authenticating?  Do they authenticate interactively or is this something like API keys?
+* [?] do we see this as something Kubernetes will handle for us in a way that is transparent to the service?  Or is this something we specifically need to support in the service itself?
 
-### Scenarios
+There maybe use cases which require interactive authentication (user based access).  There is a system already in place to use user authentication called TARA which will handle this.
 
-> TBD
-> - [?] can we drill down on this, who is doing what here when it comes to enrolling a chatbot into the system?
+### API Scenarios
 
+#### Onboarding a new Chatbot
+
+* [?] I'd like to understand this scenario much better.  How is this initiated?  Who/What is doing this?
 
 ## Monitoring
 
@@ -50,9 +49,9 @@ CentOps will 'observe' chatbots for signals they are not operating correctly.  T
 1. Logging from the Chatbot itself.
 2. Calls routed through the DMR will get HTTP response codes.
 
-### Scenarios
+Data from Chatbot logs will be stored in CentOps to be analysed to determine how to proceed, either taking the chatbot out of routing or notifying owners of issues.
 
-> TBD
+### Monitoring Scenarios
 
 #### Handling a chatbot which is failing
 
@@ -60,5 +59,15 @@ If enough of an indication is received to indicate the chatbot is having difficu
 
 #### Bringing a chatbot back online
 
-Once the situation has been resolved the administrator can bring the chatbot back online manually by changing the state of the bot using the API.
-[?]Is this what we envisage here - or something more automatic perhaps using the [Circuit Breaker Pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker#:~:text=The%20Circuit%20Breaker%20pattern%20prevents%20an%20application%20from,to%20invoke%20an%20operation%20through%20a%20circuit%20breaker)?
+In order to bring a chatbot which is failing back online, a mechanism to test the offline bot with traffic to bring it back 'Online' will be required.
+
+We can look at the [Circuit Breaker Pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker#:~:text=The%20Circuit%20Breaker%20pattern%20prevents%20an%20application%20from,to%20invoke%20an%20operation%20through%20a%20circuit%20breaker) for some pointers here.
+
+
+## Chatbot Maintenance
+
+### Versioning
+
+CentOps will also hold Chatbot component versioning information.  Chatbots themselves can find out if their components are up to date and react accordingly.
+
+* [?] Would this be a notification for Chatbot maintainers or some automatic process?
