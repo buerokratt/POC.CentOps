@@ -17,7 +17,7 @@ check_python() {
       if which python >/dev/null 2>&1; then
           PYTHON_REF="python"
       else
-          echo "Python is not installed.  Install Python 3.10 and try again"
+          echo "Python is not installed.  Install Python and try again"
           exit 1
       fi
     fi
