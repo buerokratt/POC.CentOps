@@ -6,7 +6,7 @@ This document contains information for developers of the Central Operations (Cen
 
 ### Detect-Secrets Pre-commit Hook
 
-This repo uses the [Yelp detect-secrets](https://github.com/Yelp/detect-secrets) tool to scan commits and ensure they don't accidentally contain secrets which are private.
+This repo uses the [Yelp detect-secrets](https://github.com/Yelp/detect-secrets) tool to scan commits and ensure they don't accidentally contain secrets which should never be persisted in source control.
 
 The scripts have been slightly tinkered with (very slightly) but the originals can be found [here](https://github.com/wbreza/pre-commit-hooks/tree/main/detect-secrets).
 
