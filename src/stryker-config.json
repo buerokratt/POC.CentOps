@@ -1,0 +1,11 @@
+{
+    "stryker-config": {
+      "test-projects": [ "./CentOps.UnitTests/CentOps.UnitTests.csproj" ],
+      "reporters": [
+        "progress",
+        "cleartext",
+        "html"
+      ],
+      "thresholds": { "high": 90, "low": 60, "break": 60 }
+    }  
+  }
