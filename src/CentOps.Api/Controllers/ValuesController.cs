@@ -17,9 +17,9 @@ namespace CentOps.Api.Controllers
 
         // GET api/<ValuesController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public int Get(int id)
         {
-            return "value";
+            return id;
         }
     }
 }

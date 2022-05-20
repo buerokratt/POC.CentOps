@@ -29,14 +29,11 @@ namespace CentOps.UnitTests
         [InlineData(10000000)]
         public void GetByIdReturnsExpected(int id)
         {
-            // Arrange
-            var expectedResult = "value";
-
             // Act
             var result = sut.Get(id);
 
             // Assert
-            Assert.Equal(expectedResult, result);
+            Assert.Equal(id, result);
         }
     }
 }
