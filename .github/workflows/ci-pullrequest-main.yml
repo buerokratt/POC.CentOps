@@ -23,7 +23,7 @@ jobs:
       run: dotnet restore src/*.sln
         
     - name: Dotnet Format
-      run: dotnet format src/*.sln --no-restore
+      run: dotnet format src/*.sln --no-restore --verify-no-changes
       
     - name: Dotnet Build
       run: dotnet build src/*.sln --no-restore
