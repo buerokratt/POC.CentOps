@@ -39,7 +39,7 @@ jobs:
       run: cp src/*.UnitTests/TestResults/**/coverage.cobertura.xml coverage.cobertura.xml
       
     - name: Code Coverage Summary
-      uses: irongut/CodeCoverageSummary@v1.2.0
+      uses: irongut/CodeCoverageSummary@5088d5eb315a46ff785c607078606c0b9107e0b6
       with:
         filename: coverage.cobertura.xml
         fail_below_min: true
@@ -60,7 +60,7 @@ jobs:
         path: coverage.cobertura.xml
         
     - name: Add Coverage PR Comment
-      uses: marocchino/sticky-pull-request-comment@v2.2.0
+      uses: marocchino/sticky-pull-request-comment@39c5b5dc7717447d0cba270cd115037d32d28443
       if: github.event_name == 'pull_request'
       with:
         recreate: true
