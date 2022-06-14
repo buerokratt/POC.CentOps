@@ -82,8 +82,7 @@ CentOps is one of the few components being in total control of Buerokratt's core
 | Publish information about outages                                       |        Buerokratt Core        |          |
 | Notify participants about outages                                       |        Buerokratt Core        |          |
 
-
-# Monitoring
+### Monitoring
 
 | Service                                                             |  Requests from  | Priority |
 |---------------------------------------------------------------------|:---------------:|:--------:|
