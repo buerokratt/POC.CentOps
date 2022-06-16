@@ -1,0 +1,327 @@
+openapi: 3.0.3
+info:
+  title: Central Operations API
+  version: '1.0'
+  license:
+    name: MIT
+    url: 'https://opensource.org/licenses/MIT'
+  description: Component responsible for enrolling and monitoring participants in the Bürokratt network.
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /admin/participants:
+    post:
+      summary: ''
+      operationId: post-participants
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Participant'
+      description: Admin creates new participant
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Participant'
+      tags:
+        - participants
+    parameters: []
+    get:
+      summary: ''
+      operationId: get-admin-participants
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Participant'
+      description: ''
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: type
+        - schema:
+            type: string
+          in: query
+          name: institutionId
+      tags:
+        - participants
+  '/admin/participants/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    delete:
+      summary: ''
+      operationId: delete-admin-participant
+      responses:
+        '204':
+          description: No Content
+      description: ''
+      tags:
+        - participants
+    put:
+      summary: ''
+      operationId: put-admin-participant
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Participant'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Participant'
+      tags:
+        - participants
+    get:
+      summary: ''
+      operationId: get-admin-participant
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Participant'
+      description: ''
+      tags:
+        - participants
+  /admin/institutions:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Institution'
+      operationId: get-private-api-institutions
+      tags:
+        - institutions
+    post:
+      summary: ''
+      operationId: post-private-api-institutions
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institution'
+      description: Admin can create new institutions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Institution'
+      tags:
+        - institutions
+    parameters: []
+  '/admin/institutions/{id}':
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institution'
+      operationId: get-private-api-institution
+      tags:
+        - institutions
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    put:
+      summary: ''
+      operationId: put-admin-institution
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institution'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Institution'
+      tags:
+        - institutions
+    delete:
+      summary: ''
+      operationId: delete-admin-institution
+      responses:
+        '204':
+          description: No Content
+      tags:
+        - institutions
+  /participants:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicParticipant'
+      operationId: get-public-api-participants
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: type
+        - schema:
+            type: string
+          in: query
+          name: institutionId
+        - $ref: '#/components/parameters/X-Api-Key'
+      description: ''
+      tags:
+        - public-participants
+    parameters: []
+  /institutions:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicInstitution'
+      operationId: get-public-api-institutions
+      parameters:
+        - $ref: '#/components/parameters/X-Api-Key'
+      tags:
+        - public-institutions
+    parameters: []
+components:
+  schemas:
+    Participant:
+      title: Participant
+      type: object
+      description: ''
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 141ee581-6d97-4845-968a-43f41464c677
+          readOnly: true
+        type:
+          type: string
+          enum:
+            - Dmr
+            - Chatbot
+            - Classifier
+          example: Chatbot
+        institutionId:
+          type: string
+        host:
+          type: string
+          example: 'http://nlib.gov:12133'
+        apiKey:
+          type: string
+      required:
+        - id
+        - type
+        - institutionId
+        - host
+        - apiKey
+    PublicParticipant:
+      title: Participant
+      type: object
+      description: ''
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 141ee581-6d97-4845-968a-43f41464c677
+          readOnly: true
+        type:
+          type: string
+          enum:
+            - Dmr
+            - Chatbot
+            - Classifier
+          example: Chatbot
+        institutionId:
+          type: string
+        host:
+          type: string
+          example: 'http://nlib.gov:12133'
+      required:
+        - id
+        - type
+        - institutionId
+        - host
+    Institution:
+      title: Institution
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+            - Active
+            - Disabled
+      required:
+        - id
+        - name
+        - status
+    PublicInstitution:
+      title: Institution
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+            - Active
+            - Disabled
+      required:
+        - id
+        - name
+        - status
+  parameters:
+    X-Api-Key:
+      name: X-Api-Key
+      in: header
+      required: true
+      schema:
+        type: string
+      description: Temporary solution to get started with authentication. Key is provided on registration.
