@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Central Operations API
-  version: '1.0'
+  version: 0.1.0
   license:
     name: MIT
     url: 'https://opensource.org/licenses/MIT'
@@ -20,18 +20,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Participant'
-      description: Admin creates new participant
+      description: (For Admin) Create a new participant
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Participant'
+        description: ''
       tags:
-        - participants
+        - admin/participants
     parameters: []
     get:
       summary: ''
-      operationId: get-admin-participants
+      operationId: admin-get-participants
       responses:
         '200':
           description: OK
@@ -41,18 +42,20 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Participant'
-      description: ''
+      description: (For Admin) Get all participants with sensitive info in payload (e.g. apiKey)
       parameters:
         - schema:
             type: string
           in: query
           name: type
+          description: Participant type
         - schema:
             type: string
           in: query
           name: institutionId
+          description: Institution ID
       tags:
-        - participants
+        - admin/participants
   '/admin/participants/{id}':
     parameters:
       - schema:
@@ -60,15 +63,16 @@ paths:
         name: id
         in: path
         required: true
+        description: Participant ID
     delete:
       summary: ''
       operationId: delete-admin-participant
       responses:
         '204':
           description: No Content
-      description: ''
+      description: (For Admin) Delete participant by id
       tags:
-        - participants
+        - admin/participants
     put:
       summary: ''
       operationId: put-admin-participant
@@ -84,8 +88,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Participant'
+      description: (For Admin) Update specific participant
       tags:
-        - participants
+        - admin/participants
     get:
       summary: ''
       operationId: get-admin-participant
@@ -96,9 +101,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Participant'
-      description: ''
+      description: (For Admin) Get specific participant by id with sensitive info in payload (e.g. apiKey)
       tags:
-        - participants
+        - admin/participants
   /admin/institutions:
     get:
       summary: Your GET endpoint
@@ -112,8 +117,9 @@ paths:
                 items:
                   $ref: '#/components/schemas/Institution'
       operationId: get-private-api-institutions
+      description: (For Admin) Get all institutions
       tags:
-        - institutions
+        - admin/institutions
     post:
       summary: ''
       operationId: post-private-api-institutions
@@ -124,14 +130,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Institution'
-      description: Admin can create new institutions
+      description: (For Admin) Create a new institution
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Institution'
       tags:
-        - institutions
+        - admin/institutions
     parameters: []
   '/admin/institutions/{id}':
     get:
@@ -144,14 +150,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Institution'
       operationId: get-private-api-institution
+      description: (For Admin) Get specific institution by id
       tags:
-        - institutions
+        - admin/institutions
     parameters:
       - schema:
           type: string
         name: id
         in: path
         required: true
+        description: Institution ID
     put:
       summary: ''
       operationId: put-admin-institution
@@ -167,16 +175,18 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Institution'
+      description: (For Admin) Update specific institution
       tags:
-        - institutions
+        - admin/institutions
     delete:
       summary: ''
       operationId: delete-admin-institution
       responses:
         '204':
           description: No Content
+      description: (For Admin) Delete institution by id
       tags:
-        - institutions
+        - admin/institutions
   /participants:
     get:
       summary: Your GET endpoint
@@ -195,14 +205,16 @@ paths:
             type: string
           in: query
           name: type
+          description: Participant type
         - schema:
             type: string
           in: query
           name: institutionId
+          description: Institution ID
         - $ref: '#/components/parameters/X-Api-Key'
-      description: ''
+      description: (For Participants) Get all participants with sensitive info removed from payload
       tags:
-        - public-participants
+        - participants
     parameters: []
   /institutions:
     get:
@@ -219,8 +231,9 @@ paths:
       operationId: get-public-api-institutions
       parameters:
         - $ref: '#/components/parameters/X-Api-Key'
+      description: (For Participants) Get all institutions with sensitive info removed from payload
       tags:
-        - public-institutions
+        - institutions
     parameters: []
 components:
   schemas:
@@ -255,7 +268,7 @@ components:
         - host
         - apiKey
     PublicParticipant:
-      title: Participant
+      title: PublicParticipant
       type: object
       description: ''
       properties:
@@ -282,7 +295,7 @@ components:
         - institutionId
         - host
     Institution:
-      title: Institution
+      title: PublicInstitution
       type: object
       properties:
         id:
@@ -325,3 +338,12 @@ components:
       schema:
         type: string
       description: Temporary solution to get started with authentication. Key is provided on registration.
+tags:
+  - name: admin/institutions
+    description: Institution management
+  - name: admin/participants
+    description: Participant management
+  - name: institutions
+    description: Institutions queryable by Participants
+  - name: participants
+    description: Participants queryable by Participants
