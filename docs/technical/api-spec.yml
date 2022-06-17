@@ -247,6 +247,10 @@ components:
           format: uuid
           example: 141ee581-6d97-4845-968a-43f41464c677
           readOnly: true
+        name:
+          type: string
+          example: NLib
+          readOnly: false
         type:
           type: string
           enum:
@@ -276,6 +280,10 @@ components:
           type: string
           format: uuid
           example: 141ee581-6d97-4845-968a-43f41464c677
+          readOnly: true
+        name:
+          type: string
+          example: NLib
           readOnly: true
         type:
           type: string
