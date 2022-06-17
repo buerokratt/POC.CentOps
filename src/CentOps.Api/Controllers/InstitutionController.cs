@@ -4,7 +4,7 @@ namespace CentOps.Api.Controllers
 {
     [Route("admin/institutions")]
     [ApiController]
-    public class Institution : ControllerBase
+    public class InstitutionController : ControllerBase
     {
     }
 }
