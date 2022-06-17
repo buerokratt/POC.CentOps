@@ -1,4 +1,6 @@
 ﻿using CentOps.Api.Controllers;
+using CentOps.Api.Services;
+using Moq;
 
 namespace CentOps.UnitTests
 {
@@ -7,7 +9,7 @@ namespace CentOps.UnitTests
         [Fact]
         public void CreatesParticipantControllerWithoutThrowing()
         {
-            _ = new InstitutionController();
+            _ = new InstitutionController(new Mock<IInsitutionStore>().Object);
         }
     }
 }
