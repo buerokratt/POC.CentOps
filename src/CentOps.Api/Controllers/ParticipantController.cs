@@ -1,4 +1,5 @@
-﻿using CentOps.Api.Services;
+﻿using CentOps.Api.Models;
+using CentOps.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentOps.Api.Controllers
@@ -12,6 +13,13 @@ namespace CentOps.Api.Controllers
         public ParticipantController(IParticipantStore store)
         {
             _store = store;
+        }
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<Participant>>> Get()
+        {
+            return Ok(await _store.GetAll().ConfigureAwait(false));
         }
     }
 }

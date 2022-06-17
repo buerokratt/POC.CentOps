@@ -1,4 +1,5 @@
-﻿using CentOps.Api.Services;
+﻿using CentOps.Api.Models;
+using CentOps.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentOps.Api.Controllers
@@ -12,6 +13,12 @@ namespace CentOps.Api.Controllers
         public InstitutionController(IInsitutionStore store)
         {
             _store = store;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Institution>>> Get()
+        {
+            return Ok(await _store.GetAll().ConfigureAwait(false));
         }
     }
 }
