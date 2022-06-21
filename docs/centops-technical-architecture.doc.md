@@ -10,12 +10,12 @@ Full scope of CentOps (planned) features and business architecture can be found 
 
 # Technical stack
 
-
-| Types of services               | Technical stack                                                                                | Comment                                                             |
-|---------------------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| All application functionalities | Custom .Net applications                                                                       | Possible to replace with BYK-stack or other applicable components   |
-| Database                        | [InMemory](https://docs.microsoft.com/en-us/ef/core/providers/in-memory/?tabs=dotnet-core-cli) | Will at some point be replaced with some persistent database engine |
-| Logs                            | [Grafana Loki](https://grafana.com/oss/loki/)                                                  | Only fetching logs from Participants is currently in scope          |
+| Types of services               | Technical stack                                                                                | Comment                                                                                      |
+| ------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| All application functionalities | Custom .Net applications                                                                       | Possible to replace with BYK-stack or other applicable components                            |
+| Database for testing purposes   | [InMemory](https://docs.microsoft.com/en-us/ef/core/providers/in-memory/?tabs=dotnet-core-cli) | Will at some point be replaced with some persistent database engine                          |
+| Persistent storage              | [Cosmos DB](https://en.wikipedia.org/wiki/Cosmos_DB)                                           | Not sure that NoSQL database is the best fit for persistent storage but we'll use it for now |
+| Logs                            | [Grafana Loki](https://grafana.com/oss/loki/)                                                  | Only fetching logs from Participants is currently in scope                                   |
 
 # Features
 
@@ -36,7 +36,7 @@ Full scope of CentOps (planned) features and business architecture can be found 
 ### Required functionalities
 
 | Service                                                     | Allowed for | Uses database | Uses API key | Comment                                                                                                         |
-|-------------------------------------------------------------|:-----------:|:-------------:|:------------:|-----------------------------------------------------------------------------------------------------------------|
+| ----------------------------------------------------------- | :---------: | :-----------: | :----------: | --------------------------------------------------------------------------------------------------------------- |
 | Request new API key for an Institution                      |      *      |               |              | Should only be for requesting a key, not providing detailed information about Institution or Participant itself |
 | Request new API key for a Participant                       | Institution |               |              | Should only be for requesting a key, not providing detailed information about Institution or Participant itself |
 | Generate new API key                                        |   CentOps   |               |              | A pure functionality to just generate the API key, will be a target for pen-testers                             |
@@ -48,7 +48,7 @@ Full scope of CentOps (planned) features and business architecture can be found 
 * Detailed information will be provided by [Updating Institutions and Participants](#updating-institutions-and-participants) appropriate services
 
 | Service                    | Allowed for | Uses database | Uses API key | Comment |
-|----------------------------|:-----------:|:-------------:|:------------:|---------|
+| -------------------------- | :---------: | :-----------: | :----------: | ------- |
 | Register a new Institution |   CentOps   |    &check;    |              |         |
 | Register a new Participant |   CentOps   |    &check;    |              |         |
 
@@ -59,7 +59,7 @@ Full scope of CentOps (planned) features and business architecture can be found 
 * All cases of misusage will be handled by another components
 
 | Service                        | Allowed for | Uses database | Uses API key | Comment                                                                                                                                                |
-|--------------------------------|:-----------:|:-------------:|:------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------ | :---------: | :-----------: | :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Request a list of Institutions |      *      |               |              | Additional query parameters may be used but not necessarily in scope of this project                                                                   |
 | Provide a list of Institutions |   CentOps   |    &check;    |              |                                                                                                                                                        |
 | Request a list of Participants |      *      |               |              | Participants are grouped by their Institutions;<br>Use query parameters to filter by Institutions and/or types of Participants (Chat, Classifier, DMR) |
@@ -70,7 +70,7 @@ Full scope of CentOps (planned) features and business architecture can be found 
 * Will have a graphical user interface in the future
 
 | Service                                     |     Allowed for      | Uses database | Uses API key | Comment |
-|---------------------------------------------|:--------------------:|:-------------:|:------------:|---------|
+| ------------------------------------------- | :------------------: | :-----------: | :----------: | ------- |
 | Request current details of an Institution   | Institution, CentOps |               |   &check;    |         |
 | Provide current details of an Institution   |       CentOps        |    &check;    |              |         |
 | Request to update details of an Institution | Institution, CentOps |    &check;    |              |         |
@@ -83,12 +83,12 @@ Full scope of CentOps (planned) features and business architecture can be found 
 ## Participants retrieve a list of other participants from CentOps
 
 | Service                                 | Allowed for | Uses database | Uses API key | Comment                             |
-|-----------------------------------------|:-----------:|:-------------:|:------------:|-------------------------------------|
+| --------------------------------------- | :---------: | :-----------: | :----------: | ----------------------------------- |
 | Generate a list of Participants for DMR |   CentOps   |    &check;    |              | Full list that will be sent to DMRs |
 | Send a list of Participants to DMRs     |   CentOps   |               |      ?       | DMR validates CentOps by API key?   |
 
 ## Receiving participant logs
 
 | Service                  | Allowed for | Uses database | Uses API key | Comment                           |
-|--------------------------|:-----------:|:-------------:|:------------:|-----------------------------------|
+| ------------------------ | :---------: | :-----------: | :----------: | --------------------------------- |
 | Get logs of Participants |   CentOps   |               |              | Fetch or accept what's been sent? |
