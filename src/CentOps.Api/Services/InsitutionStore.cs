@@ -6,7 +6,7 @@ namespace CentOps.Api.Services
     {
         private readonly List<Institution> _institutions = new();
 
-         Task<Institution> IModelStore<Institution>.Create(Institution model)
+        Task<Institution> IModelStore<Institution>.Create(Institution model)
         {
             _institutions.Add(model);
             return Task.FromResult(model);
@@ -14,7 +14,10 @@ namespace CentOps.Api.Services
 
         Task<Institution> IModelStore<Institution>.DeleteById(string id)
         {
-            throw new NotImplementedException();
+            var model = _institutions.First(c => c.Id == id);
+            _ = _institutions.Remove(model);
+            return Task.FromResult(model);
+
         }
 
         Task<IEnumerable<Institution>> IModelStore<Institution>.GetAll()

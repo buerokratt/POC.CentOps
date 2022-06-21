@@ -51,9 +51,16 @@ namespace CentOps.Api.Controllers
         }
 
         [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<ActionResult<Institution>> Delete()
         {
-            return Ok(await _store.GetAll().ConfigureAwait(false));
+            string id;
+            using (StreamReader reader = new(Request.Body, Encoding.UTF8))
+            {
+                id = await reader.ReadToEndAsync().ConfigureAwait(false);
+            }
+            _ = await _store.DeleteById(id).ConfigureAwait(false);
+            return NoContent();
         }
     }
 }
