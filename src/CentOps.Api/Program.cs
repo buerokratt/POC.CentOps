@@ -1,3 +1,4 @@
+using CentOps.Api.Services;
 using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api
@@ -15,7 +16,7 @@ namespace CentOps.Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             _ = builder.Services.AddEndpointsApiExplorer();
             _ = builder.Services.AddSwaggerGen();
-
+            _ = builder.Services.AddSingleton<IInstitutionStore, InstitutionStore>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

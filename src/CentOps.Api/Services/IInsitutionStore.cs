@@ -2,7 +2,7 @@
 
 namespace CentOps.Api.Services
 {
-    public interface IInsitutionStore : IModelStore<Institution>
+    public interface IInstitutionStore : IModelStore<Institution>
     {
     }
 }

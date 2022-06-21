@@ -11,14 +11,14 @@ namespace CentOps.UnitTests
         [Fact]
         public void CreatesParticipantControllerWithoutThrowing()
         {
-            _ = new InstitutionController(new Mock<IInsitutionStore>().Object);
+            _ = new InstitutionController(new Mock<IInstitutionStore>().Object);
         }
 
         [Fact]
-        public async Task ReturnsAllInsitutions()
+        public async Task ReturnsAllInstitutions()
         {
             // Arrange
-            var mockInstitutions = new Mock<IInsitutionStore>();
+            var mockInstitutions = new Mock<IInstitutionStore>();
             var institutions = new[]
             {
                 new Institution { Id = "1", Name = "Test1", Status = InstitutionStatus.Active },
@@ -34,6 +34,28 @@ namespace CentOps.UnitTests
             // Assert
             var okay = Assert.IsType<OkObjectResult>(response.Result);
             Assert.Equal(institutions, okay.Value);
+        }
+
+        [Fact]
+        public async Task ReturnsInstitutionById()
+        {
+            // Arrange
+            var mockInstitutions = new Mock<IInstitutionStore>();
+            var institutions = new[]
+            {
+                new Institution { Id = "1", Name = "Test1", Status = InstitutionStatus.Active },
+                new Institution { Id = "2", Name = "Test2", Status = InstitutionStatus.Disabled }
+            };
+            var institutionId = "1";
+            _ = mockInstitutions.Setup(m => m.GetById(institutionId)).Returns(Task.FromResult(institutions.First(x => x.Id == institutionId)));
+            var sut = new InstitutionController(mockInstitutions.Object);
+
+            // Act
+            var response = await sut.Get(institutionId).ConfigureAwait(false);
+
+            // Assert
+            var okay = Assert.IsType<OkObjectResult>(response.Result);
+            Assert.Equal(institutions.First(x => x.Id == institutionId), okay.Value);
         }
     }
 }
