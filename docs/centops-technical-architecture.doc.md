@@ -6,7 +6,7 @@ This document outlines the technical design for CentOps within a scope to cover 
 
 The scope of current developments is to have fully functional proof of concept deployed at least on Azure.
 
-Full scope of CentOps (planned) features and business architecture can be found on [centops-business-architecture.doc.md](https://github.com/bürokratt/CentOps/blob/main/docs/centops-business-architecture.doc.md).
+Full scope of CentOps (planned) features and business architecture can be found on [centops-business-architecture.doc.md](https://github.com/buerokratt/CentOps/blob/main/docs/centops-business-architecture.doc.md).
 
 # Technical stack
 
@@ -16,6 +16,22 @@ Full scope of CentOps (planned) features and business architecture can be found 
 | Database for testing purposes   | [InMemory](https://docs.microsoft.com/en-us/ef/core/providers/in-memory/?tabs=dotnet-core-cli) | Will at some point be replaced with some persistent database engine                          |
 | Persistent storage              | [Cosmos DB](https://en.wikipedia.org/wiki/Cosmos_DB)                                           | Not sure that NoSQL database is the best fit for persistent storage but we'll use it for now |
 | Logs                            | [Grafana Loki](https://grafana.com/oss/loki/)                                                  | Only fetching logs from Participants is currently in scope                                   |
+
+# Authentication
+
+## API keys
+
+In scope of phase 1, Participants use API keys to identify them. This is also the basis for CentOps to validate if API keys provided by requesters have sufficient permissions to perform these specific actions.
+
+**In the long run,** API keys will only be used as short-living, once-only usable keys for initial acceptance of new Participants. After that, more sophisticated authentication methods will be taken into use.
+
+## CentOps permissions validation
+
+**Within phase 1,** we won't even use API keys to validate permissions for requests. All requests come via Admin API and as stated in section **"Authenticate with CentOps API",** "*Applications also assume that all incoming requests come from appropriate participants with appropriate rights without any restrictions based on network, certificates etc.*"
+
+This is because we use Ruuter as a reverse proxy in front of all of our back-end components which, among othery things, allows us to validate user permissions the same way [(see first lines of this Ruuter DSL-to-be sample)](https://github.com/buerokratt/Ruuter/blob/main/samples/backlog/templated-services.md). This is a common practice for many projects using Ruuter, but as of writing this document, Ruuter 2.0 is in active development and we are not interested in using its previous (deprecated) version any more.
+
+This means that regardless of if CentOps or any of its services are based on currently developed .Net or any other solutions, request authentication, permissions validation etc has been done before the request makes it to CentOps (or any other component / service), leaving application (like CentOps) just execute the requests without any additional validation.
 
 # Features
 
