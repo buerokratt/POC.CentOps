@@ -14,7 +14,15 @@ namespace CentOps.Api.Services
 
         Task<bool> IModelStore<Institution>.DeleteById(string id)
         {
-            throw new NotImplementedException();
+            var model = _institutions.First(c => c.Id == id);
+
+            if (model != null)
+            {
+                _ = _institutions.Remove(model);
+                return Task.FromResult(true);
+            }
+
+            return Task.FromResult(false);
         }
 
         Task<IEnumerable<Institution>> IModelStore<Institution>.GetAll()
@@ -29,7 +37,9 @@ namespace CentOps.Api.Services
 
         Task<Institution> IModelStore<Institution>.Update(Institution model)
         {
-            throw new NotImplementedException();
+            var idx = _institutions.FindIndex(x => x.Id == model.Id);
+            _institutions[idx] = model;
+            return Task.FromResult(model);
         }
     }
 }

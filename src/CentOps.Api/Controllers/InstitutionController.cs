@@ -1,6 +1,8 @@
 ﻿using CentOps.Api.Models;
 using CentOps.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace CentOps.Api.Controllers
 {
@@ -37,15 +39,31 @@ namespace CentOps.Api.Controllers
         }
 
         [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Institution))]
         public async Task<ActionResult<Institution>> Put()
         {
-            return Ok(await _store.GetAll().ConfigureAwait(false));
+            string content;
+            using (StreamReader reader = new(Request.Body, Encoding.UTF8))
+            {
+                content = await reader.ReadToEndAsync().ConfigureAwait(false);
+            }
+            var institution = JsonConvert.DeserializeObject<Institution>(content);
+            return institution == null
+                ? BadRequest()
+                : (ActionResult<Institution>)Ok(await _store.Update(institution).ConfigureAwait(false));
         }
 
         [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<ActionResult<Institution>> Delete()
         {
-            return Ok(await _store.GetAll().ConfigureAwait(false));
+            string id;
+            using (StreamReader reader = new(Request.Body, Encoding.UTF8))
+            {
+                id = await reader.ReadToEndAsync().ConfigureAwait(false);
+            }
+            _ = await _store.DeleteById(id).ConfigureAwait(false);
+            return NoContent();
         }
     }
 }
