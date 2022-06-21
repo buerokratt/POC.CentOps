@@ -1,8 +1,6 @@
 ﻿using CentOps.Api.Models;
 using CentOps.Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Text;
 
 namespace CentOps.Api.Controllers
 {
@@ -26,21 +24,15 @@ namespace CentOps.Api.Controllers
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Institution>> Get(string id)
+        public async Task<ActionResult<Institution>> Get(string name)
         {
-            return Ok(await _store.GetById(id).ConfigureAwait(false));
+            return Ok(await _store.GetById(name).ConfigureAwait(false));
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Institution))]
-        public async Task<ActionResult<Institution>> Post()
+        public async Task<ActionResult<Institution>> Post(Institution institution)
         {
-            string content;
-            using (StreamReader reader = new(Request.Body, Encoding.UTF8))
-            {
-                content = await reader.ReadToEndAsync().ConfigureAwait(false);
-            }
-            var institution = JsonConvert.DeserializeObject<Institution>(content);
             return institution == null ? BadRequest() : await _store.Create(institution).ConfigureAwait(false);
         }
 

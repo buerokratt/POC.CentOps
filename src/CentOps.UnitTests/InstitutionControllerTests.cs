@@ -47,7 +47,7 @@ namespace CentOps.UnitTests
                 new Institution { Id = "2", Name = "Test2", Status = InstitutionStatus.Disabled }
             };
             var institutionId = "1";
-            _ = mockInstitutions.Setup(m => m.GetById(institutionId)).Returns(Task.FromResult(institutions.First(x => x.Id == institutionId)));
+            _ = mockInstitutions.Setup(m => m.GetById(institutionId)).Returns(Task.FromResult(institutions.FirstOrDefault(x => x.Id == institutionId)));
             var sut = new InstitutionController(mockInstitutions.Object);
 
             // Act
@@ -55,7 +55,7 @@ namespace CentOps.UnitTests
 
             // Assert
             var okay = Assert.IsType<OkObjectResult>(response.Result);
-            Assert.Equal(institutions.First(x => x.Id == institutionId), okay.Value);
+            Assert.Equal(institutions.Single(x => x.Id == institutionId), okay.Value);
         }
     }
 }

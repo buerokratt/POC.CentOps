@@ -1,5 +1,6 @@
 using CentOps.Api.Services;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace CentOps.Api
 {
@@ -12,11 +13,15 @@ namespace CentOps.Api
 
             // Add services to the container.
 
-            _ = builder.Services.AddControllers();
+            _ = builder.Services.AddControllers().AddJsonOptions(jo =>
+            {
+                jo.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             _ = builder.Services.AddEndpointsApiExplorer();
             _ = builder.Services.AddSwaggerGen();
             _ = builder.Services.AddSingleton<IInstitutionStore, InstitutionStore>();
+            _ = builder.Services.AddSingleton<IParticipantStore, InMemoryParticipantStore>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

@@ -6,13 +6,13 @@ namespace CentOps.Api.Services
     {
         private readonly List<Institution> _institutions = new();
 
-         Task<Institution> IModelStore<Institution>.Create(Institution model)
+        Task<Institution> IModelStore<Institution>.Create(Institution model)
         {
             _institutions.Add(model);
             return Task.FromResult(model);
         }
 
-        Task<Institution> IModelStore<Institution>.DeleteById(string id)
+        Task<bool> IModelStore<Institution>.DeleteById(string id)
         {
             throw new NotImplementedException();
         }
@@ -22,9 +22,9 @@ namespace CentOps.Api.Services
             return Task.FromResult(_institutions.AsEnumerable());
         }
 
-        Task<Institution> IModelStore<Institution>.GetById(string id)
+        Task<Institution?> IModelStore<Institution>.GetById(string id)
         {
-            return Task.FromResult(_institutions.First(x => x.Id == id));
+            return Task.FromResult(_institutions.FirstOrDefault(x => x.Id == id));
         }
 
         Task<Institution> IModelStore<Institution>.Update(Institution model)

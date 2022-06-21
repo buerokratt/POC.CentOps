@@ -4,12 +4,12 @@
     {
         Task<TModel> Create(TModel model);
 
-        Task<TModel> GetById(string id);
+        Task<TModel?> GetById(string id);
 
         Task<IEnumerable<TModel>> GetAll();
 
         Task<TModel> Update(TModel model);
 
-        Task<TModel> DeleteById(string id);
+        Task<bool> DeleteById(string id);
     }
 }

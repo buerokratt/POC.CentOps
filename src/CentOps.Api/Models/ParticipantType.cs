@@ -5,6 +5,6 @@
         Uknown = 0,
         Chatbot = 1,
         Dmr = 2,
-        Classifier,
+        Classifier = 3,
     }
 }
