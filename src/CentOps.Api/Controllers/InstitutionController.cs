@@ -41,13 +41,24 @@ namespace CentOps.Api.Controllers
                 content = await reader.ReadToEndAsync().ConfigureAwait(false);
             }
             var institution = JsonConvert.DeserializeObject<Institution>(content);
-            return institution == null ? BadRequest() : await _store.Create(institution).ConfigureAwait(false);
+            return institution == null
+                ? BadRequest()
+                : await _store.Create(institution).ConfigureAwait(false);
         }
 
         [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Institution))]
         public async Task<ActionResult<Institution>> Put()
         {
-            return Ok(await _store.GetAll().ConfigureAwait(false));
+            string content;
+            using (StreamReader reader = new(Request.Body, Encoding.UTF8))
+            {
+                content = await reader.ReadToEndAsync().ConfigureAwait(false);
+            }
+            var institution = JsonConvert.DeserializeObject<Institution>(content);
+            return institution == null
+                ? BadRequest()
+                : (ActionResult<Institution>)Ok(await _store.Update(institution).ConfigureAwait(false));
         }
 
         [HttpDelete]

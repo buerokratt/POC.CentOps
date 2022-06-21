@@ -17,7 +17,6 @@ namespace CentOps.Api.Services
             var model = _institutions.First(c => c.Id == id);
             _ = _institutions.Remove(model);
             return Task.FromResult(model);
-
         }
 
         Task<IEnumerable<Institution>> IModelStore<Institution>.GetAll()
@@ -32,7 +31,9 @@ namespace CentOps.Api.Services
 
         Task<Institution> IModelStore<Institution>.Update(Institution model)
         {
-            throw new NotImplementedException();
+            var idx = _institutions.FindIndex(x => x.Id == model.Id);
+            _institutions[idx] = model;
+            return Task.FromResult(model);
         }
     }
 }
