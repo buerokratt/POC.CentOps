@@ -1,4 +1,4 @@
-﻿namespace CentOps.Api.Services.Exceptions
+﻿namespace CentOps.Api.Services.ModelStore.Exceptions
 {
     public class ModelNotFoundException<TModel> : Exception where TModel : class
     {

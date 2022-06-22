@@ -1,4 +1,4 @@
-﻿namespace CentOps.Api.Services
+﻿namespace CentOps.Api.Services.ModelStore.Interfaces
 {
     public interface IModel
     {

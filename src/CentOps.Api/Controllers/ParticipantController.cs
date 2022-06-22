@@ -1,6 +1,8 @@
-﻿using CentOps.Api.Models;
-using CentOps.Api.Services;
-using CentOps.Api.Services.Exceptions;
+﻿using AutoMapper;
+using CentOps.Api.Models;
+using CentOps.Api.Services.ModelStore.Exceptions;
+using CentOps.Api.Services.ModelStore.Interfaces;
+using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentOps.Api.Controllers
@@ -10,23 +12,25 @@ namespace CentOps.Api.Controllers
     public class ParticipantController : ControllerBase
     {
         private readonly IParticipantStore _store;
+        private readonly IMapper _mapper;
 
-        public ParticipantController(IParticipantStore store)
+        public ParticipantController(IParticipantStore store, IMapper mapper)
         {
             _store = store;
+            _mapper = mapper;
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Participant>>> Get()
+        public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> Get()
         {
             return Ok(await _store.GetAll().ConfigureAwait(false));
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Participant>>> Get(string id)
+        public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> Get(string id)
         {
             var participant = await _store.GetById(id).ConfigureAwait(false);
 
@@ -39,70 +43,73 @@ namespace CentOps.Api.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<Participant>> Post(Participant participant)
+        public async Task<ActionResult<ParticipantResponseModel>> Post(CreateUpdateParticipantModel participant)
         {
             try
             {
-                var createdParticipant = await _store.Create(participant).ConfigureAwait(false);
+                ParticipantDto participantDTO = _mapper.Map<ParticipantDto>(participant);
+
+                var createdParticipant = await _store.Create(participantDTO).ConfigureAwait(false);
                 return Created(
-                    new Uri($"/admin/participants/{createdParticipant.Name}", UriKind.Relative),
-                    createdParticipant);
+                    new Uri($"/admin/participants/{createdParticipant.Id}", UriKind.Relative),
+                    _mapper.Map<ParticipantResponseModel>(createdParticipant));
             }
             catch (ArgumentException argEx)
             {
-                return BadRequest(argEx);
+                return BadRequest(argEx.Message);
             }
-            catch (ModelNotFoundException<Institution> institutionEx)
+            catch (ModelNotFoundException<InstitutionDto> institutionEx)
             {
                 return BadRequest(institutionEx.Message);
             }
-            catch (ModelExistsException<Participant>)
+            catch (ModelExistsException<ParticipantDto>)
             {
                 return Conflict();
             }
         }
 
-        [HttpPut("{name}")]
+        [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Participant>> Put(Participant participant)
+        public async Task<ActionResult<ParticipantResponseModel>> Put(string id, CreateUpdateParticipantModel participant)
         {
-            // Validate participant.
             try
             {
-                var updatedParticipant = await _store.Update(participant).ConfigureAwait(false);
-                return Ok(updatedParticipant);
+                ParticipantDto participantDTO = _mapper.Map<ParticipantDto>(participant);
+                participantDTO.Id = id;
+                var updatedParticipant = await _store.Update(participantDTO).ConfigureAwait(false);
+                return Ok(_mapper.Map<ParticipantResponseModel>(updatedParticipant));
             }
             catch (ArgumentException argEx)
             {
                 return BadRequest(argEx);
             }
-            catch (ModelNotFoundException<Institution> institutionEx)
+            catch (ModelNotFoundException<InstitutionDto> institutionEx)
             {
                 return BadRequest(institutionEx.Message);
             }
-            catch (ModelNotFoundException<Participant> participantEx)
+            catch (ModelNotFoundException<ParticipantDto> participantEx)
             {
                 return BadRequest(participantEx.Message);
             }
         }
 
-        [HttpDelete("name")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Delete(string name)
+        public async Task<ActionResult> Delete(string id)
         {
             try
             {
-                var deleted = await _store.DeleteById(name).ConfigureAwait(false);
+                var deleted = await _store.DeleteById(id).ConfigureAwait(false);
                 return deleted
                     ? NoContent()
-                    : NotFound(name);
+                    : NotFound(id);
             }
-            catch (ArgumentException)
+            catch (ArgumentException argEx)
             {
-                return BadRequest();
+                return BadRequest(argEx.Message);
             }
         }
     }
