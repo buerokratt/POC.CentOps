@@ -1,6 +1,7 @@
 # Participants States
 
-This document defines the states of all participants of the Beurokratt network. The states will be stored, updated and removed as part of the CentOps Admin operations to ensure that the overall state of the network is kept up to date and concurrent with the literal state of the institutions participating in the Beurokratt network.  
+This document defines the states of all participants of the Buerokratt network. The states will be stored, updated and removed as part of the CentOps Admin operations to ensure that the overall state of the network is kept up to date and concurrent with the literal state of the institutions participating in the Buerokratt network.  
+
 
 <u>**Term definition**:</u> Participant
 
