@@ -5,7 +5,8 @@ This document defines the states of all participants of the Buerokratt network. 
 
 <u>**Term definition**:</u> Participant
 
-Is any component operating in the Beurokratt network. These are: Bots, Classifier and DMRs
+Is any component operating in the Buerokratt network. These are: Bots, Classifier and DMRs
+
 
 
 
