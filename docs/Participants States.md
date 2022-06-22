@@ -19,7 +19,8 @@ Is any component operating in the Beurokratt network. These are: Bots, Classifie
 | Institution makes a request to go offline                    | Institution: Online -> Offline |
 | Request for institution to be removed from the Buerokratt Network | Institution: Revoked           |
 
-| Request for institution bot to be deleted from the Beurokratt Network | Institution: Deleted           |
+| Request for institution bot to be deleted from the Buerokratt Network | Institution: Deleted           |
+
 
 
 
