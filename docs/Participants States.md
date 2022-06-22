@@ -13,7 +13,8 @@ Is any component operating in the Beurokratt network. These are: Bots, Classifie
 
 | Scenario                                                     | State                          |
 | ------------------------------------------------------------ | ------------------------------ |
-| Institution requests to be registered into the Beurokratt network, the institution gets added to the routing table: Institution | Institution: Offline           |
+| Institution requests to be registered into the Buerokratt network, the institution gets added to the routing table: Institution | Institution: Offline           |
+
 | Institution confirms the Bot is live and ready to accept messages: | Institution: Offline -> Online |
 | Institution makes a request to go offline                    | Institution: Online -> Offline |
 | Request for institution to be removed from the Beurokratt Network | Institution: Revoked           |
