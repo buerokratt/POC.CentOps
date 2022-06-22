@@ -15,7 +15,7 @@ namespace CentOps.Api.Models
         public string? InstitutionId { get; set; }
 
         [Required]
-        [StringLength(50, MinimumLength = 5)]
+        [StringLength(100, MinimumLength = 5)]
         public string? Host { get; set; }
 
         public ParticipantType Type { get; set; }

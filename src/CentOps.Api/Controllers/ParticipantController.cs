@@ -24,7 +24,8 @@ namespace CentOps.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> Get()
         {
-            return Ok(await _store.GetAll().ConfigureAwait(false));
+            var participants = await _store.GetAll().ConfigureAwait(false);
+            return Ok(_mapper.Map<IEnumerable<ParticipantResponseModel>>(participants));
         }
 
         [HttpGet("{id}")]
@@ -35,7 +36,7 @@ namespace CentOps.Api.Controllers
             var participant = await _store.GetById(id).ConfigureAwait(false);
 
             return participant != null
-                ? Ok(participant)
+                ? Ok(_mapper.Map<ParticipantResponseModel>(participant))
                 : NotFound();
         }
 
