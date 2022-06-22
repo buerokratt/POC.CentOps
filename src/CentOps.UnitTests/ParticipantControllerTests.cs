@@ -14,6 +14,18 @@ namespace CentOps.UnitTests
     {
         private readonly MapperConfiguration _mapper;
 
+        private readonly ParticipantDto[] _participantDtos = new[]
+            {
+                new ParticipantDto { Id = "1", Name = "Test1", InstitutionId = "1", Status = ParticipantStatusDto.Active },
+                new ParticipantDto { Id = "2", Name = "Test2", InstitutionId = "2", Status = ParticipantStatusDto.Disabled }
+            };
+
+        private readonly ParticipantResponseModel[] _participantResponseModels = new[]
+            {
+                new ParticipantResponseModel { Id = "1", Name = "Test1", InstitutionId = "1", Status = ParticipantStatus.Active },
+                new ParticipantResponseModel { Id = "2", Name = "Test2", InstitutionId = "2", Status = ParticipantStatus.Disabled }
+            };
+
         public ParticipantControllerTests()
         {
             _mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AutoMapperProfile()));
@@ -30,18 +42,7 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            var participants = new[]
-            {
-                new ParticipantDto { Id = "1", Name = "Test1", Status = ParticipantStatusDto.Active },
-                new ParticipantDto { Id = "2", Name = "Test2", Status = ParticipantStatusDto.Disabled }
-            };
-            _ = mockParticipantStore.Setup(m => m.GetAll()).Returns(Task.FromResult(participants.AsEnumerable()));
-
-            var expectedParticipants = new[]
-            {
-                new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active },
-                new ParticipantResponseModel { Id = "2", Name = "Test2", Status = ParticipantStatus.Disabled }
-            };
+            _ = mockParticipantStore.Setup(m => m.GetAll()).Returns(Task.FromResult(_participantDtos.AsEnumerable()));
 
             var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
@@ -51,7 +52,7 @@ namespace CentOps.UnitTests
             // Assert
             var okay = Assert.IsType<OkObjectResult>(response.Result);
             var values = Assert.IsAssignableFrom<IEnumerable<ParticipantResponseModel>>(okay.Value);
-            _ = values.Should().BeEquivalentTo(expectedParticipants);
+            _ = values.Should().BeEquivalentTo(_participantResponseModels);
         }
 
         [Fact]
@@ -59,24 +60,37 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            var participants = new[]
-            {
-                new ParticipantDto { Id = "1", Name = "Test1", Status = ParticipantStatusDto.Active },
-                new ParticipantDto { Id = "2", Name = "Test2", Status = ParticipantStatusDto.Disabled }
-            };
-            _ = mockParticipantStore.Setup(m => m.GetById(participants[0].Id!)).Returns(Task.FromResult<ParticipantDto?>(participants[0]));
+            _ = mockParticipantStore.Setup(m => m.GetById(_participantDtos[0].Id!)).Returns(Task.FromResult<ParticipantDto?>(_participantDtos[0]));
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
             var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
-            var response = await sut.Get(participants[0].Id!).ConfigureAwait(false);
+            var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);
 
             // Assert
             var okay = Assert.IsType<OkObjectResult>(response.Result);
             var value = Assert.IsType<ParticipantResponseModel>(okay.Value);
-            _ = value.Should().BeEquivalentTo(participants[0]);
+            _ = value.Should().BeEquivalentTo(_participantResponseModels[0]);
+        }
+
+        [Fact]
+        public async Task Returns404ForParticipantNotFound()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.GetById(_participantDtos[0].Id!)).Returns(Task.FromResult<ParticipantDto?>(null));
+
+            var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);
+
+            // Assert
+            var okay = Assert.IsType<NotFoundResult>(response.Result);
         }
     }
 }
