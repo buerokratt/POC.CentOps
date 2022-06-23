@@ -37,7 +37,7 @@ namespace CentOps.Api.Controllers
 
             return institution != null
                 ? Ok(_mapper.Map<InstitutionResponseModel>(institution))
-                : NotFound();
+                : NotFound(id);
         }
 
         [HttpPost]

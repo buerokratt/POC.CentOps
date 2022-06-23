@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-
-namespace CentOps.UnitTests
+﻿namespace CentOps.UnitTests
 {
     public class AutomapperTests
     {
