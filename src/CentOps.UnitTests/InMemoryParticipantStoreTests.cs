@@ -249,5 +249,11 @@ namespace CentOps.UnitTests
             Assert.NotNull(storedItems);
             Assert.Equal(2, storedItems.Count());
         }
+
+        //[Fact]
+        //public async Task DeleteSuccessfullyRemovesParticipants()
+        //{
+
+        //}
     }
 }
