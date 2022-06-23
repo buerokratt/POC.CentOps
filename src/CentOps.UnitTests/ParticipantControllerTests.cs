@@ -7,6 +7,7 @@ using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using FluentAssertions;
+using CentOps.Api.Services.ModelStore.Exceptions;
 
 namespace CentOps.UnitTests
 {
@@ -38,7 +39,7 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task ReturnsAllParticipants()
+        public async Task GetReturnsAllParticipants()
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
@@ -56,7 +57,7 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task ReturnsASpecificParticipant()
+        public async Task GetReturnsASpecificParticipant()
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
@@ -76,7 +77,7 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task Returns404ForParticipantNotFound()
+        public async Task GetReturns404ForParticipantNotFound()
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
@@ -90,7 +91,134 @@ namespace CentOps.UnitTests
             var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);
 
             // Assert
-            var okay = Assert.IsType<NotFoundResult>(response.Result);
+            _ = Assert.IsType<NotFoundObjectResult>(response.Result);
+        }
+
+        [Fact]
+        public async Task PostAddsAParticipant()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.Create(It.IsAny<ParticipantDto>())).Returns(Task.FromResult(_participantDtos[0]));
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            var createParticipantModel = new CreateUpdateParticipantModel
+            {
+                Host = _participantResponseModels[0].Host,
+                InstitutionId = _participantResponseModels[0].InstitutionId,
+                Name = _participantResponseModels[0].Name,
+                Status = _participantResponseModels[0].Status,
+                Type = _participantResponseModels[0].Type,
+            };
+
+            // Act
+            var response = await sut.Post(createParticipantModel).ConfigureAwait(false);
+
+            // Assert
+            var okay = Assert.IsType<CreatedResult>(response.Result);
+            _ = _participantResponseModels[0].Should().BeEquivalentTo(okay.Value);
+        }
+
+        [Fact]
+        public async Task PostReturns409ForExistingParticipant()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.Create(It.IsAny<ParticipantDto>())).ThrowsAsync(new ModelExistsException<ParticipantDto>());
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            var createParticipantModel = new CreateUpdateParticipantModel
+            {
+                Host = _participantResponseModels[0].Host,
+                InstitutionId = _participantResponseModels[0].InstitutionId,
+                Name = _participantResponseModels[0].Name,
+                Status = _participantResponseModels[0].Status,
+                Type = _participantResponseModels[0].Type,
+            };
+
+            // Act
+            var response = await sut.Post(createParticipantModel).ConfigureAwait(false);
+
+            // Assert
+            var okay = Assert.IsType<ConflictResult>(response.Result);
+        }
+
+        [Fact]
+        public async Task PutUpdatesAParticipant()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.Update(It.IsAny<ParticipantDto>())).Returns(Task.FromResult(_participantDtos[0]));
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.Put(_participantDtos[0].Id!, new CreateUpdateParticipantModel()).ConfigureAwait(false);
+
+            // Assert
+            var okay = Assert.IsType<OkObjectResult>(response.Result);
+            _ = _participantResponseModels[0].Should().BeEquivalentTo(okay.Value);
+        }
+
+        [Fact]
+        public async Task PutReturns404ForUpdatingANonexistentParticipant()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.Update(It.IsAny<ParticipantDto>())).ThrowsAsync(new ModelNotFoundException<ParticipantDto>());
+
+            var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            var updateParticipantModel = new CreateUpdateParticipantModel
+            {
+                Host = _participantResponseModels[0].Host,
+                InstitutionId = _participantResponseModels[0].InstitutionId,
+                Name = _participantResponseModels[0].Name,
+                Status = _participantResponseModels[0].Status,
+                Type = _participantResponseModels[0].Type,
+            };
+
+            // Act
+            var response = await sut.Put(_participantDtos[0].Id!, updateParticipantModel).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<NotFoundObjectResult>(response.Result);
+        }
+
+        [Fact]
+        public async Task DeleteRemovesParticipant()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.DeleteById(_participantDtos[0].Id!)).Returns(Task.FromResult(true));
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.Delete(_participantDtos[0].Id!).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<NoContentResult>(response);
+        }
+
+        [Fact]
+        public async Task DeleteReturns404ForNonexistentParticipant()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.DeleteById(_participantDtos[0].Id!)).Returns(Task.FromResult(false));
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.Delete(_participantDtos[0].Id!).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<NotFoundResult>(response);
         }
     }
 }
