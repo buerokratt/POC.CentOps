@@ -9,7 +9,7 @@ namespace CentOps.UnitTests
     public class InMemoryParticipantStoreTests
     {
         [Fact]
-        public async Task CanStoreParticipant()
+        public async Task CreateCanStoreParticipant()
         {
             // Arrange
             var mock = new Mock<IInstitutionStore>();
@@ -36,68 +36,6 @@ namespace CentOps.UnitTests
             Assert.Equal(participant.Status, createdParticipant.Status);
             Assert.Equal(participant.Type, createdParticipant.Type);
             Assert.Equal(participant.InstitutionId, createdParticipant.InstitutionId);
-        }
-
-        [Fact]
-        public async Task CanRetrieveStoredParticipant()
-        {
-            // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
-
-            var participant =
-                new ParticipantDto
-                {
-                    Name = "Test",
-                    Host = "https://host:8080",
-                    Status = ParticipantStatusDto.Active,
-                    Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
-                };
-
-            var createdParticipant = await sut.Create(participant).ConfigureAwait(false);
-            Assert.NotNull(createdParticipant.Id);
-
-            // Act
-            var storedItem = await sut.GetById(createdParticipant.Id!).ConfigureAwait(false);
-
-            // Assert
-            Assert.NotNull(storedItem);
-            Assert.Equal(storedItem?.Id, createdParticipant.Id);
-            Assert.Equal(storedItem?.Name, participant.Name);
-            Assert.Equal(storedItem?.Host, participant.Host);
-            Assert.Equal(storedItem?.Status, participant.Status);
-            Assert.Equal(storedItem?.Type, participant.Type);
-            Assert.Equal(storedItem?.InstitutionId, participant.InstitutionId);
-        }
-
-        [Fact]
-        public async Task ReturnsNullIfParticipantNotFound()
-        {
-            // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
-
-            var participant =
-                new ParticipantDto
-                {
-                    Name = "Test",
-                    Host = "https://host:8080",
-                    Status = ParticipantStatusDto.Active,
-                    Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
-                };
-
-            var createdParticipant = await sut.Create(participant).ConfigureAwait(false);
-            Assert.NotNull(createdParticipant.Id);
-
-            // Act
-            var storedItem = await sut.GetById("DoesntExist").ConfigureAwait(false);
-
-            // Assert
-            Assert.Null(storedItem);
         }
 
         [Fact]
@@ -210,6 +148,106 @@ namespace CentOps.UnitTests
                 .ThrowsAsync<ModelExistsException<ParticipantDto>>(
                     async () => await sut.Create(participant).ConfigureAwait(false))
                 .ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task GetByIdCanRetrieveStoredParticipant()
+        {
+            // Arrange
+            var mock = new Mock<IInstitutionStore>();
+            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
+            var sut = new InMemoryParticipantStore(mock.Object);
+
+            var participant =
+                new ParticipantDto
+                {
+                    Name = "Test",
+                    Host = "https://host:8080",
+                    Status = ParticipantStatusDto.Active,
+                    Type = ParticipantTypeDto.Chatbot,
+                    InstitutionId = "1"
+                };
+
+            var createdParticipant = await sut.Create(participant).ConfigureAwait(false);
+            Assert.NotNull(createdParticipant.Id);
+
+            // Act
+            var storedItem = await sut.GetById(createdParticipant.Id!).ConfigureAwait(false);
+
+            // Assert
+            Assert.NotNull(storedItem);
+            Assert.Equal(storedItem?.Id, createdParticipant.Id);
+            Assert.Equal(storedItem?.Name, participant.Name);
+            Assert.Equal(storedItem?.Host, participant.Host);
+            Assert.Equal(storedItem?.Status, participant.Status);
+            Assert.Equal(storedItem?.Type, participant.Type);
+            Assert.Equal(storedItem?.InstitutionId, participant.InstitutionId);
+        }
+
+        [Fact]
+        public async Task GetByIdReturnsNullIfParticipantNotFound()
+        {
+            // Arrange
+            var mock = new Mock<IInstitutionStore>();
+            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
+            var sut = new InMemoryParticipantStore(mock.Object);
+
+            var participant =
+                new ParticipantDto
+                {
+                    Name = "Test",
+                    Host = "https://host:8080",
+                    Status = ParticipantStatusDto.Active,
+                    Type = ParticipantTypeDto.Chatbot,
+                    InstitutionId = "1"
+                };
+
+            var createdParticipant = await sut.Create(participant).ConfigureAwait(false);
+            Assert.NotNull(createdParticipant.Id);
+
+            // Act
+            var storedItem = await sut.GetById("DoesntExist").ConfigureAwait(false);
+
+            // Assert
+            Assert.Null(storedItem);
+        }
+
+        [Fact]
+        public async Task GetAllReturnsAllStoredParticipants()
+        {
+            // Arrange
+            var mock = new Mock<IInstitutionStore>();
+            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
+            var sut = new InMemoryParticipantStore(mock.Object);
+
+            var participant1 =
+                new ParticipantDto
+                {
+                    Name = "Test1",
+                    Host = "https://host:8080",
+                    Status = ParticipantStatusDto.Active,
+                    Type = ParticipantTypeDto.Chatbot,
+                    InstitutionId = "1"
+                };
+            var createdParticipant1 = await sut.Create(participant1).ConfigureAwait(false);
+
+            var participant2 =
+                new ParticipantDto
+                {
+                    Name = "Test2",
+                    Host = "https://host:8080",
+                    Status = ParticipantStatusDto.Active,
+                    Type = ParticipantTypeDto.Chatbot,
+                    InstitutionId = "1"
+                };
+            var createdParticipant2 = await sut.Create(participant2).ConfigureAwait(false);
+
+            // Act
+            var storedItems = await sut.GetAll().ConfigureAwait(false);
+
+            // Assert
+            Assert.NotNull(storedItems);
+            Assert.Equal(2, storedItems.Count());
         }
     }
 }
