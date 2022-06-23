@@ -94,7 +94,7 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockInstitutions = new Mock<IInstitutionStore>();
-             _ = mockInstitutions.Setup(m => m.Create(It.IsAny<InstitutionDto>())).ReturnsAsync(_institutionsDtos[0]);
+            _ = mockInstitutions.Setup(m => m.Create(It.IsAny<InstitutionDto>())).ReturnsAsync(_institutionsDtos[0]);
 
             var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
