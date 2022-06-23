@@ -1,47 +1,77 @@
-﻿using CentOps.Api.Services.ModelStore.Interfaces;
+﻿using CentOps.Api.Services.ModelStore.Exceptions;
+using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
+using System.Collections.Concurrent;
 
 namespace CentOps.Api.Services
 {
     public sealed class InstitutionStore : IInstitutionStore
     {
-        private readonly List<InstitutionDto> _institutions = new();
+        private readonly ConcurrentDictionary<string, InstitutionDto> _institutions = new();
 
-        Task<InstitutionDto> IModelStore<InstitutionDto>.Create(InstitutionDto model)
+        public Task<InstitutionDto> Create(InstitutionDto model)
         {
+            if (model == null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
+
+            if (string.IsNullOrEmpty(model.Name))
+            {
+                throw new ArgumentException("Institution Name not specified.");
+            }
             model.Id = Guid.NewGuid().ToString();
-            _institutions.Add(model);
+            _ = _institutions.TryAdd(model.Id, model);
             return Task.FromResult(model);
         }
-
-        Task<bool> IModelStore<InstitutionDto>.DeleteById(string id)
+        public Task<bool> DeleteById(string id)
         {
-            var model = _institutions.First(c => c.Id == id);
-
-            if (model != null)
+            if (string.IsNullOrEmpty(id))
             {
-                _ = _institutions.Remove(model);
+                throw new ArgumentException($"{nameof(id)} not specified.");
+            }
+
+            //Dont delete Institution that has associated Participants 
+            //go thru all the Participants and see if they have same Institution id
+            if (_institutions.ContainsKey(id))
+            {
+                _ = _institutions.Remove(id, out _);
                 return Task.FromResult(true);
             }
 
             return Task.FromResult(false);
         }
 
-        Task<IEnumerable<InstitutionDto>> IModelStore<InstitutionDto>.GetAll()
+        public Task<IEnumerable<InstitutionDto>> GetAll()
         {
-            return Task.FromResult(_institutions.AsEnumerable());
+            return Task.FromResult(_institutions.Values.AsEnumerable());
         }
 
-        Task<InstitutionDto?> IModelStore<InstitutionDto>.GetById(string id)
+        public Task<InstitutionDto?> GetById(string id)
         {
-            return Task.FromResult(_institutions.FirstOrDefault(x => x.Id == id));
+            return string.IsNullOrEmpty(id)
+                ? throw new ArgumentException($"{nameof(id)} not specified.")
+                : _institutions.ContainsKey(id)
+                    ? Task.FromResult<InstitutionDto?>(_institutions[id])
+                    : Task.FromResult<InstitutionDto?>(null);
         }
 
-        Task<InstitutionDto> IModelStore<InstitutionDto>.Update(InstitutionDto model)
+        public Task<InstitutionDto> Update(InstitutionDto model)
         {
-            var idx = _institutions.FindIndex(x => x.Id == model.Id);
-            _institutions[idx] = model;
+            if (model == null || string.IsNullOrEmpty(model.Id))
+            {
+                throw new ArgumentException($"Institution or Institution Id not specified.");
+            }
+
+            if (!_institutions.ContainsKey(model.Id))
+            {
+                throw new ModelNotFoundException<InstitutionDto>(model.Id);
+            }
+
+            _institutions[model.Id] = model;
+
             return Task.FromResult(model);
         }
+
     }
 }

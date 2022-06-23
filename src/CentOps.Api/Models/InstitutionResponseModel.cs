@@ -1,5 +1,4 @@
-﻿using CentOps.Api.Services.ModelStore.Interfaces;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api.Models
 {

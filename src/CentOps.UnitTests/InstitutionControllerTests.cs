@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using CentOps.Api;
 using CentOps.Api.Controllers;
-using CentOps.Api.Models;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.AspNetCore.Mvc;
