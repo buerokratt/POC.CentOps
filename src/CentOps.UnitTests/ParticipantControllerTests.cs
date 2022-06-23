@@ -43,7 +43,7 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.GetAll()).Returns(Task.FromResult(_participantDtos.AsEnumerable()));
+            _ = mockParticipantStore.Setup(m => m.GetAll()).ReturnsAsync(_participantDtos.AsEnumerable());
 
             var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
@@ -61,7 +61,7 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.GetById(_participantDtos[0].Id!)).Returns(Task.FromResult<ParticipantDto?>(_participantDtos[0]));
+            _ = mockParticipantStore.Setup(m => m.GetById(_participantDtos[0].Id!)).ReturnsAsync(_participantDtos[0]);
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
@@ -81,7 +81,7 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.GetById(_participantDtos[0].Id!)).Returns(Task.FromResult<ParticipantDto?>(null));
+            _ = mockParticipantStore.Setup(m => m.GetById(_participantDtos[0].Id!)).ReturnsAsync((ParticipantDto)null);
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
@@ -99,7 +99,7 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.Create(It.IsAny<ParticipantDto>())).Returns(Task.FromResult(_participantDtos[0]));
+            _ = mockParticipantStore.Setup(m => m.Create(It.IsAny<ParticipantDto>())).ReturnsAsync(_participantDtos[0]);
 
             var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
@@ -150,7 +150,7 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.Update(It.IsAny<ParticipantDto>())).Returns(Task.FromResult(_participantDtos[0]));
+            _ = mockParticipantStore.Setup(m => m.Update(It.IsAny<ParticipantDto>())).ReturnsAsync(_participantDtos[0]);
 
             var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
@@ -194,7 +194,7 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.DeleteById(_participantDtos[0].Id!)).Returns(Task.FromResult(true));
+            _ = mockParticipantStore.Setup(m => m.DeleteById(_participantDtos[0].Id!)).ReturnsAsync(true);
 
             var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
@@ -210,7 +210,7 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.DeleteById(_participantDtos[0].Id!)).Returns(Task.FromResult(false));
+            _ = mockParticipantStore.Setup(m => m.DeleteById(_participantDtos[0].Id!)).ReturnsAsync(false);
 
             var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
@@ -218,7 +218,7 @@ namespace CentOps.UnitTests
             var response = await sut.Delete(_participantDtos[0].Id!).ConfigureAwait(false);
 
             // Assert
-            _ = Assert.IsType<NotFoundResult>(response);
+            _ = Assert.IsType<NotFoundObjectResult>(response);
         }
     }
 }
