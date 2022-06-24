@@ -8,7 +8,12 @@ namespace CentOps.Api.Services
     public sealed class InstitutionStore : IInstitutionStore
     {
         private readonly ConcurrentDictionary<string, InstitutionDto> _institutions = new();
+        private readonly IParticipantStore _participantStore;
 
+        public InstitutionStore(IParticipantStore participantStore)
+        {
+            _participantStore = participantStore;
+        }
         public Task<InstitutionDto> Create(InstitutionDto model)
         {
             if (model == null)
@@ -24,22 +29,21 @@ namespace CentOps.Api.Services
             _ = _institutions.TryAdd(model.Id, model);
             return Task.FromResult(model);
         }
-        public Task<bool> DeleteById(string id)
+        public async Task<bool> DeleteById(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
                 throw new ArgumentException($"{nameof(id)} not specified.");
             }
 
-            //Dont delete Institution that has associated Participants 
-            //go thru all the Participants and see if they have same Institution id
+            await CheckAssociatedParticipantAsync(id).ConfigureAwait(false);
             if (_institutions.ContainsKey(id))
             {
                 _ = _institutions.Remove(id, out _);
-                return Task.FromResult(true);
+                return true;
             }
 
-            return Task.FromResult(false);
+            return false;
         }
 
         public Task<IEnumerable<InstitutionDto>> GetAll()
@@ -73,5 +77,15 @@ namespace CentOps.Api.Services
             return Task.FromResult(model);
         }
 
+        private async Task CheckAssociatedParticipantAsync(string institutionId)
+        {
+            var participants = await _participantStore.GetAll().ConfigureAwait(false);
+            var associatedParticipant = participants.FirstOrDefault(x => x.InstitutionId == institutionId);
+
+            if (associatedParticipant != null && associatedParticipant.Id != null)
+            {
+                throw new ModelExistsException<ParticipantDto>(associatedParticipant.Id);
+            }
+        }
     }
 }
