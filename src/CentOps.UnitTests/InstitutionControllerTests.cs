@@ -108,8 +108,8 @@ namespace CentOps.UnitTests
             var response = await sut.Post(createInstitutionModel).ConfigureAwait(false);
 
             // Assert
-            var okay = Assert.IsType<CreatedResult>(response.Result);
-            _ = _institutionsResponseModels[0].Should().BeEquivalentTo(okay.Value);
+            var created = Assert.IsType<CreatedResult>(response.Result);
+            _ = _institutionsResponseModels[0].Should().BeEquivalentTo(created.Value);
         }
 
         [Fact]

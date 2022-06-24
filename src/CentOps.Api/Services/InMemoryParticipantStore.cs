@@ -80,9 +80,14 @@ namespace CentOps.Api.Services
 
         public async Task<ParticipantDto> Update(ParticipantDto model)
         {
-            if (model == null || string.IsNullOrEmpty(model.Id))
+            if (model == null)
             {
-                throw new ArgumentException($"Participant or Participant Id not specified.");
+                throw new ArgumentNullException(nameof(model));
+            }
+
+            if (string.IsNullOrEmpty(model.Id))
+            {
+                throw new ArgumentException($"Participant Id not specified.");
             }
 
             if (string.IsNullOrEmpty(model.InstitutionId))
