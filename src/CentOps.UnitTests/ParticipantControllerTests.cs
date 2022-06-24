@@ -116,8 +116,10 @@ namespace CentOps.UnitTests
             var response = await sut.Post(createParticipantModel).ConfigureAwait(false);
 
             // Assert
-            var okay = Assert.IsType<CreatedResult>(response.Result);
-            _ = _participantResponseModels[0].Should().BeEquivalentTo(okay.Value);
+            var created = Assert.IsType<CreatedResult>(response.Result);
+            var createdParticipant = Assert.IsType<ParticipantResponseModel>(created.Value);
+            _ = _participantResponseModels[0].Should().BeEquivalentTo(createdParticipant);
+            Assert.Equal($"/admin/participants/{createdParticipant.Id}", created.Location);
         }
 
         [Fact]
@@ -143,6 +145,56 @@ namespace CentOps.UnitTests
 
             // Assert
             var okay = Assert.IsType<ConflictResult>(response.Result);
+        }
+
+        [Fact]
+        public async Task PostReturns400ForMissingField()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.Create(It.IsAny<ParticipantDto>())).ThrowsAsync(new ArgumentException());
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            var createParticipantModel = new CreateUpdateParticipantModel
+            {
+                Host = _participantResponseModels[0].Host,
+                InstitutionId = null,
+                Name = _participantResponseModels[0].Name,
+                Status = _participantResponseModels[0].Status,
+                Type = _participantResponseModels[0].Type,
+            };
+
+            // Act
+            var response = await sut.Post(createParticipantModel).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<BadRequestObjectResult>(response.Result);
+        }
+
+        [Fact]
+        public async Task PostReturns400ForNonexistentInsitution()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.Create(It.IsAny<ParticipantDto>())).ThrowsAsync(new ModelNotFoundException<InstitutionDto>());
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            var createParticipantModel = new CreateUpdateParticipantModel
+            {
+                Host = _participantResponseModels[0].Host,
+                InstitutionId = _participantResponseModels[0].InstitutionId,
+                Name = null,
+                Status = _participantResponseModels[0].Status,
+                Type = _participantResponseModels[0].Type,
+            };
+
+            // Act
+            var response = await sut.Post(createParticipantModel).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<BadRequestObjectResult>(response.Result);
         }
 
         [Fact]

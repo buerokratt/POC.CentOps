@@ -377,7 +377,6 @@ namespace CentOps.UnitTests
                 .ConfigureAwait(false);
         }
 
-
         [Fact]
         public async Task UpdateThrowsIfParticipantNotFound()
         {
