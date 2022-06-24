@@ -2,19 +2,32 @@
 using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
-using Moq;
+using FluentAssertions;
 
 namespace CentOps.UnitTests
 {
     public class InMemoryParticipantStoreTests
     {
+        private InstitutionDto _defaultCreatedInstitution;
+
+        private async Task<IParticipantStore> CreateParticipantStoreAsync()
+        {
+            var memoryStore = new InMemoryStore() as IInstitutionStore;
+            var defaultInstutution = new InstitutionDto
+            {
+                Name = "DefaultInstitution",
+                Status = InstitutionStatusDto.Active
+            };
+
+            _defaultCreatedInstitution = await memoryStore.Create(defaultInstutution).ConfigureAwait(false);
+            return memoryStore as IParticipantStore;
+        }
+
         [Fact]
         public async Task CreateCanStoreParticipant()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -23,7 +36,7 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
 
             // Act
@@ -42,8 +55,7 @@ namespace CentOps.UnitTests
         public async Task CreateParticipantThrowsIfInsitutionNotFound()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -52,7 +64,7 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = "DoesntExist"
                 };
 
             // Act & Assert
@@ -66,8 +78,7 @@ namespace CentOps.UnitTests
         public async Task CreateThrowsIfParticipantIsNull()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             // Act & Assert
             _ = await Assert
@@ -80,8 +91,7 @@ namespace CentOps.UnitTests
         public async Task CreateThrowsIfParticipantNameIsNull()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant = new ParticipantDto
             {
@@ -103,8 +113,7 @@ namespace CentOps.UnitTests
         public async Task CreateThrowsIfParticipantInsitutionIdIsNull()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant = new ParticipantDto
             {
@@ -126,15 +135,12 @@ namespace CentOps.UnitTests
         public async Task CreateThrowsIfParticipantNameAlreadyExists()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant = new ParticipantDto
             {
                 Name = "Test",
-                InstitutionId = "1",
+                InstitutionId = _defaultCreatedInstitution.Id,
                 Host = "https://host:8080",
                 Status = ParticipantStatusDto.Active,
                 Type = ParticipantTypeDto.Chatbot
@@ -154,9 +160,7 @@ namespace CentOps.UnitTests
         public async Task GetByIdCanRetrieveStoredParticipant()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -165,7 +169,7 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
 
             var createdParticipant = await sut.Create(participant).ConfigureAwait(false);
@@ -188,9 +192,7 @@ namespace CentOps.UnitTests
         public async Task GetByIdReturnsNullIfParticipantNotFound()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -199,7 +201,7 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
 
             var createdParticipant = await sut.Create(participant).ConfigureAwait(false);
@@ -216,9 +218,7 @@ namespace CentOps.UnitTests
         public async Task GetAllReturnsAllStoredParticipants()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant1 =
                 new ParticipantDto
@@ -227,9 +227,9 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
-            var createdParticipant1 = await sut.Create(participant1).ConfigureAwait(false);
+            _ = await sut.Create(participant1).ConfigureAwait(false);
 
             var participant2 =
                 new ParticipantDto
@@ -238,26 +238,22 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
-            var createdParticipant2 = await sut.Create(participant2).ConfigureAwait(false);
+            _ = await sut.Create(participant2).ConfigureAwait(false);
 
             // Act
             var storedItems = await sut.GetAll().ConfigureAwait(false);
 
             // Assert
-            Assert.NotNull(storedItems);
-            Assert.Equal(2, storedItems.Count());
+            _ = storedItems.Should().BeEquivalentTo(new[] { participant1, participant2 });
         }
 
         [Fact]
         public async Task DeleteSuccessfullyRemovesParticipants()
         {
-
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -266,7 +262,7 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
 
             var createdParticipant = await sut.Create(participant).ConfigureAwait(false);
@@ -284,11 +280,8 @@ namespace CentOps.UnitTests
         [Fact]
         public async Task DeleteIndicatesFailureForNonexistentParticipant()
         {
-
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             // Act
             var deleted = await sut.DeleteById("DoesntExist").ConfigureAwait(false);
@@ -298,12 +291,23 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
+        public async Task DeleteThrowsForNullId()
+        {
+            // Arrange
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
+
+            // Act & Assert
+            _ = await Assert.
+                ThrowsAsync<ArgumentException>(
+                    async () => await sut.DeleteById(null).ConfigureAwait(false))
+                .ConfigureAwait(false);
+        }
+
+        [Fact]
         public async Task UpdateCanUpdateAParticipant()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -312,7 +316,7 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
 
             var createdParticipant = await sut.Create(participant).ConfigureAwait(false);
@@ -325,7 +329,7 @@ namespace CentOps.UnitTests
                    Host = "https://host:443",
                    Status = ParticipantStatusDto.Disabled,
                    Type = ParticipantTypeDto.Chatbot,
-                   InstitutionId = "1"
+                   InstitutionId = _defaultCreatedInstitution.Id
                };
 
             // Act
@@ -343,9 +347,7 @@ namespace CentOps.UnitTests
         public async Task UpdateThrowsIfInsitutionNotFound()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -354,7 +356,7 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
 
             var createdParticipant = await sut.Create(participant).ConfigureAwait(false);
@@ -381,9 +383,7 @@ namespace CentOps.UnitTests
         public async Task UpdateThrowsIfParticipantNotFound()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -392,7 +392,7 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
 
             var createdParticipant = await sut.Create(participant).ConfigureAwait(false);
@@ -405,7 +405,7 @@ namespace CentOps.UnitTests
                    Host = "https://host:443",
                    Status = ParticipantStatusDto.Disabled,
                    Type = ParticipantTypeDto.Chatbot,
-                   InstitutionId = "1"
+                   InstitutionId = _defaultCreatedInstitution.Id
                };
 
             // Act & Assert
@@ -419,8 +419,7 @@ namespace CentOps.UnitTests
         public async Task UpdateThrowsIfModelIsNull()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             // Act & Assert
             _ = await Assert
@@ -433,9 +432,7 @@ namespace CentOps.UnitTests
         public async Task UpdateThrowsIfModelIdIsNull()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -445,7 +442,7 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
 
             // Act & Assert
@@ -459,9 +456,7 @@ namespace CentOps.UnitTests
         public async Task UpdateThrowsIfNameIsNull()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -471,7 +466,7 @@ namespace CentOps.UnitTests
                     Host = "https://host:8080",
                     Status = ParticipantStatusDto.Active,
                     Type = ParticipantTypeDto.Chatbot,
-                    InstitutionId = "1"
+                    InstitutionId = _defaultCreatedInstitution.Id
                 };
 
             // Act & Assert
@@ -485,9 +480,7 @@ namespace CentOps.UnitTests
         public async Task UpdateThrowsIfInsitutionIdIsNull()
         {
             // Arrange
-            var mock = new Mock<IInstitutionStore>();
-            _ = mock.Setup(i => i.GetById("1")).ReturnsAsync(new InstitutionDto { Id = "1" });
-            var sut = new InMemoryParticipantStore(mock.Object);
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
 
             var participant =
                 new ParticipantDto
@@ -504,6 +497,53 @@ namespace CentOps.UnitTests
             _ = await Assert
                 .ThrowsAsync<ArgumentException>(
                     async () => await sut.Update(participant).ConfigureAwait(false))
+                .ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task UpdateThrowsForDuplicateName()
+        {
+            // Arrange
+            var sut = await CreateParticipantStoreAsync().ConfigureAwait(false);
+
+            var participant1 =
+                new ParticipantDto
+                {
+                    Name = "Test1",
+                    Host = "https://host:8080",
+                    Status = ParticipantStatusDto.Active,
+                    Type = ParticipantTypeDto.Chatbot,
+                    InstitutionId = _defaultCreatedInstitution.Id
+                };
+            var createdParticipant1 = await sut.Create(participant1).ConfigureAwait(false);
+
+            var participant2 =
+                new ParticipantDto
+                {
+                    Name = "Test2",
+                    Host = "https://host:8080",
+                    Status = ParticipantStatusDto.Active,
+                    Type = ParticipantTypeDto.Chatbot,
+                    InstitutionId = _defaultCreatedInstitution.Id
+                };
+
+            var createdParticipant2 = await sut.Create(participant2).ConfigureAwait(false);
+
+            var updateWithDuplicate =
+                new ParticipantDto
+                {
+                    Name = createdParticipant1.Name,
+                    Id = createdParticipant2.Id,
+                    Host = participant2.Host,
+                    InstitutionId = participant2.InstitutionId,
+                    Type = participant2.Type,
+                    Status = participant2.Status
+                };
+
+            // Act & Assert
+            _ = await Assert
+                .ThrowsAsync<ModelExistsException<ParticipantDto>>(
+                    async () => await sut.Update(updateWithDuplicate).ConfigureAwait(false))
                 .ConfigureAwait(false);
         }
     }

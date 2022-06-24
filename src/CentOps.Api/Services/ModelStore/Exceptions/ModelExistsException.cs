@@ -1,5 +1,8 @@
-﻿namespace CentOps.Api.Services.ModelStore.Exceptions
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace CentOps.Api.Services.ModelStore.Exceptions
 {
+    [ExcludeFromCodeCoverage]
     public class ModelExistsException<TModel> : Exception where TModel : class
     {
         public ModelExistsException()

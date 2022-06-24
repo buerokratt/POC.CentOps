@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using FluentAssertions;
 using CentOps.Api.Services.ModelStore.Exceptions;
+using System.Configuration;
 
 namespace CentOps.UnitTests
 {
@@ -241,6 +242,62 @@ namespace CentOps.UnitTests
             _ = Assert.IsType<NotFoundObjectResult>(response.Result);
         }
 
+
+        [Fact]
+        public async Task PutReturns400ForAnImproperParticipant()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.Update(It.IsAny<ParticipantDto>())).ThrowsAsync(new ArgumentException());
+
+            var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            var updateParticipantModel = new CreateUpdateParticipantModel
+            {
+                Host = null,
+                InstitutionId = _participantResponseModels[0].InstitutionId,
+                Name = null,
+                Status = _participantResponseModels[0].Status,
+                Type = _participantResponseModels[0].Type,
+            };
+
+            // Act
+            var response = await sut.Put(_participantDtos[0].Id!, updateParticipantModel).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<BadRequestObjectResult>(response.Result);
+        }
+
+
+        [Fact]
+        public async Task PutReturns400ForNonexistentInsitution()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.Update(It.IsAny<ParticipantDto>())).ThrowsAsync(new ModelNotFoundException<InstitutionDto>());
+
+            var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            var updateParticipantModel = new CreateUpdateParticipantModel
+            {
+                Host = _participantResponseModels[0].Host,
+                InstitutionId = "DoesntExist",
+                Name = _participantResponseModels[0].Name,
+                Status = _participantResponseModels[0].Status,
+                Type = _participantResponseModels[0].Type,
+            };
+
+            // Act
+            var response = await sut.Put(_participantDtos[0].Id!, updateParticipantModel).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<BadRequestObjectResult>(response.Result);
+        }
+
         [Fact]
         public async Task DeleteRemovesParticipant()
         {
@@ -271,6 +328,22 @@ namespace CentOps.UnitTests
 
             // Assert
             _ = Assert.IsType<NotFoundObjectResult>(response);
+        }
+
+        [Fact]
+        public async Task DeleteReturns400ForNullId()
+        {
+            // Arrange
+            var mockParticipantStore = new Mock<IParticipantStore>();
+            _ = mockParticipantStore.Setup(m => m.DeleteById(_participantDtos[0].Id!)).ThrowsAsync(new ArgumentException());
+
+            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.Delete(_participantDtos[0].Id!).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<BadRequestObjectResult>(response);
         }
     }
 }
