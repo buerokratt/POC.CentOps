@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using FluentAssertions;
 using CentOps.Api.Services.ModelStore.Exceptions;
-using System.Configuration;
 
 namespace CentOps.UnitTests
 {
