@@ -1,10 +1,10 @@
-﻿using CentOps.Api.Services;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api.Models
 {
+    // Excluded as model contains no logic.
     [ExcludeFromCodeCoverage]
-    public class Participant : IModel
+    public class ParticipantResponseModel
     {
         public string? Id { get; set; }
 

@@ -2,8 +2,7 @@
 {
     public enum ParticipantStatus
     {
-        Unknown = 0,
+        Disabled = 0,
         Active = 1,
-        Disabled = 2,
     }
 }

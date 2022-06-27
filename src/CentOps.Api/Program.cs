@@ -1,4 +1,7 @@
+using CentOps.Api.Services;
+using CentOps.Api.Services.ModelStore.Interfaces;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace CentOps.Api
 {
@@ -9,12 +12,20 @@ namespace CentOps.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            _ = builder.Services.AddControllers().AddJsonOptions(jo =>
+            {
+                jo.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
-            _ = builder.Services.AddControllers();
+            _ = builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             _ = builder.Services.AddEndpointsApiExplorer();
             _ = builder.Services.AddSwaggerGen();
+
+            var inMemoryStore = new InMemoryStore();
+            _ = builder.Services.AddSingleton<IInstitutionStore>(provider => inMemoryStore);
+            _ = builder.Services.AddSingleton<IParticipantStore>(provider => inMemoryStore);
 
             var app = builder.Build();
 
