@@ -133,5 +133,118 @@ namespace CentOps.UnitTests
             // Assert
             var okay = Assert.IsType<ConflictResult>(response.Result);
         }
+        [Fact]
+        public async Task PutUpdatesAInstitution()
+        {
+            // Arrange
+            var mockInstitutions = new Mock<IInstitutionStore>();
+            _ = mockInstitutions.Setup(m => m.Update(It.IsAny<InstitutionDto>())).ReturnsAsync(_institutionsDtos[0]);
+
+            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.Put(_institutionsDtos[0].Id!, new CreateUpdateInsitutionModel()).ConfigureAwait(false);
+
+            // Assert
+            var okay = Assert.IsType<OkObjectResult>(response.Result);
+            _ = _institutionsResponseModels[0].Should().BeEquivalentTo(okay.Value);
+        }
+
+        [Fact]
+        public async Task PutReturns404ForUpdatingANonexistentInstitution()
+        {
+            // Arrange
+            var mockInstitutions = new Mock<IInstitutionStore>();
+            _ = mockInstitutions.Setup(m => m.Update(It.IsAny<InstitutionDto>())).ThrowsAsync(new ModelNotFoundException<InstitutionDto>());
+
+            var expectedParticipant = new InstitutionResponseModel { Id = "1", Name = "Test1", Status = InstitutionStatus.Active };
+
+            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+
+            var updateInstitutionModel = new CreateUpdateInsitutionModel
+            {
+                Name = _institutionsResponseModels[0].Name,
+                Status = _institutionsResponseModels[0].Status,
+            };
+
+            // Act
+            var response = await sut.Put(_institutionsDtos[0].Id!, updateInstitutionModel).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<NotFoundObjectResult>(response.Result);
+        }
+
+
+        [Fact]
+        public async Task PutReturns400ForAnImproperInstitution()
+        {
+            // Arrange
+            var mockInstitutions = new Mock<IInstitutionStore>();
+            _ = mockInstitutions.Setup(m => m.Update(It.IsAny<InstitutionDto>())).ThrowsAsync(new ArgumentException());
+
+            var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
+
+            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+
+            var updateInstitutionModel = new CreateUpdateInsitutionModel
+            {
+                Name = null,
+                Status = _institutionsResponseModels[0].Status,
+            };
+
+            // Act
+            var response = await sut.Put(_institutionsDtos[0].Id!, updateInstitutionModel).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<BadRequestObjectResult>(response.Result);
+        }
+
+        [Fact]
+        public async Task DeleteRemovesInstitution()
+        {
+            // Arrange
+            var mockInstitutions = new Mock<IInstitutionStore>();
+            _ = mockInstitutions.Setup(m => m.DeleteById(_institutionsDtos[0].Id!)).ReturnsAsync(true);
+
+            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.Delete(_institutionsDtos[0].Id!).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<NoContentResult>(response);
+        }
+
+        [Fact]
+        public async Task DeleteReturns404ForNonexistentInstitution()
+        {
+            // Arrange
+            var mockInstitutions = new Mock<IInstitutionStore>();
+            _ = mockInstitutions.Setup(m => m.DeleteById(_institutionsDtos[0].Id!)).ReturnsAsync(false);
+
+            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.Delete(_institutionsDtos[0].Id!).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<NotFoundObjectResult>(response);
+        }
+
+        [Fact]
+        public async Task DeleteReturns400ForNullId()
+        {
+            // Arrange
+            var mockInstitutions = new Mock<IInstitutionStore>();
+            _ = mockInstitutions.Setup(m => m.DeleteById(_institutionsDtos[0].Id!)).ThrowsAsync(new ArgumentException());
+
+            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.Delete(_institutionsDtos[0].Id!).ConfigureAwait(false);
+
+            // Assert
+            _ = Assert.IsType<BadRequestObjectResult>(response);
+        }
     }
 }

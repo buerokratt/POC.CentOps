@@ -80,9 +80,9 @@ namespace CentOps.Api.Controllers
             {
                 return BadRequest(argEx);
             }
-            catch (ModelNotFoundException<InstitutionDto> institutionEx)
+            catch (ModelNotFoundException<InstitutionDto>)
             {
-                return BadRequest(institutionEx.Message);
+                return NotFound(id);
             }
         }
 
