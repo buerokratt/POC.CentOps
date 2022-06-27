@@ -2,7 +2,7 @@ name: CentOps Api Build and Publish Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feature/5-centops-setup-cd ]
 
 jobs:
   PackageDeploy:
