@@ -134,7 +134,7 @@ namespace CentOps.UnitTests
             var okay = Assert.IsType<ConflictResult>(response.Result);
         }
         [Fact]
-        public async Task PutUpdatesAInstitution()
+        public async Task PutUpdatesAnInstitution()
         {
             // Arrange
             var mockInstitutions = new Mock<IInstitutionStore>();

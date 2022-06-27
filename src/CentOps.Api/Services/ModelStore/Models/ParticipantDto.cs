@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api.Services.ModelStore.Models
 {
+    // Excluded as model contains no logic.
     [ExcludeFromCodeCoverage]
     public class ParticipantDto : IModel
     {

@@ -19,12 +19,12 @@ namespace CentOps.Api.Services
 
             if (string.IsNullOrEmpty(model.InstitutionId))
             {
-                throw new ArgumentException("Participant InstitutionId not specified.");
+                throw new ArgumentException(nameof(model.InstitutionId));
             }
 
             if (string.IsNullOrEmpty(model.Name))
             {
-                throw new ArgumentException("Participant Name not specified.");
+                throw new ArgumentException(nameof(model.Name));
             }
 
             await CheckInstitution(model.InstitutionId).ConfigureAwait(false);
@@ -82,17 +82,17 @@ namespace CentOps.Api.Services
 
             if (string.IsNullOrEmpty(model.Id))
             {
-                throw new ArgumentException($"Participant Id not specified.");
+                throw new ArgumentException(nameof(model.Id));
             }
 
             if (string.IsNullOrEmpty(model.InstitutionId))
             {
-                throw new ArgumentException("Participant InstitutionId not specified.");
+                throw new ArgumentException(nameof(model.InstitutionId));
             }
 
             if (string.IsNullOrEmpty(model.Name))
             {
-                throw new ArgumentException("Participant Name not specified.");
+                throw new ArgumentException(nameof(model.Name));
             }
 
             await CheckInstitution(model.InstitutionId).ConfigureAwait(false);
@@ -122,7 +122,7 @@ namespace CentOps.Api.Services
 
             if (string.IsNullOrEmpty(model.Name))
             {
-                throw new ArgumentException("Institution Name not specified.");
+                throw new ArgumentException(nameof(model.Name));
             }
 
             var existingName = _institutions.Values.FirstOrDefault(i => i.Name == model.Name);
@@ -176,12 +176,12 @@ namespace CentOps.Api.Services
 
             if (string.IsNullOrEmpty(model.Id))
             {
-                throw new ArgumentException($"Institution Id not specified.");
+                throw new ArgumentException(nameof(model.Id));
             }
 
             if (string.IsNullOrEmpty(model.Name))
             {
-                throw new ArgumentException("Institution Name not specified.");
+                throw new ArgumentException(nameof(model.Name));
             }
 
             if (!_institutions.ContainsKey(model.Id))

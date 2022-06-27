@@ -2,6 +2,7 @@
 
 namespace CentOps.Api.Services.ModelStore.Exceptions
 {
+    // Excluded as exception contains no logic.
     [ExcludeFromCodeCoverage]
     public class ModelNotFoundException<TModel> : Exception where TModel : class
     {

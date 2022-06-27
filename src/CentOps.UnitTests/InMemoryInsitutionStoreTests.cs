@@ -9,28 +9,6 @@ namespace CentOps.UnitTests
     public class InMemoryInsitutionStoreTests
     {
         [Fact]
-        public async Task CreateCanStoreParticipant()
-        {
-            // Arrange
-            var sut = new InMemoryStore() as IInstitutionStore;
-
-            var institution =
-                new InstitutionDto
-                {
-                    Name = "Test",
-                    Status = InstitutionStatusDto.Active
-                };
-
-            // Act
-            var createdInstitution = await sut.Create(institution).ConfigureAwait(false);
-
-            // Assert
-            Assert.NotNull(createdInstitution.Id);
-            Assert.Equal(institution.Name, createdInstitution.Name);
-            Assert.Equal(createdInstitution.Status, createdInstitution.Status);
-        }
-
-        [Fact]
         public async Task CreateCanStoreInstitution()
         {
             // Arrange
@@ -223,7 +201,7 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task UpdateThrowsForNullModelId()
+        public async Task UpdateThrowsForNullInstitutionName()
         {
             // Arrange
             var sut = new InMemoryStore() as IInstitutionStore;
@@ -238,7 +216,7 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task UpdateThrowsForNullInsitutionIdId()
+        public async Task UpdateThrowsForNullInsitutionId()
         {
             // Arrange
             var sut = new InMemoryStore() as IInstitutionStore;

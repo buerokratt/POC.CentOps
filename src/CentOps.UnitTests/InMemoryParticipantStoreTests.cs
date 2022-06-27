@@ -10,6 +10,10 @@ namespace CentOps.UnitTests
     {
         private InstitutionDto _defaultCreatedInstitution;
 
+        /// <summary>
+        /// Create Participant Store with Default Insitution.
+        /// </summary>
+        /// <returns>An Async Task wrapping this process.</returns>
         private async Task<IParticipantStore> CreateParticipantStoreAsync()
         {
             var memoryStore = new InMemoryStore() as IInstitutionStore;
