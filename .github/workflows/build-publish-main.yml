@@ -2,7 +2,7 @@ name: CentOps Api Build and Publish Pipeline
 
 on:
   push:
-    branches: [ main, feature/5-centops-setup-cd ]
+    branches: [ main ]
 
 jobs:
   PackageDeploy:
@@ -52,8 +52,6 @@ jobs:
       app_name: centops
     runs-on:
       ubuntu-22.04
-    permissions:
-      actions: read
     defaults:
       run:
         shell : bash
@@ -64,4 +62,4 @@ jobs:
         run: |
           gh workflow run $cd_workflow_dispatch_file_name -f app_name=$app_name -f image_tag=${GITHUB_SHA} --repo $infrastructure_repo_path --ref main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_MULTI_REPO_WORKFLOW_ACCESS }}
