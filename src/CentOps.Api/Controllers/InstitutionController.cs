@@ -1,5 +1,6 @@
 ﻿using CentOps.Api.Models;
 using CentOps.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentOps.Api.Controllers
@@ -16,6 +17,7 @@ namespace CentOps.Api.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminPolicy")]
         public async Task<ActionResult<IEnumerable<Institution>>> Get()
         {
             return Ok(await _store.GetAll().ConfigureAwait(false));
