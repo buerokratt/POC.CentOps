@@ -9,7 +9,7 @@ namespace CentOps.Api.Services
     {
         private readonly ConcurrentDictionary<string, InstitutionDto> _institutions = new();
 
-        public Task<InstitutionDto> Create(InstitutionDto model)
+        Task<InstitutionDto> IModelStore<InstitutionDto>.Create(InstitutionDto model)
         {
             if (model == null)
             {
@@ -32,7 +32,7 @@ namespace CentOps.Api.Services
             return Task.FromResult(model);
         }
 
-        public async Task<bool> DeleteById(string id)
+        async Task<bool> IModelStore<InstitutionDto>.DeleteById(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -49,12 +49,12 @@ namespace CentOps.Api.Services
             return false;
         }
 
-        public Task<IEnumerable<InstitutionDto>> GetAll()
+        Task<IEnumerable<InstitutionDto>> IModelStore<InstitutionDto>.GetAll()
         {
             return Task.FromResult(_institutions.Values.AsEnumerable());
         }
 
-        public Task<InstitutionDto?> GetById(string id)
+        Task<InstitutionDto?> IModelStore<InstitutionDto>.GetById(string id)
         {
             return string.IsNullOrEmpty(id)
                 ? throw new ArgumentException($"{nameof(id)} not specified.")
@@ -63,7 +63,7 @@ namespace CentOps.Api.Services
                     : Task.FromResult<InstitutionDto?>(null);
         }
 
-        public Task<InstitutionDto> Update(InstitutionDto model)
+        Task<InstitutionDto> IModelStore<InstitutionDto>.Update(InstitutionDto model)
         {
             if (model == null)
             {

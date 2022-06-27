@@ -9,9 +9,7 @@ namespace CentOps.Api.Services
     {
         private readonly ConcurrentDictionary<string, ParticipantDto> _participants = new();
 
-        #region Participant store implementations
-
-        async Task<ParticipantDto> IModelStore<ParticipantDto>.Create(ParticipantDto model)
+        public async Task<ParticipantDto> Create(ParticipantDto model)
         {
             if (model == null)
             {
@@ -44,7 +42,7 @@ namespace CentOps.Api.Services
             return model;
         }
 
-        Task<bool> IModelStore<ParticipantDto>.DeleteById(string id)
+        public Task<bool> DeleteById(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -60,12 +58,12 @@ namespace CentOps.Api.Services
             return Task.FromResult(false);
         }
 
-        Task<IEnumerable<ParticipantDto>> IModelStore<ParticipantDto>.GetAll()
+        public Task<IEnumerable<ParticipantDto>> GetAll()
         {
             return Task.FromResult(_participants.Values.AsEnumerable());
         }
 
-        Task<ParticipantDto?> IModelStore<ParticipantDto>.GetById(string id)
+        public Task<ParticipantDto?> GetById(string id)
         {
             return string.IsNullOrEmpty(id)
                 ? throw new ArgumentException($"{nameof(id)} not specified.")
@@ -74,7 +72,7 @@ namespace CentOps.Api.Services
                     : Task.FromResult<ParticipantDto?>(null);
         }
 
-        async Task<ParticipantDto> IModelStore<ParticipantDto>.Update(ParticipantDto model)
+        public async Task<ParticipantDto> Update(ParticipantDto model)
         {
             if (model == null)
             {

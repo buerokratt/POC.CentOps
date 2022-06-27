@@ -18,8 +18,6 @@ namespace CentOps.Api
             // Add services to the container.
             var services = builder.Services;
 
-            _ = services.AddSingleton<IAuthService, AuthService>();
-
             _ = services
                 .AddControllers(options => options.Filters.Add(new AuthorizeFilter()))
                 .AddJsonOptions(jo =>
@@ -36,7 +34,7 @@ namespace CentOps.Api
                 _ = options.AddApiKeyOpenApiSecurity();
             });
 
-            services.AddApiKeyAuthentication();
+            services.AddApiKeyAuthentication<ApiUserClaimsProvider>();
             services.AddAuthorizationPolicies();
 
             services.AddDataStores();

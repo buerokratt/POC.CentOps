@@ -1,5 +1,7 @@
-﻿using CentOps.Api.Services;
+﻿using CentOps.Api.Authentication.Interfaces;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
@@ -8,17 +10,17 @@ namespace CentOps.Api.Authentication
 {
     public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
     {
-        private readonly IAuthService _userService;
+        private readonly IApiUserClaimsProvider _claimsProvider;
 
         public ApiKeyAuthenticationHandler(
-            IAuthService userService,
+            IApiUserClaimsProvider claimsProvider,
             IOptionsMonitor<ApiKeyAuthenticationOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock) :
             base(options, logger, encoder, clock)
         {
-            _userService = userService;
+            _claimsProvider = claimsProvider;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -27,23 +29,17 @@ namespace CentOps.Api.Authentication
 
             if (string.IsNullOrEmpty(apiKey))
             {
-                return AuthenticateResult.Fail("The 'Authorization' header does not contain the API Key.");
+                return AuthenticateResult.Fail($"The '{Options.ApiKeyHeaderName}' header does not contain a value.");
             }
 
-            var user = await _userService.AuthenticateAsync(apiKey).ConfigureAwait(false);
+            var apiUser = await _claimsProvider.GetUserClaimsAsync(apiKey).ConfigureAwait(false);
 
-            if (user == null)
+            if (apiUser == null)
             {
-                return AuthenticateResult.Fail("The API is invalid.");
+                return AuthenticateResult.Fail($"The '{Options.ApiKeyHeaderName}' header contains an invalid API key.");
             }
 
-            var claims = new[]
-            {
-                new Claim("id", user.Id),
-                new Claim("isAdmin", user.IsAdmin.ToString().ToUpperInvariant())
-            };
-
-            var identity = new ClaimsIdentity(claims, ApiKeyAuthenciationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity(apiUser.Claims, ApiKeyAuthenciationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, ApiKeyAuthenciationDefaults.AuthenticationScheme);
 
