@@ -1,6 +1,6 @@
-﻿namespace CentOps.Api.Models
+﻿namespace CentOps.Api.Services.ModelStore.Models
 {
-    public enum ParticipantType
+    public enum ParticipantTypeDto
     {
         Unknown = 0,
         Chatbot = 1,

@@ -1,7 +1,10 @@
+
 using CentOps.Api.Authentication;
 using CentOps.Api.Authentication.Extensions;
 using CentOps.Api.Services;
+using CentOps.Api.Services.ModelStore.Interfaces;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace CentOps.Api
 {
@@ -17,11 +20,12 @@ namespace CentOps.Api
 
             _ = services.AddSingleton<IAuthService, AuthService>();
 
-            _ = services
-                .AddSingleton<IParticipantStore, ParticipantStore>()
-                .AddSingleton<IInsitutionStore, InstitutionStore>();
+            _ = services.AddControllers().AddJsonOptions(jo =>
+            {
+                jo.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
-            _ = services.AddControllers();
+            _ = builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             _ = services.AddEndpointsApiExplorer();
@@ -49,6 +53,9 @@ namespace CentOps.Api
                 });
             });
 
+            var inMemoryStore = new InMemoryStore();
+            _ = services.AddSingleton<IInstitutionStore>(provider => inMemoryStore);
+            _ = services.AddSingleton<IParticipantStore>(provider => inMemoryStore);
 
             var app = builder.Build();
 
