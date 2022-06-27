@@ -10,6 +10,7 @@ namespace CentOps.Api.Extensions
             var inMemoryStore = new InMemoryStore();
             _ = services.AddSingleton<IInstitutionStore>(provider => inMemoryStore);
             _ = services.AddSingleton<IParticipantStore>(provider => inMemoryStore);
+            _ = services.AddSingleton<IApiUserStore>(provider => inMemoryStore);
         }
     }
 }
