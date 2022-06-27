@@ -37,7 +37,7 @@ namespace CentOps.Api.Controllers
 
             return participant != null
                 ? Ok(_mapper.Map<ParticipantResponseModel>(participant))
-                : NotFound();
+                : NotFound(id);
         }
 
         [HttpPost]
@@ -72,6 +72,7 @@ namespace CentOps.Api.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ParticipantResponseModel>> Put(string id, CreateUpdateParticipantModel participant)
         {
             try
@@ -89,9 +90,9 @@ namespace CentOps.Api.Controllers
             {
                 return BadRequest(institutionEx.Message);
             }
-            catch (ModelNotFoundException<ParticipantDto> participantEx)
+            catch (ModelNotFoundException<ParticipantDto>)
             {
-                return BadRequest(participantEx.Message);
+                return NotFound(id);
             }
         }
 

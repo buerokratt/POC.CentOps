@@ -1,8 +1,8 @@
-﻿using CentOps.Api.Services.ModelStore.Interfaces;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api.Models
 {
+    // Excluded as model contains no logic.
     [ExcludeFromCodeCoverage]
     public class InstitutionResponseModel
     {

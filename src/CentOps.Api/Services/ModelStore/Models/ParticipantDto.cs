@@ -1,9 +1,9 @@
-﻿using CentOps.Api.Models;
-using CentOps.Api.Services.ModelStore.Interfaces;
+﻿using CentOps.Api.Services.ModelStore.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api.Services.ModelStore.Models
 {
+    // Excluded as model contains no logic.
     [ExcludeFromCodeCoverage]
     public class ParticipantDto : IModel
     {

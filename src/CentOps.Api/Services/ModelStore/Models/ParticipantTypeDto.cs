@@ -2,7 +2,7 @@
 {
     public enum ParticipantTypeDto
     {
-        Uknown = 0,
+        Unknown = 0,
         Chatbot = 1,
         Dmr = 2,
         Classifier = 3,
