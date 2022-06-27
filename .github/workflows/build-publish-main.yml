@@ -44,3 +44,24 @@ jobs:
           $DOCKER_TAG_SHA
       env:
         COSIGN_EXPERIMENTAL: "true"
+
+  app_deployment:
+    env:
+      cd_workflow_dispatch_file_name: cd-app-deployment.yml
+      infrastructure_repo_path: buerokratt/Infrastructure
+      app_name: centops
+    runs-on:
+      ubuntu-22.04
+    permissions:
+      actions: read
+    defaults:
+      run:
+        shell : bash
+    needs :
+      PackageDeploy
+    steps:
+      - name: Initiate k8s app deployment
+        run: |
+          gh workflow run $cd_workflow_dispatch_file_name -f app_name=$app_name -f image_tag=${GITHUB_SHA} --repo $infrastructure_repo_path --ref main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
