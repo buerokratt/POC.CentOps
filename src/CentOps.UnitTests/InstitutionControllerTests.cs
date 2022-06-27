@@ -33,7 +33,7 @@ namespace CentOps.UnitTests
         [Fact]
         public void CreatesParticipantControllerWithoutThrowing()
         {
-            _ = new InstitutionController(new Mock<IInstitutionStore>().Object, new Mock<IMapper>().Object);
+            _ = new AdminInstitutionController(new Mock<IInstitutionStore>().Object, new Mock<IMapper>().Object);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace CentOps.UnitTests
             var mockInstitutions = new Mock<IInstitutionStore>();
             _ = mockInstitutions.Setup(m => m.GetAll()).Returns(Task.FromResult(_institutionsDtos.AsEnumerable()));
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get().ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace CentOps.UnitTests
             var mockInstitutions = new Mock<IInstitutionStore>();
             var institutionId = "1";
             _ = mockInstitutions.Setup(m => m.GetById(institutionId)).Returns(Task.FromResult(_institutionsDtos.FirstOrDefault(x => x.Id == institutionId)));
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get(institutionId).ConfigureAwait(false);
@@ -80,7 +80,7 @@ namespace CentOps.UnitTests
             var randomInstitutionId = "999";
             _ = mockInstitutions.Setup(m => m.GetById(randomInstitutionId)).Returns(Task.FromResult<InstitutionDto>(null));
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get(randomInstitutionId).ConfigureAwait(false);
@@ -96,7 +96,7 @@ namespace CentOps.UnitTests
             var mockInstitutions = new Mock<IInstitutionStore>();
             _ = mockInstitutions.Setup(m => m.Create(It.IsAny<InstitutionDto>())).ReturnsAsync(_institutionsDtos[0]);
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             var createInstitutionModel = new CreateUpdateInsitutionModel
             {
@@ -119,7 +119,7 @@ namespace CentOps.UnitTests
             var mockInstitutions = new Mock<IInstitutionStore>();
             _ = mockInstitutions.Setup(m => m.Create(It.IsAny<InstitutionDto>())).ThrowsAsync(new ModelExistsException<InstitutionDto>());
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             var createInstitutionModel = new CreateUpdateInsitutionModel
             {
@@ -140,7 +140,7 @@ namespace CentOps.UnitTests
             var mockInstitutions = new Mock<IInstitutionStore>();
             _ = mockInstitutions.Setup(m => m.Update(It.IsAny<InstitutionDto>())).ReturnsAsync(_institutionsDtos[0]);
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Put(_institutionsDtos[0].Id!, new CreateUpdateInsitutionModel()).ConfigureAwait(false);
@@ -159,7 +159,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new InstitutionResponseModel { Id = "1", Name = "Test1", Status = InstitutionStatus.Active };
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             var updateInstitutionModel = new CreateUpdateInsitutionModel
             {
@@ -184,7 +184,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             var updateInstitutionModel = new CreateUpdateInsitutionModel
             {
@@ -206,7 +206,7 @@ namespace CentOps.UnitTests
             var mockInstitutions = new Mock<IInstitutionStore>();
             _ = mockInstitutions.Setup(m => m.DeleteById(_institutionsDtos[0].Id!)).ReturnsAsync(true);
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Delete(_institutionsDtos[0].Id!).ConfigureAwait(false);
@@ -222,7 +222,7 @@ namespace CentOps.UnitTests
             var mockInstitutions = new Mock<IInstitutionStore>();
             _ = mockInstitutions.Setup(m => m.DeleteById(_institutionsDtos[0].Id!)).ReturnsAsync(false);
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Delete(_institutionsDtos[0].Id!).ConfigureAwait(false);
@@ -238,7 +238,7 @@ namespace CentOps.UnitTests
             var mockInstitutions = new Mock<IInstitutionStore>();
             _ = mockInstitutions.Setup(m => m.DeleteById(_institutionsDtos[0].Id!)).ThrowsAsync(new ArgumentException());
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new AdminInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Delete(_institutionsDtos[0].Id!).ConfigureAwait(false);

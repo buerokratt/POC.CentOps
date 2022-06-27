@@ -11,12 +11,12 @@ namespace CentOps.Api.Controllers
     [Route("admin/institutions")]
     [ApiController]
     [Authorize(Policy = "AdminPolicy")]
-    public class InstitutionController : ControllerBase
+    public class AdminInstitutionController : ControllerBase
     {
         private readonly IInstitutionStore _store;
         private readonly IMapper _mapper;
 
-        public InstitutionController(IInstitutionStore store, IMapper mapper)
+        public AdminInstitutionController(IInstitutionStore store, IMapper mapper)
         {
             _store = store;
             _mapper = mapper;
