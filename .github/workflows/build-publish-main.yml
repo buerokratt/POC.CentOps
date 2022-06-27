@@ -52,7 +52,10 @@ jobs:
       app_name: centops
     runs-on:
       ubuntu-22.04
-    permissions: write-all
+    permissions:
+      actions: read
+      packages: write
+      contents: read
     defaults:
       run:
         shell : bash
