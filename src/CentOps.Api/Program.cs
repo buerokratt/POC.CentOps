@@ -1,8 +1,8 @@
 
-using CentOps.Api.Authentication;
 using CentOps.Api.Authentication.Extensions;
+using CentOps.Api.Extensions;
 using CentOps.Api.Services;
-using CentOps.Api.Services.ModelStore.Interfaces;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
@@ -20,12 +20,14 @@ namespace CentOps.Api
 
             _ = services.AddSingleton<IAuthService, AuthService>();
 
-            _ = services.AddControllers().AddJsonOptions(jo =>
-            {
-                jo.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+            _ = services
+                .AddControllers(options => options.Filters.Add(new AuthorizeFilter()))
+                .AddJsonOptions(jo =>
+                {
+                    jo.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
-            _ = builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            _ = services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             _ = services.AddEndpointsApiExplorer();
@@ -35,27 +37,9 @@ namespace CentOps.Api
             });
 
             services.AddApiKeyAuthentication();
+            services.AddAuthorizationPolicies();
 
-            _ = services.AddAuthorization(options =>
-            {
-                options.AddPolicy("AdminPolicy", builder =>
-                {
-                    _ = builder
-                        .AddAuthenticationSchemes(ApiKeyAuthenciationDefaults.AuthenticationScheme)
-                        .RequireClaim("isAdmin", "TRUE");
-                });
-
-                options.AddPolicy("UserPolicy", builder =>
-                {
-                    _ = builder
-                        .AddAuthenticationSchemes(ApiKeyAuthenciationDefaults.AuthenticationScheme)
-                        .RequireClaim("id");
-                });
-            });
-
-            var inMemoryStore = new InMemoryStore();
-            _ = services.AddSingleton<IInstitutionStore>(provider => inMemoryStore);
-            _ = services.AddSingleton<IParticipantStore>(provider => inMemoryStore);
+            services.AddDataStores();
 
             var app = builder.Build();
 
