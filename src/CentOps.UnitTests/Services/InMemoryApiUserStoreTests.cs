@@ -237,5 +237,61 @@ namespace CentOps.UnitTests.Services
                     async () => await sut.Update(apiUserWithUpdates).ConfigureAwait(false))
                 .ConfigureAwait(false);
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void GetByKeyThrowsExceptionWhenApiKeyIsNullOrEmpty(string key)
+        {
+            // Arrange
+            var sut = new InMemoryStore() as IApiUserStore;
+
+            // Act
+            Func<Task> action = async () => _ = await sut.GetByKeyAsync(key).ConfigureAwait(false);
+
+            // Assert
+            _ = action.Should()
+                .ThrowExactlyAsync<ArgumentNullException>()
+                .WithParameterName("apiKey");
+        }
+
+        [Fact]
+        public async Task GetByKeyShouldReturnExistingApiUserWhenApiKeyExists()
+        {
+            // Arrange
+            var sut = new InMemoryStore() as IApiUserStore;
+
+            var apiUser1 = new ApiUserDto { Name = "Test1", ApiKey = "unique-key-1" };
+            _ = await sut.Create(apiUser1).ConfigureAwait(false);
+
+            var apiUser2 = new ApiUserDto { Name = "Test2", ApiKey = "unique-key-2" };
+            _ = await sut.Create(apiUser2).ConfigureAwait(false);
+
+            // Act
+            var fetchedApiUser = await sut.GetByKeyAsync("unique-key-1").ConfigureAwait(false);
+
+            // Assert
+            _ = fetchedApiUser.Should().NotBeNull();
+            _ = fetchedApiUser.Name.Should().Be("Test1");
+        }
+
+        [Fact]
+        public async Task GetByKeyShouldReturnNullWhenApiKeyDoesNotExist()
+        {
+            // Arrange
+            var sut = new InMemoryStore() as IApiUserStore;
+
+            var apiUser1 = new ApiUserDto { Name = "Test1", ApiKey = "unique-key-1" };
+            _ = await sut.Create(apiUser1).ConfigureAwait(false);
+
+            var apiUser2 = new ApiUserDto { Name = "Test2", ApiKey = "unique-key-2" };
+            _ = await sut.Create(apiUser2).ConfigureAwait(false);
+
+            // Act
+            var fetchedApiUser = await sut.GetByKeyAsync("not-existing-user").ConfigureAwait(false);
+
+            // Assert
+            _ = fetchedApiUser.Should().BeNull();
+        }
     }
 }
