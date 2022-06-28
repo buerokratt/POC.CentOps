@@ -155,8 +155,6 @@ namespace CentOps.UnitTests.Authentication
                 .Setup(m => m.GetUserClaimsAsync(It.IsAny<string>()))
                 .Returns<string>(apiKey =>
                 {
-                    var exists = users.ContainsKey(apiKey);
-
                     return users.ContainsKey(apiKey)
                         ? Task.FromResult<ApiUser?>(users[apiKey])
                         : Task.FromResult<ApiUser?>(null);
