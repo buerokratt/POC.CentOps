@@ -35,7 +35,8 @@ namespace CentOps.Api.Services
 
             var queryString = @"SELECT *
                               FROM c
-                              WHERE c.name = @name";
+                              WHERE c.name = @name
+                              AND STARTSWITH(c.PartitionKey, 'institution', false)";
 
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name);
@@ -163,7 +164,8 @@ namespace CentOps.Api.Services
 
             var queryString = @"SELECT *
                               FROM c
-                              WHERE c.name = @name";
+                              WHERE c.name = @name
+                              AND STARTSWITH(c.PartitionKey, 'participant', false)";
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name);
             var existingName = await GetExistingParticipants(query).ConfigureAwait(false);
