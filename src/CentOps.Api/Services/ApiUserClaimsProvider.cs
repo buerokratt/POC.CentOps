@@ -20,7 +20,7 @@ namespace CentOps.Api.Services
 
             ApiUser? result = null;
 
-            if (user != null && user.Id != null)
+            if (user != null && !string.IsNullOrEmpty(user.Id)) // Code analysis requires the 'Id' null check
             {
                 result = new ApiUser(new[]
                 {

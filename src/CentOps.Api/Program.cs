@@ -1,4 +1,3 @@
-
 using CentOps.Api.Authentication.Extensions;
 using CentOps.Api.Extensions;
 using CentOps.Api.Services;
@@ -34,7 +33,10 @@ namespace CentOps.Api
                 _ = options.AddApiKeyOpenApiSecurity();
             });
 
-            services.AddApiKeyAuthentication<ApiUserClaimsProvider>();
+            services
+                .AddAuthentication()
+                .AddApiKeyAuth<ApiUserClaimsProvider>();
+
             services.AddAuthorizationPolicies();
 
             services.AddDataStores();

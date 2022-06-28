@@ -1,5 +1,8 @@
-﻿namespace CentOps.Api.Authentication
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace CentOps.Api.Authentication
 {
+    [ExcludeFromCodeCoverage] // No logic in this file
     public static class ApiKeyAuthenciationDefaults
     {
         public static readonly string AuthenticationScheme = "ApiKey";
