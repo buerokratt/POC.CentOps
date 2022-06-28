@@ -4,7 +4,7 @@ using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using FluentAssertions;
 
-namespace CentOps.UnitTests
+namespace CentOps.UnitTests.Services
 {
     public class InMemoryParticipantStoreTests
     {
