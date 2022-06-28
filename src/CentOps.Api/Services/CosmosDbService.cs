@@ -131,8 +131,8 @@ namespace CentOps.Api.Services
                               WHERE c.name = @name";
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name);
-            var existingInstitutions = await GetExistingInstitutions(query).ConfigureAwait(false);
-            if (existingInstitutions != null)
+            var existingName = await GetExistingInstitutions(query).ConfigureAwait(false);
+            if (existingName != null)
             {
                 throw new ModelExistsException<InstitutionDto>(model.Name);
             }
@@ -166,7 +166,7 @@ namespace CentOps.Api.Services
                               WHERE c.name = @name";
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name);
-            var existingName = await GetExistingInstitutions(query).ConfigureAwait(false);
+            var existingName = await GetExistingParticipants(query).ConfigureAwait(false);
             if (existingName != null && existingName.Any())
             {
                 throw new ModelExistsException<ParticipantDto>(model.Name);
@@ -266,8 +266,8 @@ namespace CentOps.Api.Services
                               WHERE c.name = @name";
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name);
-            var existingInstitutions = await GetExistingInstitutions(query).ConfigureAwait(false);
-            if (existingInstitutions != null)
+            var existingName = await GetExistingParticipants(query).ConfigureAwait(false);
+            if (existingName != null)
             {
                 throw new ModelExistsException<ParticipantDto>(model.Name);
             }
@@ -305,6 +305,26 @@ namespace CentOps.Api.Services
         {
             var query = _container.GetItemQueryIterator<InstitutionDto>(queryString);
             List<InstitutionDto> results = new();
+            while (query.HasMoreResults)
+            {
+                try
+                {
+                    var response = await query.ReadNextAsync().ConfigureAwait(false);
+                    results.AddRange(response.ToList());
+                }
+                catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    continue;
+                }
+            }
+
+            return results;
+        }
+
+        private async Task<IEnumerable<ParticipantDto>> GetExistingParticipants(QueryDefinition queryString)
+        {
+            var query = _container.GetItemQueryIterator<ParticipantDto>(queryString);
+            List<ParticipantDto> results = new();
             while (query.HasMoreResults)
             {
                 try
