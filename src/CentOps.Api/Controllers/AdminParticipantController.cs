@@ -10,6 +10,7 @@ namespace CentOps.Api.Controllers
 {
     [Route("admin/participants")]
     [ApiController]
+    [Authorize(Policy = "AdminPolicy")]
     public class AdminParticipantController : ControllerBase
     {
         private readonly IParticipantStore _store;
