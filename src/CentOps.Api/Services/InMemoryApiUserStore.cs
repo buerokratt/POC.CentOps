@@ -7,6 +7,14 @@ namespace CentOps.Api.Services
 {
     public sealed partial class InMemoryStore : IApiUserStore
     {
+        public static readonly ApiUserDto DefaultAdminUser = new()
+        {
+            Id = "seed_admin",
+            Name = "Seed Admin",
+            ApiKey = "iamadmin",
+            IsAdmin = true
+        };
+
         private readonly ConcurrentDictionary<string, ApiUserDto> _apiUsers = new();
 
         public Task<ApiUserDto> Create(ApiUserDto model)

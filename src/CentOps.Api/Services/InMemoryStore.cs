@@ -6,6 +6,11 @@ namespace CentOps.Api.Services
 {
     public sealed partial class InMemoryStore : IParticipantStore, IInstitutionStore
     {
+        public InMemoryStore()
+        {
+            _ = _apiUsers.TryAdd(DefaultAdminUser.Id ?? string.Empty, DefaultAdminUser);
+        }
+
         private async Task CheckInstitution(string institutionId)
         {
             var institutionStore = this as IInstitutionStore;

@@ -134,7 +134,7 @@ namespace CentOps.UnitTests.Services
             var response = await sut.GetAll().ConfigureAwait(false);
 
             // Assert
-            _ = response.Should().BeEquivalentTo(new[] { apiUser1, apiUser2 });
+            _ = response.Should().BeEquivalentTo(new[] { InMemoryStore.DefaultAdminUser, apiUser1, apiUser2 });
         }
 
         [Fact]
