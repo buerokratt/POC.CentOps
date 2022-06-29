@@ -122,8 +122,7 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task DeleteFailsIfParticipantsExistForInstitution
-        ()
+        public async Task DeleteFailsIfParticipantsExistForInstitution()
         {
             // Arrange
             var sut = new InMemoryStore() as IInstitutionStore;
@@ -170,7 +169,74 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task UpdateCanUpdateAnInsitution()
+        public async Task GetParticipantsByInstitutionIdReturnsAllParticipantWithInstitutionId()
+        {
+            // Arrange
+            var memoryStore = new InMemoryStore() as IInstitutionStore;
+
+            var institutionDto1 = new InstitutionDto { Name = "Test1", Status = InstitutionStatusDto.Active };
+            var institution1 = await memoryStore.Create(institutionDto1).ConfigureAwait(false);
+
+            var institutionDto2 = new InstitutionDto { Name = "Test2", Status = InstitutionStatusDto.Active };
+            var institution2 = await memoryStore.Create(institutionDto2).ConfigureAwait(false);
+
+            var participantStore = memoryStore as IParticipantStore;
+
+            var participantDto1 = new ParticipantDto
+            {
+                Name = "Test1",
+                Host = "https://host:8080",
+                Status = ParticipantStatusDto.Active,
+                Type = ParticipantTypeDto.Chatbot,
+                InstitutionId = institution1.Id
+            };
+            var participant1 = await participantStore.Create(participantDto1).ConfigureAwait(false);
+
+            var participantDto2 = new ParticipantDto
+            {
+                Name = "Test2",
+                Host = "https://host:8080",
+                Status = ParticipantStatusDto.Active,
+                Type = ParticipantTypeDto.Dmr,
+                InstitutionId = institution1.Id
+            };
+            var participant2 = await participantStore.Create(participantDto2).ConfigureAwait(false);
+
+            var participantDto3 = new ParticipantDto
+            {
+                Name = "Test3",
+                Host = "https://different-host:8080",
+                Status = ParticipantStatusDto.Active,
+                Type = ParticipantTypeDto.Classifier,
+                InstitutionId = institution2.Id
+            };
+            _ = await participantStore.Create(participantDto3).ConfigureAwait(false);
+
+            // Act
+            var response = await memoryStore.GetParticipantsByInstitutionId(institution1.Id).ConfigureAwait(false);
+            //var response = await institutionStore.GetById(institution1.Id).ConfigureAwait(false);
+
+            // Assert
+            _ = response.Should().BeEquivalentTo(new[] { participant1, participant2 });
+            //_ = response.Should().BeEquivalentTo(institution1);
+
+        }
+
+        [Fact]
+        public async Task GetParticipantsByInstitutionIdThrowsIfIfIdIsNull()
+        {
+            // Arrange
+            var sut = new InMemoryStore() as IInstitutionStore;
+
+            // Act & Assert
+            _ = await Assert
+                .ThrowsAsync<ArgumentException>(
+                    async () => await sut.GetParticipantsByInstitutionId("").ConfigureAwait(false))
+                .ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task UpdateCanUpdateAnInstitution()
         {
             // Arrange
             var sut = new InMemoryStore() as IInstitutionStore;
