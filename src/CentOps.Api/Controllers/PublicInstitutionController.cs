@@ -29,11 +29,23 @@ namespace CentOps.Api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> Get(string id)
+        public async Task<ActionResult<InstitutionResponseModel>> Get(string id)
         {
-            var instituion = await _store.GetById(id).ConfigureAwait(false);
+            var institution = await _store.GetById(id).ConfigureAwait(false);
 
-            if (instituion == null)
+            return institution != null
+                ? Ok(_mapper.Map<InstitutionResponseModel>(institution))
+                : NotFound(id);
+        }
+
+        [HttpGet("{id}/participants")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> GetParticipantsByInstitutionId(string id)
+        {
+            var institution = await _store.GetById(id).ConfigureAwait(false);
+
+            if (institution == null)
             {
                 return NotFound(id);
             }

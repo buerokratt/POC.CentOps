@@ -30,7 +30,7 @@ namespace CentOps.Api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> Get(string id)
+        public async Task<ActionResult<ParticipantResponseModel>> Get(string id)
         {
             var participant = await _store.GetById(id).ConfigureAwait(false);
 
