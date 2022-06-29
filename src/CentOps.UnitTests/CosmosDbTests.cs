@@ -201,9 +201,6 @@ namespace CentOps.UnitTests
 
             var sut = new CosmosDbService(mockClient.Object, "", "") as IInstitutionStore;
 
-            // var institution1 = new InstitutionDto { Name = "Test", Status = InstitutionStatusDto.Active };
-            // _ = await sut.Create(institution1).ConfigureAwait(false);
-
             var institution2 = new InstitutionDto { Name = institutionName, Status = InstitutionStatusDto.Active };
 
             // Act & Assert
@@ -212,5 +209,320 @@ namespace CentOps.UnitTests
                     async () => await sut.Create(institution2).ConfigureAwait(false))
                 .ConfigureAwait(false);
         }
+
+        [Fact]
+        public async Task DeleteThrowsIfIdIsNull()
+        {
+            // Arrange
+            var mockContainer = new Mock<Container>();
+            var mockClient = new Mock<CosmosClient>();
+
+            _ = mockClient.Setup(x => x.GetContainer(It.IsAny<string>(), It.IsAny<string>())).Returns(mockContainer.Object);
+
+            var mockItemResponse = new Mock<ItemResponse<InstitutionDto>>();
+
+            _ = mockContainer.Setup(x => x.CreateItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .ReturnsAsync(mockItemResponse.Object);
+
+            var myInstitutions = new List<InstitutionDto> { };
+
+            var feedResponseMock = new Mock<FeedResponse<InstitutionDto>>();
+            _ = feedResponseMock.Setup(x => x.GetEnumerator()).Returns(myInstitutions.GetEnumerator());
+
+            var feedIteratorMock = new Mock<FeedIterator<InstitutionDto>>();
+            _ = feedIteratorMock.Setup(f => f.HasMoreResults).Returns(false);
+            _ = feedIteratorMock
+                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(feedResponseMock.Object)
+                .Callback(() => feedIteratorMock
+                    .Setup(f => f.HasMoreResults)
+                    .Returns(false));
+            _ = mockContainer
+                .Setup(c => c.GetItemQueryIterator<InstitutionDto>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>()))
+                .Returns(feedIteratorMock.Object);
+
+            var sut = new CosmosDbService(mockClient.Object, "", "") as IInstitutionStore;
+
+            // Act & Assert
+            _ = await Assert
+                .ThrowsAsync<ArgumentException>(
+                    async () => await sut.DeleteById(null).ConfigureAwait(false))
+                .ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task DeleteReturnsFalseIfInstitutionDoesntExist()
+        {
+            // Arrange
+            var mockContainer = new Mock<Container>();
+            var mockClient = new Mock<CosmosClient>();
+
+            _ = mockClient.Setup(x => x.GetContainer(It.IsAny<string>(), It.IsAny<string>())).Returns(mockContainer.Object);
+
+            var mockItemResponse = new Mock<ItemResponse<InstitutionDto>>();
+
+            // CreateItemAsync
+            _ = mockContainer.Setup(x => x.CreateItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .ReturnsAsync(mockItemResponse.Object);
+
+            var myInstitutions = new List<InstitutionDto> { };
+
+            // GetItemQueryIterator
+            var feedResponseMock = new Mock<FeedResponse<InstitutionDto>>();
+            _ = feedResponseMock.Setup(x => x.GetEnumerator()).Returns(myInstitutions.GetEnumerator());
+
+            var feedIteratorMock = new Mock<FeedIterator<InstitutionDto>>();
+            _ = feedIteratorMock.Setup(f => f.HasMoreResults).Returns(false);
+            _ = feedIteratorMock
+                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(feedResponseMock.Object)
+                .Callback(() => feedIteratorMock
+                    .Setup(f => f.HasMoreResults)
+                    .Returns(false));
+            _ = mockContainer.Setup(c => c.GetItemQueryIterator<InstitutionDto>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>()))
+                .Returns(feedIteratorMock.Object);
+
+            // ReadItemStreamAsync
+            var institution =
+                new InstitutionDto
+                {
+                    Name = "Test",
+                    Status = InstitutionStatusDto.Active
+                };
+            var partitionKey = new PartitionKey($"institution::{institution.Id}");
+            var responseMsg = new ResponseMessage(System.Net.HttpStatusCode.NotFound);
+            _ = mockContainer.Setup(x => x.ReadItemStreamAsync(It.IsAny<string>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .Returns(Task.FromResult(responseMsg));
+            responseMsg.Dispose();
+
+            // DeleteItemAsync
+
+            var sut = new CosmosDbService(mockClient.Object, "", "") as IInstitutionStore;
+
+            // Act & Assert
+            var response = await sut.DeleteById("DoesntExist").ConfigureAwait(false);
+
+            Assert.False(response);
+        }
+
+        [Fact]
+        public async Task DeleteReturnsTrueIfSuccessful()
+        {
+            // Arrange
+            var mockContainer = new Mock<Container>();
+            var mockClient = new Mock<CosmosClient>();
+
+            _ = mockClient.Setup(x => x.GetContainer(It.IsAny<string>(), It.IsAny<string>())).Returns(mockContainer.Object);
+
+            var mockItemResponse = new Mock<ItemResponse<InstitutionDto>>();
+
+            // CreateItemAsync
+            _ = mockContainer.Setup(x => x.CreateItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .ReturnsAsync(mockItemResponse.Object);
+
+            var myInstitutions = new List<InstitutionDto> { };
+
+            // GetItemQueryIterator
+            var feedResponseMockInstitution = new Mock<FeedResponse<InstitutionDto>>();
+            _ = feedResponseMockInstitution.Setup(x => x.GetEnumerator()).Returns(myInstitutions.GetEnumerator());
+
+            var feedIteratorMockInstitution = new Mock<FeedIterator<InstitutionDto>>();
+            _ = feedIteratorMockInstitution.Setup(f => f.HasMoreResults).Returns(false);
+            _ = feedIteratorMockInstitution
+                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(feedResponseMockInstitution.Object)
+                .Callback(() => feedIteratorMockInstitution
+                    .Setup(f => f.HasMoreResults)
+                    .Returns(false));
+            _ = mockContainer.Setup(c => c.GetItemQueryIterator<InstitutionDto>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>()))
+                .Returns(feedIteratorMockInstitution.Object);
+
+            var myParticipants = new List<ParticipantDto> { };
+
+            var feedResponseMockParticipant = new Mock<FeedResponse<ParticipantDto>>();
+            _ = feedResponseMockParticipant.Setup(x => x.GetEnumerator()).Returns(myParticipants.GetEnumerator());
+
+            var feedIteratorMockParticipant = new Mock<FeedIterator<ParticipantDto>>();
+            _ = feedIteratorMockParticipant.Setup(f => f.HasMoreResults).Returns(false);
+            _ = feedIteratorMockParticipant
+                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(feedResponseMockParticipant.Object)
+                .Callback(() => feedIteratorMockParticipant
+                    .Setup(f => f.HasMoreResults)
+                    .Returns(false));
+            _ = mockContainer.Setup(c => c.GetItemQueryIterator<ParticipantDto>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>()))
+                .Returns(feedIteratorMockParticipant.Object);
+
+            // ReadItemStreamAsync
+            var responseMsg = new ResponseMessage(System.Net.HttpStatusCode.OK);
+            _ = mockContainer.Setup(x => x.ReadItemStreamAsync(It.IsAny<string>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .Returns(Task.FromResult(responseMsg));
+            responseMsg.Dispose();
+
+            // ReadItemAsync
+            _ = mockContainer.Setup(x => x.ReadItemAsync<InstitutionDto>(It.IsAny<string>(), It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .Returns(Task.FromResult(mockItemResponse.Object));
+
+            var sut = new CosmosDbService(mockClient.Object, "", "") as IInstitutionStore;
+
+            var institution = new InstitutionDto { Name = "Test", Status = InstitutionStatusDto.Active };
+
+            // Act
+            var created = await sut.Create(institution).ConfigureAwait(false);
+            var response = await sut.DeleteById(created.Id).ConfigureAwait(false);
+
+            // Assert
+            Assert.True(response);
+
+            var found = await sut.GetById(institution.Id).ConfigureAwait(false);
+            Assert.Null(found);
+        }
+
+        [Fact]
+#pragma warning disable CA1506
+        public async Task DeleteFailsIfParticipantsExistForInstitution
+#pragma warning restore CA1506
+        ()
+        {
+            // Arrange
+            var mockContainer = new Mock<Container>();
+            var mockClient = new Mock<CosmosClient>();
+
+            _ = mockClient.Setup(x => x.GetContainer(It.IsAny<string>(), It.IsAny<string>())).Returns(mockContainer.Object);
+
+            var mockItemResponse = new Mock<ItemResponse<InstitutionDto>>();
+            var institution = new InstitutionDto { Name = "Test", Status = InstitutionStatusDto.Active };
+
+            // CreateItemAsync
+            _ = mockContainer.Setup(x => x.CreateItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .ReturnsAsync(mockItemResponse.Object);
+
+            var myInstitutions = new List<InstitutionDto> { };
+
+            // GetItemQueryIterator
+            var feedResponseMockInstitution = new Mock<FeedResponse<InstitutionDto>>();
+            _ = feedResponseMockInstitution.Setup(x => x.GetEnumerator()).Returns(myInstitutions.GetEnumerator());
+
+            var feedIteratorMockInstitution = new Mock<FeedIterator<InstitutionDto>>();
+            _ = feedIteratorMockInstitution.Setup(f => f.HasMoreResults).Returns(false);
+            _ = feedIteratorMockInstitution
+                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(feedResponseMockInstitution.Object)
+                .Callback(() => feedIteratorMockInstitution
+                    .Setup(f => f.HasMoreResults)
+                    .Returns(false));
+            _ = mockContainer.Setup(c => c.GetItemQueryIterator<InstitutionDto>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>()))
+                .Returns(feedIteratorMockInstitution.Object);
+
+
+            var feedResponseMockParticipant = new Mock<FeedResponse<ParticipantDto>>();
+
+
+            // ReadItemStreamAsync
+            var responseMsg = new ResponseMessage(System.Net.HttpStatusCode.OK);
+            _ = mockContainer.Setup(x => x.ReadItemStreamAsync(It.IsAny<string>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .Returns(Task.FromResult(responseMsg));
+            responseMsg.Dispose();
+
+            // ReadItemAsync
+            _ = mockContainer.Setup(x => x.ReadItemAsync<InstitutionDto>(It.IsAny<string>(), It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .Returns(Task.FromResult(mockItemResponse.Object));
+
+            var sut = new CosmosDbService(mockClient.Object, "", "") as IInstitutionStore;
+
+            var createdInstitution = await sut.Create(institution).ConfigureAwait(false);
+            _ = mockItemResponse.Setup(f => f.Resource).Returns(createdInstitution);
+
+            var participant =
+                new ParticipantDto
+                {
+                    Name = "Test",
+                    Host = "https://participant:8080",
+                    InstitutionId = createdInstitution.Id,
+                    Status = ParticipantStatusDto.Active,
+                    Type = ParticipantTypeDto.Chatbot
+                };
+
+            var myParticipants = new List<ParticipantDto> { };
+            var feedIteratorMockParticipant = new Mock<FeedIterator<ParticipantDto>>();
+            _ = feedResponseMockParticipant.Setup(x => x.GetEnumerator()).Returns(myParticipants.GetEnumerator());
+            _ = feedIteratorMockParticipant.Setup(f => f.HasMoreResults).Returns(true);
+            _ = feedIteratorMockParticipant
+                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(feedResponseMockParticipant.Object)
+                .Callback(() => feedIteratorMockParticipant
+                    .Setup(f => f.HasMoreResults)
+                    .Returns(false));
+            _ = mockContainer.Setup(c => c.GetItemQueryIterator<ParticipantDto>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>()))
+                .Returns(feedIteratorMockParticipant.Object);
+
+            var createdParticipant = await ((IParticipantStore)sut).Create(participant).ConfigureAwait(false);
+
+            myParticipants = new List<ParticipantDto> { createdParticipant };
+            feedIteratorMockParticipant = new Mock<FeedIterator<ParticipantDto>>();
+            _ = feedResponseMockParticipant.Setup(x => x.GetEnumerator()).Returns(myParticipants.GetEnumerator());
+            _ = feedIteratorMockParticipant.Setup(f => f.HasMoreResults).Returns(true);
+            _ = feedIteratorMockParticipant
+                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(feedResponseMockParticipant.Object)
+                .Callback(() => feedIteratorMockParticipant
+                    .Setup(f => f.HasMoreResults)
+                    .Returns(false));
+            _ = mockContainer.Setup(c => c.GetItemQueryIterator<ParticipantDto>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>()))
+                .Returns(feedIteratorMockParticipant.Object);
+
+            // Act & Assert
+            _ = await Assert
+                .ThrowsAsync<ModelExistsException<ParticipantDto>>(
+                    async () => await sut.DeleteById(createdInstitution.Id).ConfigureAwait(false))
+                .ConfigureAwait(false);
+        }
+
     }
 }
