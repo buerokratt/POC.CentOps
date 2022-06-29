@@ -89,4 +89,4 @@ jobs:
       uses: docker/setup-buildx-action@v2
     
     - name: Docker Build
-      run: docker image build src/CentOps.Api/
+      run: docker image build -f src/CentOps.Api/Dockerfile ./src
