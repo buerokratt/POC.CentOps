@@ -9,9 +9,7 @@ namespace CentOps.Api
     [ExcludeFromCodeCoverage] // This is not solution code, no need for unit tests
     public static class Program
     {
-#pragma warning disable CA1506
         public static void Main(string[] args)
-#pragma warning restore CA1506
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +29,7 @@ namespace CentOps.Api
             // _ = builder.Services.AddSingleton<IParticipantStore>(provider => inMemoryStore);
 
             var section = builder.Configuration.GetSection("CosmosDb");
-            var cosmosDb = InitializeCosmosClientInstanceAsync(section).GetAwaiter().GetResult();
+            var cosmosDb = CosmosDbService.CreateCosmosDbService(section);
             _ = builder.Services.AddSingleton<IInstitutionStore>(provider => cosmosDb);
             _ = builder.Services.AddSingleton<IParticipantStore>(provider => cosmosDb);
 
@@ -51,21 +49,6 @@ namespace CentOps.Api
             _ = app.MapControllers();
 
             app.Run();
-        }
-
-        private static async Task<CosmosDbService> InitializeCosmosClientInstanceAsync(IConfigurationSection configurationSection)
-        {
-            var databaseName = configurationSection["DatabaseName"];
-            var containerName = configurationSection["ContainerName"];
-            var account = configurationSection["Account"];
-            var key = configurationSection["Key"];
-#pragma warning disable CA2000
-            var cosmosClient = new Microsoft.Azure.Cosmos.CosmosClient(account, key);
-#pragma warning restore CA2000
-            var database = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName).ConfigureAwait(false);
-            _ = await database.Database.CreateContainerIfNotExistsAsync(containerName, "/PartitionKey").ConfigureAwait(false);
-            var cosmosDbService = new CosmosDbService(cosmosClient, databaseName, containerName);
-            return cosmosDbService;
         }
     }
 }

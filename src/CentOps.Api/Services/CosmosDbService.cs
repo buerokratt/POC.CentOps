@@ -7,6 +7,7 @@ namespace CentOps.Api.Services
 {
     public sealed class CosmosDbService : IInstitutionStore, IParticipantStore
     {
+        private readonly CosmosClient _dbClient;
         private readonly Container _container;
 
         public CosmosDbService(
@@ -14,11 +15,23 @@ namespace CentOps.Api.Services
             string databaseName,
             string containerName)
         {
-            if (dbClient == null)
-            {
-                throw new ArgumentNullException(databaseName);
-            }
+            _dbClient = dbClient ?? throw new ArgumentNullException(databaseName);
             _container = dbClient.GetContainer(databaseName, containerName);
+        }
+        public static CosmosDbService CreateCosmosDbService(IConfigurationSection configurationSection)
+        {
+            if (configurationSection == null)
+            {
+                throw new ArgumentNullException(nameof(configurationSection));
+            }
+
+            var databaseName = configurationSection["DatabaseName"];
+            var containerName = configurationSection["ContainerName"];
+            var account = configurationSection["Account"];
+            var key = configurationSection["Key"];
+            var cosmosClient = new CosmosClient(account, key);
+            var cosmosDbService = new CosmosDbService(cosmosClient, databaseName, containerName);
+            return cosmosDbService;
         }
 
         async Task<InstitutionDto> IModelStore<InstitutionDto>.Create(InstitutionDto model)
@@ -51,6 +64,7 @@ namespace CentOps.Api.Services
             _ = await _container.CreateItemAsync(model, new PartitionKey(model.PartitionKey)).ConfigureAwait(false);
             return model;
         }
+
 
         async Task<bool> IModelStore<InstitutionDto>.DeleteById(string id)
         {
@@ -129,16 +143,17 @@ namespace CentOps.Api.Services
 
             var queryString = @"SELECT *
                               FROM c
-                              WHERE c.name = @name";
+                              WHERE c.name = @name AND NOT c.id = @id";
             var query = new QueryDefinition(queryString)
-                .WithParameter("@name", model.Name);
+                .WithParameter("@name", model.Name)
+                .WithParameter("@id", model.Id);
             var existingName = await GetExistingInstitutions(query).ConfigureAwait(false);
-            if (existingName != null)
+            if (existingName != null && existingName.Any())
             {
                 throw new ModelExistsException<InstitutionDto>(model.Name);
             }
 
-            _ = await _container.UpsertItemAsync(model, new PartitionKey($"institution::{model.Id}")).ConfigureAwait(false);
+            _ = await _container.UpsertItemAsync(model, new PartitionKey(model.PartitionKey)).ConfigureAwait(false);
 
             return model;
         }
@@ -265,16 +280,16 @@ namespace CentOps.Api.Services
 
             var queryString = @"SELECT *
                               FROM c
-                              WHERE c.name = @name";
+                              WHERE c.name = @name AND NOT c.id = @id";
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name);
             var existingName = await GetExistingParticipants(query).ConfigureAwait(false);
-            if (existingName != null)
+            if (existingName != null && existingName.Any())
             {
                 throw new ModelExistsException<ParticipantDto>(model.Name);
             }
 
-            _ = await _container.UpsertItemAsync(model, new PartitionKey($"participant::{model.Id}")).ConfigureAwait(false);
+            _ = await _container.UpsertItemAsync(model, new PartitionKey(model.PartitionKey)).ConfigureAwait(false);
 
             return model;
         }
