@@ -32,7 +32,7 @@ namespace CentOps.UnitTests
         [Fact]
         public void CreatesParticipantControllerWithoutThrowing()
         {
-            _ = new InstitutionController(new Mock<IInstitutionStore>().Object, new Mock<IMapper>().Object);
+            _ = new PublicInstitutionController(new Mock<IInstitutionStore>().Object, new Mock<IMapper>().Object);
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace CentOps.UnitTests
             var mockInstitutions = new Mock<IInstitutionStore>();
             _ = mockInstitutions.Setup(m => m.GetAll()).Returns(Task.FromResult(_institutionsDtos.AsEnumerable()));
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new PublicInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get().ConfigureAwait(false);
@@ -60,7 +60,7 @@ namespace CentOps.UnitTests
             var mockInstitutions = new Mock<IInstitutionStore>();
             var institutionId = "1";
             _ = mockInstitutions.Setup(m => m.GetById(institutionId)).Returns(Task.FromResult(_institutionsDtos.FirstOrDefault(x => x.Id == institutionId)));
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new PublicInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get(institutionId).ConfigureAwait(false);
@@ -79,7 +79,7 @@ namespace CentOps.UnitTests
             var randomInstitutionId = "999";
             _ = mockInstitutions.Setup(m => m.GetById(randomInstitutionId)).Returns(Task.FromResult<InstitutionDto>(null));
 
-            var sut = new InstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+            var sut = new PublicInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get(randomInstitutionId).ConfigureAwait(false);

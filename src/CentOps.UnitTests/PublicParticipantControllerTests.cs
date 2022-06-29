@@ -34,7 +34,7 @@ namespace CentOps.UnitTests
         [Fact]
         public void CreatesParticipantControllerWithoutThrowing()
         {
-            _ = new ParticipantController(new Mock<IParticipantStore>().Object, new Mock<IMapper>().Object);
+            _ = new PublicParticipantController(new Mock<IParticipantStore>().Object, new Mock<IMapper>().Object);
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace CentOps.UnitTests
             var mockParticipantStore = new Mock<IParticipantStore>();
             _ = mockParticipantStore.Setup(m => m.GetAll()).ReturnsAsync(_participantDtos.AsEnumerable());
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new PublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get().ConfigureAwait(false);
@@ -64,7 +64,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new PublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);
@@ -84,7 +84,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new PublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);

@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using CentOps.Api.Models;
 using CentOps.Api.Services.ModelStore.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentOps.Api.Controllers
 {
     [Route("public/institutions")]
     [ApiController]
+    [Authorize]
     public class PublicInstitutionController : ControllerBase
     {
         private readonly IInstitutionStore _store;
