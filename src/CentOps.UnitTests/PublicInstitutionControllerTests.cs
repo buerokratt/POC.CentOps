@@ -87,6 +87,25 @@ namespace CentOps.UnitTests
             // Assert
             _ = Assert.IsType<NotFoundObjectResult>(response.Result);
         }
+
+        [Fact]
+        public async Task GetParticipantsByInstitutionIdReturnsParticipants()
+        {
+            // Arrange
+            var mockInstitutions = new Mock<IInstitutionStore>();
+            var mockParticipatns = new Mock<IParticipantStore>();
+            var institutionId = "1";
+            _ = mockInstitutions.Setup(m => m.GetById(institutionId)).Returns(Task.FromResult(_institutionsDtos.FirstOrDefault(x => x.Id == institutionId)));
+            var sut = new PublicInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.GetParticipantsByInstitutionId(institutionId).ConfigureAwait(false);
+
+            // Assert
+            var okay = Assert.IsType<OkObjectResult>(response.Result);
+            var values = Assert.IsAssignableFrom<IEnumerable<ParticipantResponseModel>>(okay.Value);
+            _ = values.Should().BeEquivalentTo(Array.Empty<object>());
+        }
     }
 }
 
