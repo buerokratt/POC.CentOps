@@ -7,17 +7,31 @@ namespace CentOps.Api.Services
 {
     public sealed class CosmosDbService : IInstitutionStore, IParticipantStore
     {
+        private readonly CosmosClient _dbClient;
         private readonly Container _container;
 
-        public CosmosDbService(
+        public static CosmosDbService CreateCosmosDbService(IConfigurationSection configurationSection)
+        {
+            if (configurationSection == null)
+            {
+                throw new ArgumentNullException(nameof(configurationSection));
+            }
+
+            var databaseName = configurationSection["DatabaseName"];
+            var containerName = configurationSection["ContainerName"];
+            var account = configurationSection["Account"];
+            var key = configurationSection["Key"];
+            var cosmosClient = new CosmosClient(account, key);
+            var cosmosDbService = new CosmosDbService(cosmosClient, databaseName, containerName);
+            return cosmosDbService;
+        }
+
+        private CosmosDbService(
             CosmosClient dbClient,
             string databaseName,
             string containerName)
         {
-            if (dbClient == null)
-            {
-                throw new ArgumentNullException(databaseName);
-            }
+            _dbClient = dbClient ?? throw new ArgumentNullException(databaseName);
             _container = dbClient.GetContainer(databaseName, containerName);
         }
 
