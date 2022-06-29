@@ -11,19 +11,19 @@ namespace CentOps.UnitTests
         private InstitutionDto _defaultCreatedInstitution;
 
         /// <summary>
-        /// Create Participant Store with Default Insitution.
+        /// Create Participant Store with Default Institution.
         /// </summary>
         /// <returns>An Async Task wrapping this process.</returns>
         private async Task<IParticipantStore> CreateParticipantStoreAsync()
         {
             var memoryStore = new InMemoryStore() as IInstitutionStore;
-            var defaultInstutution = new InstitutionDto
+            var defaultInstitution = new InstitutionDto
             {
                 Name = "DefaultInstitution",
                 Status = InstitutionStatusDto.Active
             };
 
-            _defaultCreatedInstitution = await memoryStore.Create(defaultInstutution).ConfigureAwait(false);
+            _defaultCreatedInstitution = await memoryStore.Create(defaultInstitution).ConfigureAwait(false);
             return memoryStore as IParticipantStore;
         }
 
