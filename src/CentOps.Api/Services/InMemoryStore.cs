@@ -75,9 +75,9 @@ namespace CentOps.Api.Services
 
         Task<IEnumerable<ParticipantDto>> IInstitutionStore.GetParticipantsByInstitutionId(string id)
         {
-            return (Task<IEnumerable<ParticipantDto>>)(string.IsNullOrEmpty(id)
+            return string.IsNullOrEmpty(id)
                 ? throw new ArgumentException($"{nameof(id)} not specified.")
-                : _participants.Values.Where(key => id.Equals(key.InstitutionId, StringComparison.Ordinal)).AsEnumerable());
+                : Task.FromResult(_participants.Values.Where(key => id.Equals(key.InstitutionId, StringComparison.Ordinal)).AsEnumerable());
         }
 
         async Task<ParticipantDto> IModelStore<ParticipantDto>.Update(ParticipantDto model)
