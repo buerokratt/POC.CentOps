@@ -57,6 +57,7 @@ namespace CentOps.Api.Services
             {
                 throw new ArgumentException($"{nameof(id)} not specified.");
             }
+
             using (ResponseMessage responseMessage = await _container.ReadItemStreamAsync(
                 partitionKey: new PartitionKey($"institution::{id}"),
                 id: id).ConfigureAwait(false))
