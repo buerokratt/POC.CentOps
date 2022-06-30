@@ -5,14 +5,7 @@ using FluentAssertions;
 
 namespace CentOps.UnitTests
 {
-    //public abstract class BaseStoreTests<TModelStore, TModel>
-    //    where TModelStore : class, IModelStore<TModel>
-    //    where TModel : class, IModel
-    //{
-    //    protected abstract TModelStore GetStore(params TModel[] seedInstitutions);
-    //}
-
-    public abstract class BaseInstitutionStoreTests// : BaseStoreTests<IInstitutionStore, InstitutionDto>
+    public abstract class BaseInstitutionStoreTests
     {
         protected abstract IInstitutionStore GetInstitutionStore(params InstitutionDto[] seedInstitutions);
         protected abstract IParticipantStore GetParticipantStore(params ParticipantDto[] seedParticipants);
@@ -233,12 +226,17 @@ namespace CentOps.UnitTests
             // Arrange
             var sut = GetInstitutionStore();
 
-            var institution = new InstitutionDto { Name = "Test1", Status = InstitutionStatusDto.Active, Id = "DoesntExist" };
-
             // Act & Assert
             _ = await Assert
                 .ThrowsAsync<ModelNotFoundException<InstitutionDto>>(
-                    async () => await sut.Update(institution).ConfigureAwait(false))
+                    () =>
+                    {
+                        var institution = GetInstitution(
+                            id: "DoesntExist",
+                            name: "Test1",
+                            status: InstitutionStatusDto.Active);
+                        return sut.Update(institution);
+                    })
                 .ConfigureAwait(false);
         }
 

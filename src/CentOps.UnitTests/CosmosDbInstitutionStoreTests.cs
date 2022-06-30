@@ -58,12 +58,6 @@ namespace CentOps.UnitTests
             return sut;
         }
 
-        // Intentionally overriding this test because it is not relevant in CosmosDB
-        public override Task UpdateThrowsForNonexistentInstitution()
-        {
-            return Task.CompletedTask;
-        }
-
         private void SetupCreateItem<TModel>()
         {
             var mockItemResponse = new Mock<ItemResponse<TModel>>();
@@ -207,15 +201,27 @@ namespace CentOps.UnitTests
                         It.IsAny<PartitionKey>(),
                         It.IsAny<ItemRequestOptions>(),
                         It.IsAny<CancellationToken>()))
-                .Returns<TModel, PartitionKey, ItemRequestOptions, CancellationToken>((model, pk, options, ct) =>
+                .Returns<TModel, PartitionKey, ItemRequestOptions, CancellationToken>((incomingModel, pk, options, ct) =>
                 {
                     var response = new Mock<ItemResponse<TModel>>();
                     _ = response.Setup(m => m.StatusCode).Returns(HttpStatusCode.OK);
 
-                    var item = models.FirstOrDefault(m => m.Id == model.Id && m.PartitionKey == model.PartitionKey);
-                    _ = models.Remove(item);
+                    var nameAlreadyInUse = models.Any(m => m.Id == incomingModel.Id && m.Name == incomingModel.Name);
 
-                    models.Add(model);
+                    if (nameAlreadyInUse)
+                    {
+                        _ = response.Setup(m => m.StatusCode).Returns(HttpStatusCode.Conflict);
+                    }
+
+                    if (models.Remove(item))
+                    {
+                        _ = response.Setup(m => m.StatusCode).Returns(HttpStatusCode.OK);
+                        models.Add(incomingModel);
+                    }
+                    else
+                    {
+                        _ = response.Setup(m => m.StatusCode).Returns(HttpStatusCode.NotFound);
+                    }
 
                     return Task.FromResult(response.Object);
                 });
