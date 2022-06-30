@@ -639,5 +639,127 @@ namespace CentOps.UnitTests
             Assert.Equal(institutionWithUpdates.Name, updatedInstitution.Name);
             Assert.Equal(institutionWithUpdates.Status, updatedInstitution.Status);
         }
+
+        [Fact]
+        public async Task UpdateThrowsForNullModel()
+        {
+            // Arrange
+            var mockContainer = new Mock<Container>();
+            var mockClient = new Mock<CosmosClient>();
+
+            _ = mockClient.Setup(x => x.GetContainer(It.IsAny<string>(), It.IsAny<string>())).Returns(mockContainer.Object);
+
+            var mockItemResponse = new Mock<ItemResponse<InstitutionDto>>();
+
+            _ = mockContainer.Setup(x => x.CreateItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .ReturnsAsync(mockItemResponse.Object);
+
+
+            var createdInstitution = new InstitutionDto { Name = "Test1", Status = InstitutionStatusDto.Active, Id = "id" };
+            var myInstitutions = new List<InstitutionDto> { };
+
+            var feedResponseMock = new Mock<FeedResponse<InstitutionDto>>();
+            _ = feedResponseMock.Setup(x => x.GetEnumerator()).Returns(myInstitutions.GetEnumerator());
+
+            var feedIteratorMock = new Mock<FeedIterator<InstitutionDto>>();
+            _ = feedIteratorMock.Setup(f => f.HasMoreResults).Returns(true);
+            _ = feedIteratorMock
+                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(feedResponseMock.Object)
+                .Callback(() => feedIteratorMock
+                    .Setup(f => f.HasMoreResults)
+                    .Returns(false));
+            _ = mockContainer
+                .Setup(c => c.GetItemQueryIterator<InstitutionDto>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>()))
+                .Returns(feedIteratorMock.Object);
+
+
+            var sut = new CosmosDbService(mockClient.Object, "", "") as IInstitutionStore;
+
+            // Act
+            var institutionWithUpdates = new InstitutionDto { Name = "Test2", Status = InstitutionStatusDto.Disabled, Id = createdInstitution.Id };
+            var mockResponse = new Mock<ItemResponse<InstitutionDto>>();
+            _ = mockResponse.Setup(m => m.Resource).Returns(institutionWithUpdates);
+            _ = mockContainer
+                .Setup(c => c.UpsertItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .ReturnsAsync(mockResponse.Object);
+
+            // Act & Assert
+            _ = await Assert
+                .ThrowsAsync<ArgumentNullException>(
+                    async () => await sut.Update(null).ConfigureAwait(false))
+                .ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task UpdateThrowsForNullInstitutionName()
+        {
+            // Arrange
+            var mockContainer = new Mock<Container>();
+            var mockClient = new Mock<CosmosClient>();
+
+            _ = mockClient.Setup(x => x.GetContainer(It.IsAny<string>(), It.IsAny<string>())).Returns(mockContainer.Object);
+
+            var mockItemResponse = new Mock<ItemResponse<InstitutionDto>>();
+
+            _ = mockContainer.Setup(x => x.CreateItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .ReturnsAsync(mockItemResponse.Object);
+
+
+            var createdInstitution = new InstitutionDto { Name = "Test1", Status = InstitutionStatusDto.Active, Id = "id" };
+            var myInstitutions = new List<InstitutionDto> { };
+
+            var feedResponseMock = new Mock<FeedResponse<InstitutionDto>>();
+            _ = feedResponseMock.Setup(x => x.GetEnumerator()).Returns(myInstitutions.GetEnumerator());
+
+            var feedIteratorMock = new Mock<FeedIterator<InstitutionDto>>();
+            _ = feedIteratorMock.Setup(f => f.HasMoreResults).Returns(true);
+            _ = feedIteratorMock
+                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(feedResponseMock.Object)
+                .Callback(() => feedIteratorMock
+                    .Setup(f => f.HasMoreResults)
+                    .Returns(false));
+            _ = mockContainer
+                .Setup(c => c.GetItemQueryIterator<InstitutionDto>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>()))
+                .Returns(feedIteratorMock.Object);
+
+
+            var sut = new CosmosDbService(mockClient.Object, "", "") as IInstitutionStore;
+
+            // Act
+            var institutionWithUpdates = new InstitutionDto { Name = "Test2", Status = InstitutionStatusDto.Disabled, Id = createdInstitution.Id };
+            var mockResponse = new Mock<ItemResponse<InstitutionDto>>();
+            _ = mockResponse.Setup(m => m.Resource).Returns(institutionWithUpdates);
+            _ = mockContainer
+                .Setup(c => c.UpsertItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .ReturnsAsync(mockResponse.Object);
+
+            var institution = new InstitutionDto { Name = null, Status = InstitutionStatusDto.Disabled, Id = "1" };
+
+            // Act & Assert
+            _ = await Assert
+                .ThrowsAsync<ArgumentException>(
+                    async () => await sut.Update(institution).ConfigureAwait(false))
+                .ConfigureAwait(false);
+        }
     }
 }
