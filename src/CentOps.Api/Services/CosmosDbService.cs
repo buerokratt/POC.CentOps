@@ -18,21 +18,6 @@ namespace CentOps.Api.Services
             _dbClient = dbClient ?? throw new ArgumentNullException(databaseName);
             _container = dbClient.GetContainer(databaseName, containerName);
         }
-        public static CosmosDbService CreateCosmosDbService(IConfigurationSection configurationSection)
-        {
-            if (configurationSection == null)
-            {
-                throw new ArgumentNullException(nameof(configurationSection));
-            }
-
-            var databaseName = configurationSection["DatabaseName"];
-            var containerName = configurationSection["ContainerName"];
-            var account = configurationSection["Account"];
-            var key = configurationSection["Key"];
-            var cosmosClient = new CosmosClient(account, key);
-            var cosmosDbService = new CosmosDbService(cosmosClient, databaseName, containerName);
-            return cosmosDbService;
-        }
 
         async Task<InstitutionDto> IModelStore<InstitutionDto>.Create(InstitutionDto model)
         {
