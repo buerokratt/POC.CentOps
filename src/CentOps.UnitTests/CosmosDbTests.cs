@@ -27,7 +27,15 @@ namespace CentOps.UnitTests
                     Status = InstitutionStatusDto.Active
                 };
 
+            var expectedInstitutionId = "123";
+
             var mockItemResponse = new Mock<ItemResponse<InstitutionDto>>();
+            _ = mockItemResponse.Setup(m => m.Resource).Returns(new InstitutionDto
+            {
+                Id = expectedInstitutionId,
+                Name = institution.Name,
+                Status = institution.Status
+            });
 
             _ = mockContainer.Setup(x => x.CreateItemAsync(It.IsAny<InstitutionDto>(),
                     It.IsAny<PartitionKey>(),
@@ -61,6 +69,7 @@ namespace CentOps.UnitTests
 
             // Assert
             Assert.NotNull(createdInstitution.Id);
+            Assert.Equal(expectedInstitutionId, createdInstitution.Id);
             Assert.Equal(institution.Name, createdInstitution.Name);
             Assert.Equal(createdInstitution.Status, createdInstitution.Status);
         }
