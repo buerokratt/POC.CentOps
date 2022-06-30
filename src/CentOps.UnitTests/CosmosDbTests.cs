@@ -2,6 +2,7 @@
 using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
+using FluentAssertions;
 using Microsoft.Azure.Cosmos;
 using Moq;
 
@@ -524,5 +525,59 @@ namespace CentOps.UnitTests
                 .ConfigureAwait(false);
         }
 
+        [Fact]
+        public async Task GetAllReturnsAllStoredInsitutions()
+        {
+            // Arrange
+            var mockContainer = new Mock<Container>();
+            var mockClient = new Mock<CosmosClient>();
+
+            _ = mockClient.Setup(x => x.GetContainer(It.IsAny<string>(), It.IsAny<string>())).Returns(mockContainer.Object);
+
+            var mockItemResponse = new Mock<ItemResponse<InstitutionDto>>();
+
+            _ = mockContainer.Setup(x => x.CreateItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<PartitionKey>(),
+                    It.IsAny<ItemRequestOptions>(),
+                    default))
+                .ReturnsAsync(mockItemResponse.Object);
+
+
+            var institution1 = new InstitutionDto { Name = "Test1", Status = InstitutionStatusDto.Active };
+            var institution2 = new InstitutionDto { Name = "Test2", Status = InstitutionStatusDto.Active };
+            var myInstitutions = new List<InstitutionDto> { institution1, institution2 };
+
+            var feedResponseMock = new Mock<FeedResponse<InstitutionDto>>();
+            _ = feedResponseMock.Setup(x => x.GetEnumerator()).Returns(myInstitutions.GetEnumerator());
+
+            var feedIteratorMock = new Mock<FeedIterator<InstitutionDto>>();
+            _ = feedIteratorMock.Setup(f => f.HasMoreResults).Returns(true);
+            _ = feedIteratorMock
+                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(feedResponseMock.Object)
+                .Callback(() => feedIteratorMock
+                    .Setup(f => f.HasMoreResults)
+                    .Returns(false));
+            _ = mockContainer
+                .Setup(c => c.GetItemQueryIterator<InstitutionDto>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>()))
+                .Returns(feedIteratorMock.Object);
+
+            var sut = new CosmosDbService(mockClient.Object, "", "") as IInstitutionStore;
+
+            // 
+            // _ = await sut.Create(institution1).ConfigureAwait(false);
+
+            // 
+            // _ = await sut.Create(institution2).ConfigureAwait(false);
+
+            // Act
+            var response = await sut.GetAll().ConfigureAwait(false);
+
+            // Assert
+            _ = response.Should().BeEquivalentTo(new[] { institution1, institution2 });
+        }
     }
 }
