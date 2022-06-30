@@ -14,20 +14,18 @@ namespace CentOps.UnitTests
 
     public abstract class BaseInstitutionStoreTests// : BaseStoreTests<IInstitutionStore, InstitutionDto>
     {
-        protected abstract IInstitutionStore GetStore(params InstitutionDto[] seedInstitutions);
+        protected abstract IInstitutionStore GetInstitutionStore(params InstitutionDto[] seedInstitutions);
+        protected abstract IParticipantStore GetParticipantStore(params ParticipantDto[] seedParticipants);
 
         [Fact]
         public virtual async Task CreateCanStoreInstitution()
         {
             // Arrange
-            var sut = GetStore();
+            var sut = GetInstitutionStore();
 
-            var institution =
-                new InstitutionDto
-                {
-                    Name = "Test",
-                    Status = InstitutionStatusDto.Active
-                };
+            var institution = GetInstitution();
+            institution.Id = null;
+            institution.PartitionKey = null;
 
             // Act
             var createdInstitution = await sut.Create(institution).ConfigureAwait(false);
@@ -42,7 +40,7 @@ namespace CentOps.UnitTests
         public async Task CreateThrowsIfInstitutiontIsNull()
         {
             // Arrange
-            var sut = GetStore();
+            var sut = GetInstitutionStore();
 
             // Act & Assert
             _ = await Assert
@@ -55,9 +53,9 @@ namespace CentOps.UnitTests
         public async Task CreateThrowsIfInstitutionNameIsNull()
         {
             // Arrange
-            var sut = GetStore();
+            var sut = GetInstitutionStore();
 
-            var institution = new InstitutionDto { Name = null, Status = InstitutionStatusDto.Active };
+            var institution = GetInstitution(name: null);
 
             // Act & Assert
             _ = await Assert
@@ -70,14 +68,14 @@ namespace CentOps.UnitTests
         public async Task CreateThrowsIfDuplicateNameSpecified()
         {
             // Arrange
-            var sut = GetStore(new InstitutionDto { Name = "Test" });
+            var sut = GetInstitutionStore(GetInstitution());
 
             // Act & Assert
             _ = await Assert
                 .ThrowsAsync<ModelExistsException<InstitutionDto>>(
                     () =>
                     {
-                        var institution2 = new InstitutionDto { Name = "Test", Status = InstitutionStatusDto.Active };
+                        var institution2 = GetInstitution(); // This creates the same object
                         return sut.Create(institution2);
                     })
                 .ConfigureAwait(false);
@@ -87,7 +85,7 @@ namespace CentOps.UnitTests
         public async Task DeleteThrowsIfIdIsNull()
         {
             // Arrange
-            var sut = GetStore();
+            var sut = GetInstitutionStore();
 
             // Act & Assert
             _ = await Assert
@@ -100,7 +98,7 @@ namespace CentOps.UnitTests
         public async Task DeleteReturnsFalseIfInstitutionDoesntExist()
         {
             // Arrange
-            var sut = GetStore();
+            var sut = GetInstitutionStore();
 
             // Act & Assert
             var response = await sut.DeleteById("DoesntExist").ConfigureAwait(false);
@@ -112,19 +110,17 @@ namespace CentOps.UnitTests
         public async Task DeleteReturnsTrueIfSuccessful()
         {
             // Arrange
-            var sut = GetStore();
-
-            var institution = new InstitutionDto { Name = "Test", Status = InstitutionStatusDto.Active };
-
-            var created = await sut.Create(institution).ConfigureAwait(false);
+            var institution = GetInstitution();
+            var sut = GetInstitutionStore(institution);
+            _ = GetParticipantStore();
 
             // Act
-            var response = await sut.DeleteById(created.Id).ConfigureAwait(false);
+            var response = await sut.DeleteById(institution.Id).ConfigureAwait(false);
 
             // Assert
             Assert.True(response);
 
-            var found = await sut.GetById(created.Id).ConfigureAwait(false);
+            var found = await sut.GetById(institution.Id).ConfigureAwait(false);
             Assert.Null(found);
         }
 
@@ -132,41 +128,38 @@ namespace CentOps.UnitTests
         public async Task DeleteFailsIfParticipantsExistForInstitution()
         {
             // Arrange
-            var sut = GetStore();
 
-            var institution = new InstitutionDto { Name = "Test", Status = InstitutionStatusDto.Active };
-            var createdInstitution = await sut.Create(institution).ConfigureAwait(false);
+            var institution = GetInstitution(name: "Test institution");
 
-            var participant =
-                new ParticipantDto
-                {
-                    Name = "Test",
-                    Host = "https://participant:8080",
-                    InstitutionId = createdInstitution.Id,
-                    Status = ParticipantStatusDto.Active,
-                    Type = ParticipantTypeDto.Chatbot
-                };
+            var participant = new ParticipantDto
+            {
+                Id = "234",
+                PartitionKey = "participant::234",
+                Name = "Test participant",
+                Host = "https://participant:8080",
+                InstitutionId = institution.Id,
+                Status = ParticipantStatusDto.Active,
+                Type = ParticipantTypeDto.Chatbot
+            };
 
-            var createdParticipant = await ((IParticipantStore)sut).Create(participant).ConfigureAwait(false);
+            var particpantStore = GetParticipantStore(participant);
+            var sut = GetInstitutionStore(institution);
 
             // Act & Assert
             _ = await Assert
                 .ThrowsAsync<ModelExistsException<ParticipantDto>>(
-                    async () => await sut.DeleteById(createdInstitution.Id).ConfigureAwait(false))
+                    async () => await sut.DeleteById(institution.Id).ConfigureAwait(false))
                 .ConfigureAwait(false);
         }
 
         [Fact]
-        public async Task GetAllReturnsAllStoredInsitutions()
+        public async Task GetAllReturnsAllStoredInstitutions()
         {
             // Arrange
-            var sut = GetStore();
+            var institution1 = GetInstitution(id: "234", name: "Test1");
+            var institution2 = GetInstitution(id: "345", name: "Test2");
 
-            var institution1 = new InstitutionDto { Name = "Test1", Status = InstitutionStatusDto.Active };
-            _ = await sut.Create(institution1).ConfigureAwait(false);
-
-            var institution2 = new InstitutionDto { Name = "Test2", Status = InstitutionStatusDto.Active };
-            _ = await sut.Create(institution2).ConfigureAwait(false);
+            var sut = GetInstitutionStore(institution1, institution2);
 
             // Act
             var response = await sut.GetAll().ConfigureAwait(false);
@@ -179,13 +172,11 @@ namespace CentOps.UnitTests
         public async Task UpdateCanUpdateAnInsitution()
         {
             // Arrange
-            var sut = GetStore();
-
-            var institution = new InstitutionDto { Name = "Test1", Status = InstitutionStatusDto.Active };
-            var createdInstitution = await sut.Create(institution).ConfigureAwait(false);
+            var institution = GetInstitution(name: "Test1");
+            var sut = GetInstitutionStore(institution);
 
             // Act
-            var institutionWithUpdates = new InstitutionDto { Name = "Test2", Status = InstitutionStatusDto.Disabled, Id = createdInstitution.Id };
+            var institutionWithUpdates = GetInstitution(id: institution.Id, name: "Test2", status: InstitutionStatusDto.Disabled);
             var updatedInstitution = await sut.Update(institutionWithUpdates).ConfigureAwait(false);
 
             Assert.Equal(institutionWithUpdates.Id, updatedInstitution.Id);
@@ -197,7 +188,7 @@ namespace CentOps.UnitTests
         public async Task UpdateThrowsForNullModel()
         {
             // Arrange
-            var sut = GetStore();
+            var sut = GetInstitutionStore();
 
             // Act & Assert
             _ = await Assert
@@ -210,7 +201,7 @@ namespace CentOps.UnitTests
         public async Task UpdateThrowsForNullInstitutionName()
         {
             // Arrange
-            var sut = GetStore();
+            var sut = GetInstitutionStore();
 
             var institution = new InstitutionDto { Name = null, Status = InstitutionStatusDto.Disabled, Id = "1" };
 
@@ -225,7 +216,7 @@ namespace CentOps.UnitTests
         public async Task UpdateThrowsForNullInsitutionId()
         {
             // Arrange
-            var sut = GetStore();
+            var sut = GetInstitutionStore();
 
             var institution = new InstitutionDto { Name = "Name", Status = InstitutionStatusDto.Disabled, Id = null };
 
@@ -237,10 +228,10 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task UpdateThrowsForNonexistentInstitution()
+        public virtual async Task UpdateThrowsForNonexistentInstitution()
         {
             // Arrange
-            var sut = GetStore();
+            var sut = GetInstitutionStore();
 
             var institution = new InstitutionDto { Name = "Test1", Status = InstitutionStatusDto.Active, Id = "DoesntExist" };
 
@@ -255,20 +246,16 @@ namespace CentOps.UnitTests
         public async Task UpdateThrowsForDuplicateName()
         {
             // Arrange
-            var sut = GetStore();
-
-            var institution1 = new InstitutionDto { Name = "Test1", Status = InstitutionStatusDto.Active };
-            var createdInstitution1 = await sut.Create(institution1).ConfigureAwait(false);
-
-            var institution2 = new InstitutionDto { Name = "Test2", Status = InstitutionStatusDto.Active };
-            var createdInstitution2 = await sut.Create(institution2).ConfigureAwait(false);
+            var institution1 = GetInstitution(id: "123", name: "Test1");
+            var institution2 = GetInstitution(id: "234", name: "Test2");
+            var sut = GetInstitutionStore(institution1, institution2);
 
             var institutionWithUpdates =
                 new InstitutionDto
                 {
+                    Id = institution2.Id,
                     Name = institution1.Name,
-                    Status = institution2.Status,
-                    Id = createdInstitution2.Id
+                    Status = institution2.Status
                 };
 
             // Act & Assert
@@ -276,6 +263,20 @@ namespace CentOps.UnitTests
                 .ThrowsAsync<ModelExistsException<InstitutionDto>>(
                     async () => await sut.Update(institutionWithUpdates).ConfigureAwait(false))
                 .ConfigureAwait(false);
+        }
+
+        private static InstitutionDto GetInstitution(
+            string id = "123",
+            string name = "Test",
+            InstitutionStatusDto status = InstitutionStatusDto.Active)
+        {
+            return new InstitutionDto
+            {
+                Id = id,
+                PartitionKey = $"institution::{id}",
+                Name = name,
+                Status = status,
+            };
         }
     }
 }

@@ -3,6 +3,7 @@ using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.Azure.Cosmos;
 using Moq;
+using System.Net;
 
 namespace CentOps.UnitTests
 {
@@ -10,6 +11,8 @@ namespace CentOps.UnitTests
     {
         private readonly Mock<Container> mockContainer = new();
         private readonly Mock<CosmosClient> mockClient = new();
+
+        private readonly CosmosDbService sut;
 
         public CosmosDbInstitutionStoreTests()
         {
@@ -21,65 +24,201 @@ namespace CentOps.UnitTests
                     It.IsAny<string>(),
                     It.IsAny<string>()))
                 .Returns(mockContainer.Object);
+
+            sut = new CosmosDbService(mockClient.Object, It.IsAny<string>(), It.IsAny<string>());
+
+            SetupDefaultReadItemStream();
         }
 
-        public override Task CreateCanStoreInstitution()
+        protected override IInstitutionStore GetInstitutionStore(params InstitutionDto[] seedInstitutions)
         {
-            // Arrange mocks for query response
-            //_ = SetupFeedIterator();
+            var seedInstitutionList = seedInstitutions.ToList() ?? new List<InstitutionDto>();
 
-            // Arrange mocks for create item response
-            var mockItemResponse = new Mock<ItemResponse<InstitutionDto>>();
+            SetupCreateItem<InstitutionDto>();
+            SetupFeedIterator(seedInstitutionList);
+            SetupReadItemStream(seedInstitutionList);
+            SetupReadItem(seedInstitutionList);
+            SetupDeleteItem(seedInstitutionList);
+            SetupUpdateItem(seedInstitutionList);
 
-            _ = mockContainer.Setup(x => x.CreateItemAsync(It.IsAny<InstitutionDto>(),
-                    It.IsAny<PartitionKey>(),
-                    It.IsAny<ItemRequestOptions>(),
-                    default))
-                .ReturnsAsync(mockItemResponse.Object);
-
-            return base.CreateCanStoreInstitution();
+            return sut;
         }
 
-        protected override IInstitutionStore GetStore(params InstitutionDto[] seedInstitutions)
+        protected override IParticipantStore GetParticipantStore(params ParticipantDto[] seedParticipants)
         {
-            if (seedInstitutions == null)
-            {
-                seedInstitutions = Array.Empty<InstitutionDto>();
-            }
+            var seedParticipantsList = seedParticipants.ToList() ?? new List<ParticipantDto>();
 
-            SetupFeedIterator(seedInstitutions);
+            SetupCreateItem<ParticipantDto>();
+            SetupFeedIterator(seedParticipantsList);
+            SetupReadItemStream(seedParticipantsList);
+            SetupReadItem(seedParticipantsList);
+            SetupDeleteItem(seedParticipantsList);
+            SetupUpdateItem(seedParticipantsList);
 
-            return new CosmosDbService(mockClient.Object, It.IsAny<string>(), It.IsAny<string>());
+            return sut;
         }
 
-        private void SetupFeedIterator(params InstitutionDto[] institutions)
+        // Intentionally overriding this test because it is not relevant in CosmosDB
+        public override Task UpdateThrowsForNonexistentInstitution()
         {
-            var feedIteratorMock = new Mock<FeedIterator<InstitutionDto>>();
+            return Task.CompletedTask;
+        }
 
-            var hasMoreResultsSeq = feedIteratorMock.SetupSequence(f => f.HasMoreResults);
-            var readNextSeq = feedIteratorMock.SetupSequence(f => f.ReadNextAsync(It.IsAny<CancellationToken>()));
-
-            for (var i = 0; i < institutions.Length; i++)
-            {
-                hasMoreResultsSeq = hasMoreResultsSeq.Returns(true);
-
-                var institution = institutions[i];
-
-                var enumerator = new List<InstitutionDto>() { institution }.GetEnumerator();
-                var feedResponseMock = new Mock<FeedResponse<InstitutionDto>>();
-                _ = feedResponseMock.Setup(x => x.GetEnumerator()).Returns(enumerator);
-
-                readNextSeq = readNextSeq.ReturnsAsync(feedResponseMock.Object);
-            }
-
-            hasMoreResultsSeq = hasMoreResultsSeq.Returns(false);
+        private void SetupCreateItem<TModel>()
+        {
+            var mockItemResponse = new Mock<ItemResponse<TModel>>();
 
             _ = mockContainer
-                .Setup(c => c.GetItemQueryIterator<InstitutionDto>(
+                .Setup(x =>
+                    x.CreateItemAsync(
+                        It.IsAny<TModel>(),
+                        It.IsAny<PartitionKey>(),
+                        It.IsAny<ItemRequestOptions>(),
+                        default))
+                .ReturnsAsync(mockItemResponse.Object);
+        }
+
+        private void SetupFeedIterator<TModel>(IList<TModel> models)
+        {
+            _ = mockContainer
+                .Setup(c => c.GetItemQueryIterator<TModel>(
                     It.IsAny<QueryDefinition>(),
                     It.IsAny<string>(),
                     It.IsAny<QueryRequestOptions>()))
-                .Returns(feedIteratorMock.Object);
+                .Returns<QueryDefinition, string, QueryRequestOptions>((query, continuation, options) =>
+                {
+                    var feedIteratorMock = new Mock<FeedIterator<TModel>>();
+
+                    var hasMoreResultsSeq = feedIteratorMock.SetupSequence(f => f.HasMoreResults);
+                    var readNextSeq = feedIteratorMock.SetupSequence(f => f.ReadNextAsync(It.IsAny<CancellationToken>()));
+
+                    for (var i = 0; i < models.Count; i++)
+                    {
+                        hasMoreResultsSeq = hasMoreResultsSeq.Returns(true);
+
+                        var model = models[i];
+
+                        var enumerator = new List<TModel>() { model }.GetEnumerator();
+                        var feedResponseMock = new Mock<FeedResponse<TModel>>();
+                        _ = feedResponseMock.Setup(x => x.GetEnumerator()).Returns(enumerator);
+
+                        readNextSeq = readNextSeq.ReturnsAsync(feedResponseMock.Object);
+                    }
+
+                    hasMoreResultsSeq = hasMoreResultsSeq.Returns(false);
+
+                    return feedIteratorMock.Object;
+                });
+        }
+
+        private void SetupDefaultReadItemStream()
+        {
+            // This setup is for the "not found" case. This will be ignored after the first call so it is safe to call multiple times.
+            _ = mockContainer
+                .Setup(m =>
+                    m.ReadItemStreamAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<PartitionKey>(),
+                        It.IsAny<ItemRequestOptions>(),
+                        default))
+                .Returns<string, PartitionKey, ItemRequestOptions, CancellationToken>((id, pk, options, _) =>
+                {
+                    return Task.FromResult(new ResponseMessage(HttpStatusCode.NotFound));
+                });
+        }
+
+        private void SetupReadItemStream<TModel>(IList<TModel> models)
+            where TModel : class, IModel
+        {
+            foreach (var model in models)
+            {
+                _ = mockContainer
+                    .Setup(m =>
+                        m.ReadItemStreamAsync(
+                            model.Id,
+                            new PartitionKey(model.PartitionKey),
+                            It.IsAny<ItemRequestOptions>(),
+                            default))
+                    .Returns<string, PartitionKey, ItemRequestOptions, CancellationToken>((id, pk, options, _) =>
+                    {
+                        var item = models
+                            .FirstOrDefault(m => m.Id == id && new PartitionKey(m.PartitionKey) == pk);
+
+                        var statusCode = item == null ? HttpStatusCode.NotFound : HttpStatusCode.OK;
+
+                        return Task.FromResult(new ResponseMessage(statusCode));
+                    });
+            }
+        }
+
+        private void SetupReadItem<TModel>(IList<TModel> models)
+            where TModel : class, IModel
+        {
+            _ = mockContainer
+                .Setup(m =>
+                    m.ReadItemAsync<TModel>(
+                        It.IsAny<string>(),
+                        It.IsAny<PartitionKey>(),
+                        It.IsAny<ItemRequestOptions>(),
+                        It.IsAny<CancellationToken>()))
+                .Returns<string, PartitionKey, ItemRequestOptions, CancellationToken>((id, pk, options, ct) =>
+                {
+                    var response = new Mock<ItemResponse<TModel>>();
+
+                    var item = models.FirstOrDefault(m => m.Id == id && new PartitionKey(m.PartitionKey) == pk);
+
+                    if (item != null)
+                    {
+                        _ = response.Setup(m => m.Resource).Returns(item);
+                    }
+
+                    return Task.FromResult(response.Object);
+                });
+        }
+
+        private void SetupDeleteItem<TModel>(IList<TModel> models)
+            where TModel : class, IModel
+        {
+            _ = mockContainer
+                .Setup(m =>
+                    m.DeleteItemAsync<TModel>(
+                        It.IsAny<string>(),
+                        It.IsAny<PartitionKey>(),
+                        It.IsAny<ItemRequestOptions>(),
+                        It.IsAny<CancellationToken>()))
+                .Returns<string, PartitionKey, ItemRequestOptions, CancellationToken>((id, pk, options, ct) =>
+                {
+                    var response = new Mock<ItemResponse<TModel>>();
+
+                    var item = models.FirstOrDefault(m => m.Id == id && new PartitionKey(m.PartitionKey) == pk);
+                    _ = models.Remove(item);
+
+                    return Task.FromResult(response.Object);
+                });
+        }
+
+        private void SetupUpdateItem<TModel>(IList<TModel> models)
+            where TModel : class, IModel
+        {
+            _ = mockContainer
+                .Setup(m =>
+                    m.UpsertItemAsync(
+                        It.IsAny<TModel>(),
+                        It.IsAny<PartitionKey>(),
+                        It.IsAny<ItemRequestOptions>(),
+                        It.IsAny<CancellationToken>()))
+                .Returns<TModel, PartitionKey, ItemRequestOptions, CancellationToken>((model, pk, options, ct) =>
+                {
+                    var response = new Mock<ItemResponse<TModel>>();
+                    _ = response.Setup(m => m.StatusCode).Returns(HttpStatusCode.OK);
+
+                    var item = models.FirstOrDefault(m => m.Id == model.Id && m.PartitionKey == model.PartitionKey);
+                    _ = models.Remove(item);
+
+                    models.Add(model);
+
+                    return Task.FromResult(response.Object);
+                });
         }
     }
 }

@@ -28,16 +28,7 @@ namespace CentOps.UnitTests
                     Status = InstitutionStatusDto.Active
                 };
 
-            var expectedInstitutionId = "123";
-
             var mockItemResponse = new Mock<ItemResponse<InstitutionDto>>();
-            _ = mockItemResponse.Setup(m => m.Resource).Returns(new InstitutionDto
-            {
-                Id = expectedInstitutionId,
-                Name = institution.Name,
-                Status = institution.Status
-            });
-
             _ = mockContainer.Setup(x => x.CreateItemAsync(It.IsAny<InstitutionDto>(),
                     It.IsAny<PartitionKey>(),
                     It.IsAny<ItemRequestOptions>(),
@@ -70,7 +61,6 @@ namespace CentOps.UnitTests
 
             // Assert
             Assert.NotNull(createdInstitution.Id);
-            Assert.Equal(expectedInstitutionId, createdInstitution.Id);
             Assert.Equal(institution.Name, createdInstitution.Name);
             Assert.Equal(createdInstitution.Status, createdInstitution.Status);
         }
@@ -419,9 +409,8 @@ namespace CentOps.UnitTests
 
         [Fact]
 #pragma warning disable CA1506
-        public async Task DeleteFailsIfParticipantsExistForInstitution
+        public async Task DeleteFailsIfParticipantsExistForInstitution()
 #pragma warning restore CA1506
-        ()
         {
             // Arrange
             var mockContainer = new Mock<Container>();
@@ -486,6 +475,7 @@ namespace CentOps.UnitTests
             var participant =
                 new ParticipantDto
                 {
+                    Id = "123",
                     Name = "Test",
                     Host = "https://participant:8080",
                     InstitutionId = createdInstitution.Id,
@@ -493,26 +483,8 @@ namespace CentOps.UnitTests
                     Type = ParticipantTypeDto.Chatbot
                 };
 
-            var myParticipants = new List<ParticipantDto> { };
+            var myParticipants = new List<ParticipantDto> { participant };
             var feedIteratorMockParticipant = new Mock<FeedIterator<ParticipantDto>>();
-            _ = feedResponseMockParticipant.Setup(x => x.GetEnumerator()).Returns(myParticipants.GetEnumerator());
-            _ = feedIteratorMockParticipant.Setup(f => f.HasMoreResults).Returns(true);
-            _ = feedIteratorMockParticipant
-                .Setup(f => f.ReadNextAsync(It.IsAny<CancellationToken>()))
-                .ReturnsAsync(feedResponseMockParticipant.Object)
-                .Callback(() => feedIteratorMockParticipant
-                    .Setup(f => f.HasMoreResults)
-                    .Returns(false));
-            _ = mockContainer.Setup(c => c.GetItemQueryIterator<ParticipantDto>(
-                    It.IsAny<QueryDefinition>(),
-                    It.IsAny<string>(),
-                    It.IsAny<QueryRequestOptions>()))
-                .Returns(feedIteratorMockParticipant.Object);
-
-            var createdParticipant = await ((IParticipantStore)sut).Create(participant).ConfigureAwait(false);
-
-            myParticipants = new List<ParticipantDto> { createdParticipant };
-            feedIteratorMockParticipant = new Mock<FeedIterator<ParticipantDto>>();
             _ = feedResponseMockParticipant.Setup(x => x.GetEnumerator()).Returns(myParticipants.GetEnumerator());
             _ = feedIteratorMockParticipant.Setup(f => f.HasMoreResults).Returns(true);
             _ = feedIteratorMockParticipant

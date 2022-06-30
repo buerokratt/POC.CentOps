@@ -6,9 +6,20 @@ namespace CentOps.UnitTests
 {
     public class InMemoryInsitutionStoreTests : BaseInstitutionStoreTests
     {
-        protected override IInstitutionStore GetStore(params InstitutionDto[] seedInstitutions)
+        private readonly InMemoryStore store = new();
+
+        protected override IInstitutionStore GetInstitutionStore(params InstitutionDto[] seedInstitutions)
         {
-            return new InMemoryStore();
+            store.SeedInstitutions(seedInstitutions);
+
+            return store;
+        }
+
+        protected override IParticipantStore GetParticipantStore(params ParticipantDto[] seedParticipants)
+        {
+            store.SeedParticipants(seedParticipants);
+
+            return store;
         }
     }
 }

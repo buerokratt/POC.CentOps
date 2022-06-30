@@ -2,6 +2,7 @@
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.Azure.Cosmos;
+using System.Net;
 
 namespace CentOps.Api.Services
 {
@@ -62,7 +63,7 @@ namespace CentOps.Api.Services
                 partitionKey: new PartitionKey($"institution::{id}"),
                 id: id).ConfigureAwait(false))
             {
-                if (responseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+                if (responseMessage.StatusCode == HttpStatusCode.NotFound)
                 {
                     return false;
                 }
@@ -104,7 +105,7 @@ namespace CentOps.Api.Services
                 ItemResponse<InstitutionDto> response = await _container.ReadItemAsync<InstitutionDto>(id, new PartitionKey($"institution::{id}")).ConfigureAwait(false);
                 return response.Resource;
             }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
@@ -147,9 +148,11 @@ namespace CentOps.Api.Services
                 throw new ModelExistsException<InstitutionDto>(model.Name);
             }
 
-            _ = await _container.UpsertItemAsync(model, new PartitionKey(model.PartitionKey)).ConfigureAwait(false);
+            var response = await _container.UpsertItemAsync(model, new PartitionKey(model.PartitionKey)).ConfigureAwait(false);
 
-            return model;
+            return response.StatusCode == HttpStatusCode.NotFound
+                ? throw new ModelNotFoundException<InstitutionDto>(model.Id)
+                : model;
         }
 
         async Task<ParticipantDto> IModelStore<ParticipantDto>.Create(ParticipantDto model)
@@ -191,16 +194,16 @@ namespace CentOps.Api.Services
 
         async Task<bool> IModelStore<ParticipantDto>.DeleteById(string id)
         {
-
             if (string.IsNullOrEmpty(id))
             {
                 throw new ArgumentException($"{nameof(id)} not specified.");
             }
+
             using (ResponseMessage responseMessage = await _container.ReadItemStreamAsync(
                 partitionKey: new PartitionKey($"participant::{id}"),
                 id: id).ConfigureAwait(false))
             {
-                if (responseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+                if (responseMessage.StatusCode == HttpStatusCode.NotFound)
                 {
                     return false;
                 }
@@ -242,7 +245,7 @@ namespace CentOps.Api.Services
                 ItemResponse<ParticipantDto> response = await _container.ReadItemAsync<ParticipantDto>(id, new PartitionKey($"participant::{id}")).ConfigureAwait(false);
                 return response.Resource;
             }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
@@ -323,7 +326,7 @@ namespace CentOps.Api.Services
                     var response = await query.ReadNextAsync().ConfigureAwait(false);
                     results.AddRange(response.ToList());
                 }
-                catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                 {
                     continue;
                 }
@@ -343,7 +346,7 @@ namespace CentOps.Api.Services
                     var response = await query.ReadNextAsync().ConfigureAwait(false);
                     results.AddRange(response.ToList());
                 }
-                catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                 {
                     continue;
                 }
