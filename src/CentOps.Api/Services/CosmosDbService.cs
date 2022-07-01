@@ -149,7 +149,7 @@ namespace CentOps.Api.Services
                 throw new ModelExistsException<InstitutionDto>(model.Name);
             }
 
-            var response = await _container.UpsertItemAsync(model, new PartitionKey(model.PartitionKey)).ConfigureAwait(false);
+            var response = await _container.ReplaceItemAsync(model, model.Id, new PartitionKey(model.PartitionKey)).ConfigureAwait(false);
 
             return response.StatusCode == HttpStatusCode.NotFound
                 ? throw new ModelNotFoundException<InstitutionDto>(model.Id)
@@ -287,9 +287,11 @@ namespace CentOps.Api.Services
                 throw new ModelExistsException<ParticipantDto>(model.Name);
             }
 
-            _ = await _container.UpsertItemAsync(model, new PartitionKey(model.PartitionKey)).ConfigureAwait(false);
+            var response = await _container.ReplaceItemAsync(model, model.Id, new PartitionKey(model.PartitionKey)).ConfigureAwait(false);
 
-            return model;
+            return response.StatusCode == HttpStatusCode.NotFound
+                ? throw new ModelNotFoundException<ParticipantDto>(model.Id)
+                : model;
         }
 
         private async Task CheckInstitution(string institutionId)

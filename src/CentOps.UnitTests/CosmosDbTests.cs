@@ -608,7 +608,8 @@ namespace CentOps.UnitTests
             var mockResponse = new Mock<ItemResponse<InstitutionDto>>();
             _ = mockResponse.Setup(m => m.Resource).Returns(institutionWithUpdates);
             _ = mockContainer
-                .Setup(c => c.UpsertItemAsync(It.IsAny<InstitutionDto>(),
+                .Setup(c => c.ReplaceItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<string>(),
                     It.IsAny<PartitionKey>(),
                     It.IsAny<ItemRequestOptions>(),
                     default))
@@ -668,7 +669,8 @@ namespace CentOps.UnitTests
             var mockResponse = new Mock<ItemResponse<InstitutionDto>>();
             _ = mockResponse.Setup(m => m.Resource).Returns(institutionWithUpdates);
             _ = mockContainer
-                .Setup(c => c.UpsertItemAsync(It.IsAny<InstitutionDto>(),
+                .Setup(c => c.ReplaceItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<string>(),
                     It.IsAny<PartitionKey>(),
                     It.IsAny<ItemRequestOptions>(),
                     default))
@@ -728,7 +730,8 @@ namespace CentOps.UnitTests
             var mockResponse = new Mock<ItemResponse<InstitutionDto>>();
             _ = mockResponse.Setup(m => m.Resource).Returns(institutionWithUpdates);
             _ = mockContainer
-                .Setup(c => c.UpsertItemAsync(It.IsAny<InstitutionDto>(),
+                .Setup(c => c.ReplaceItemAsync(It.IsAny<InstitutionDto>(),
+                    It.IsAny<string>(),
                     It.IsAny<PartitionKey>(),
                     It.IsAny<ItemRequestOptions>(),
                     default))
