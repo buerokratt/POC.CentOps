@@ -207,7 +207,7 @@ namespace CentOps.UnitTests
                 {
                     var response = new Mock<ItemResponse<TModel>>();
 
-                    var item = models.FirstOrDefault(m => m.Id == incomingModel.Id && new PartitionKey(m.Name) == pk);
+                    var item = models.FirstOrDefault(m => m.Id == incomingModel.Id && new PartitionKey(m.PartitionKey) == pk);
                     _ = models.Remove(item);
                     models.Add(incomingModel);
 
