@@ -59,6 +59,7 @@ namespace CentOps.UnitTests
         }
 
         private void SetupCreateItem<TModel>()
+            where TModel : class, IModel
         {
             var mockItemResponse = new Mock<ItemResponse<TModel>>();
 
@@ -73,6 +74,7 @@ namespace CentOps.UnitTests
         }
 
         private void SetupFeedIterator<TModel>(IList<TModel> models)
+            where TModel : class, IModel
         {
             _ = mockContainer
                 .Setup(c => c.GetItemQueryIterator<TModel>(

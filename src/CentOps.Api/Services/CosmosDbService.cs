@@ -142,6 +142,7 @@ namespace CentOps.Api.Services
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name)
                 .WithParameter("@id", model.Id);
+
             var existingName = await GetExistingInstitutions(query).ConfigureAwait(false);
             if (existingName != null && existingName.Any())
             {
