@@ -8,16 +8,16 @@ namespace CentOps.UnitTests
     {
         private readonly InMemoryStore store = new();
 
-        protected override IInstitutionStore GetInstitutionStore(params InstitutionDto[] seedInstitutions)
+        protected override IInstitutionStore GetInstitutionStore(params InstitutionDto[] seed)
         {
-            store.SeedInstitutions(seedInstitutions);
+            store.SeedInstitutions(seed);
 
             return store;
         }
 
-        protected override IParticipantStore GetParticipantStore(params ParticipantDto[] seedParticipants)
+        protected override IParticipantStore GetParticipantStore(params ParticipantDto[] seed)
         {
-            store.SeedParticipants(seedParticipants);
+            store.SeedParticipants(seed);
 
             return store;
         }

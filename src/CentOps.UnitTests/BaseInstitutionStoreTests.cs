@@ -2,13 +2,35 @@
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using FluentAssertions;
+using System.Linq.Expressions;
 
 namespace CentOps.UnitTests
 {
     public abstract class BaseInstitutionStoreTests
     {
-        protected abstract IInstitutionStore GetInstitutionStore(params InstitutionDto[] seedInstitutions);
-        protected abstract IParticipantStore GetParticipantStore(params ParticipantDto[] seedParticipants);
+        protected Expression<Func<InstitutionDto, bool>> InstitutionFilter { get; private set; }
+
+        protected Expression<Func<ParticipantDto, bool>> ParticipantFilter { get; private set; }
+
+        protected BaseInstitutionStoreTests()
+        {
+            InstitutionFilter = m => true;
+            ParticipantFilter = m => true;
+        }
+
+        protected abstract IInstitutionStore GetInstitutionStore(params InstitutionDto[] seed);
+
+        protected abstract IParticipantStore GetParticipantStore(params ParticipantDto[] seed);
+
+        protected void SetupInstitutionQuery(Expression<Func<InstitutionDto, bool>> filter)
+        {
+            InstitutionFilter = filter;
+        }
+
+        protected void SetupParticipantQuery(Expression<Func<ParticipantDto, bool>> filter)
+        {
+            ParticipantFilter = filter;
+        }
 
         [Fact]
         public virtual async Task CreateCanStoreInstitution()
@@ -61,7 +83,7 @@ namespace CentOps.UnitTests
         public async Task CreateThrowsIfDuplicateNameSpecified()
         {
             // Arrange
-            var sut = GetInstitutionStore(GetInstitution());
+            var sut = GetInstitutionStore(seed: GetInstitution());
 
             // Act & Assert
             _ = await Assert
@@ -104,7 +126,7 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var institution = GetInstitution();
-            var sut = GetInstitutionStore(institution);
+            var sut = GetInstitutionStore(seed: institution);
             _ = GetParticipantStore();
 
             // Act
@@ -136,7 +158,7 @@ namespace CentOps.UnitTests
             };
 
             var particpantStore = GetParticipantStore(participant);
-            var sut = GetInstitutionStore(institution);
+            var sut = GetInstitutionStore(seed: institution);
 
             // Act & Assert
             _ = await Assert
@@ -162,11 +184,13 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task UpdateCanUpdateAnInsitution()
+        public virtual async Task UpdateCanUpdateAnInstitution()
         {
             // Arrange
             var institution = GetInstitution(name: "Test1");
-            var sut = GetInstitutionStore(institution);
+            var sut = GetInstitutionStore(seed: institution);
+
+            SetupInstitutionQuery(m => m.Id == institution.Id && m.Name == "Test2");
 
             // Act
             var institutionWithUpdates = GetInstitution(id: institution.Id, name: "Test2", status: InstitutionStatusDto.Disabled);

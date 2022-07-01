@@ -3,6 +3,7 @@ using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.Azure.Cosmos;
 using Moq;
+using System.Linq.Expressions;
 using System.Net;
 
 namespace CentOps.UnitTests
@@ -30,12 +31,17 @@ namespace CentOps.UnitTests
             SetupDefaultReadItemStream();
         }
 
-        protected override IInstitutionStore GetInstitutionStore(params InstitutionDto[] seedInstitutions)
+        public override Task UpdateCanUpdateAnInstitution()
         {
-            var seedInstitutionList = seedInstitutions.ToList() ?? new List<InstitutionDto>();
+            return base.UpdateCanUpdateAnInstitution();
+        }
+
+        protected override IInstitutionStore GetInstitutionStore(params InstitutionDto[] seed)
+        {
+            var seedInstitutionList = seed.ToList() ?? new List<InstitutionDto>();
 
             SetupCreateItem<InstitutionDto>();
-            SetupFeedIterator(seedInstitutionList);
+            SetupFeedIterator(seedInstitutionList, () => InstitutionFilter);
             SetupReadItemStream(seedInstitutionList);
             SetupReadItem(seedInstitutionList);
             SetupDeleteItem(seedInstitutionList);
@@ -44,12 +50,12 @@ namespace CentOps.UnitTests
             return sut;
         }
 
-        protected override IParticipantStore GetParticipantStore(params ParticipantDto[] seedParticipants)
+        protected override IParticipantStore GetParticipantStore(params ParticipantDto[] seed)
         {
-            var seedParticipantsList = seedParticipants.ToList() ?? new List<ParticipantDto>();
+            var seedParticipantsList = seed.ToList() ?? new List<ParticipantDto>();
 
             SetupCreateItem<ParticipantDto>();
-            SetupFeedIterator(seedParticipantsList);
+            SetupFeedIterator(seedParticipantsList, () => ParticipantFilter);
             SetupReadItemStream(seedParticipantsList);
             SetupReadItem(seedParticipantsList);
             SetupDeleteItem(seedParticipantsList);
@@ -73,7 +79,7 @@ namespace CentOps.UnitTests
                 .ReturnsAsync(mockItemResponse.Object);
         }
 
-        private void SetupFeedIterator<TModel>(IList<TModel> models)
+        private void SetupFeedIterator<TModel>(IList<TModel> models, Func<Expression<Func<TModel, bool>>> filterFactory)
             where TModel : class, IModel
         {
             _ = mockContainer
@@ -88,11 +94,13 @@ namespace CentOps.UnitTests
                     var hasMoreResultsSeq = feedIteratorMock.SetupSequence(f => f.HasMoreResults);
                     var readNextSeq = feedIteratorMock.SetupSequence(f => f.ReadNextAsync(It.IsAny<CancellationToken>()));
 
-                    for (var i = 0; i < models.Count; i++)
+                    var filteredModels = models.Where(filterFactory().Compile()).ToArray();
+
+                    for (var i = 0; i < filteredModels.Length; i++)
                     {
                         hasMoreResultsSeq = hasMoreResultsSeq.Returns(true);
 
-                        var model = models[i];
+                        var model = filteredModels[i];
 
                         var enumerator = new List<TModel>() { model }.GetEnumerator();
                         var feedResponseMock = new Mock<FeedResponse<TModel>>();
