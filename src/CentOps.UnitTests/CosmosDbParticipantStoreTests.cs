@@ -31,10 +31,10 @@ namespace CentOps.UnitTests
             SetupDefaultReadItemStream();
         }
 
-        //public override Task UpdateCanUpdateAnInstitution()
-        //{
-        //    return base.UpdateCanUpdateAnInstitution();
-        //}
+        public override Task UpdateCanUpdateAParticipant()
+        {
+            return base.UpdateCanUpdateAParticipant();
+        }
 
         protected override IInstitutionStore GetInstitutionStore(params InstitutionDto[] seed)
         {
@@ -206,12 +206,13 @@ namespace CentOps.UnitTests
         {
             _ = mockContainer
                 .Setup(m =>
-                    m.UpsertItemAsync(
+                    m.ReplaceItemAsync(
                         It.IsAny<TModel>(),
+                        It.IsAny<string>(),
                         It.IsAny<PartitionKey>(),
                         It.IsAny<ItemRequestOptions>(),
                         It.IsAny<CancellationToken>()))
-                .Returns<TModel, PartitionKey, ItemRequestOptions, CancellationToken>((incomingModel, pk, options, ct) =>
+                .Returns<TModel, string, PartitionKey, ItemRequestOptions, CancellationToken>((incomingModel, id, pk, options, ct) =>
                 {
                     var response = new Mock<ItemResponse<TModel>>();
 
