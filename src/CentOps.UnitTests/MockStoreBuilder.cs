@@ -1,5 +1,4 @@
-﻿using CentOps.Api.Services;
-using CentOps.Api.Services.ModelStore.Interfaces;
+﻿using CentOps.Api.Services.ModelStore.Interfaces;
 using Microsoft.Azure.Cosmos;
 using Moq;
 using System.Linq.Expressions;
