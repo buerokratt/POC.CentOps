@@ -204,24 +204,12 @@ namespace CentOps.UnitTests
                 .Returns<TModel, PartitionKey, ItemRequestOptions, CancellationToken>((incomingModel, pk, options, ct) =>
                 {
                     var response = new Mock<ItemResponse<TModel>>();
-                    _ = response.Setup(m => m.StatusCode).Returns(HttpStatusCode.OK);
 
-                    var nameAlreadyInUse = models.Any(m => m.Id == incomingModel.Id && m.Name == incomingModel.Name);
+                    var item = models.FirstOrDefault(m => m.Id == incomingModel.Id && new PartitionKey(m.Name) == pk);
+                    _ = models.Remove(item);
+                    models.Add(incomingModel);
 
-                    if (nameAlreadyInUse)
-                    {
-                        _ = response.Setup(m => m.StatusCode).Returns(HttpStatusCode.Conflict);
-                    }
-
-                    if (models.Remove(item))
-                    {
-                        _ = response.Setup(m => m.StatusCode).Returns(HttpStatusCode.OK);
-                        models.Add(incomingModel);
-                    }
-                    else
-                    {
-                        _ = response.Setup(m => m.StatusCode).Returns(HttpStatusCode.NotFound);
-                    }
+                    _ = response.Setup(m => m.StatusCode).Returns(item == null ? HttpStatusCode.NotFound : HttpStatusCode.OK);
 
                     return Task.FromResult(response.Object);
                 });
