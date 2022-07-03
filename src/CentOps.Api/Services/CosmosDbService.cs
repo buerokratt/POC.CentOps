@@ -111,12 +111,22 @@ namespace CentOps.Api.Services
             }
         }
 
-        Task<IEnumerable<ParticipantDto>> IInstitutionStore.GetParticipantsByInstitutionId(string id)
+        async Task<IEnumerable<ParticipantDto>> IInstitutionStore.GetParticipantsByInstitutionId(string id)
         {
-            // return string.IsNullOrEmpty(id)
-            //     ? throw new ArgumentException($"{nameof(id)} not specified.")
-            //     : Task.FromResult(_participants.Values.Where(key => id.Equals(key.InstitutionId, StringComparison.Ordinal)).AsEnumerable());
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentException($"{nameof(id)} not specified.");
+            }
+            else
+            {
+                var queryString = @"SELECT *
+                              FROM c
+                              WHERE c.institutionId = @id
+                              AND STARTSWITH(c.PartitionKey, 'participant', false)";
+                var query = new QueryDefinition(queryString)
+                    .WithParameter("@id", id);
+                return await GetExistingParticipants(query).ConfigureAwait(false);
+            }
         }
 
         async Task<InstitutionDto> IModelStore<InstitutionDto>.Update(InstitutionDto model)
