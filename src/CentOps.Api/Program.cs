@@ -1,8 +1,6 @@
 using CentOps.Api.Authentication.Extensions;
 using CentOps.Api.Extensions;
 using CentOps.Api.Services;
-using Microsoft.AspNetCore.Mvc.Authorization;
-using CentOps.Api.Extensions;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
@@ -19,7 +17,7 @@ namespace CentOps.Api
             var services = builder.Services;
 
             _ = services
-                .AddControllers(options => options.Filters.Add(new AuthorizeFilter()))
+                .AddControllers()
                 .AddJsonOptions(jo =>
                 {
                     jo.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -40,7 +38,7 @@ namespace CentOps.Api
             services.AddAuthorizationPolicies();
 
             var section = builder.Configuration.GetSection("CosmosDb");
-            builder.Services.AddCosmosDbServices(section);
+            services.AddCosmosDbServices(section);
 
             var app = builder.Build();
 

@@ -7,16 +7,16 @@ namespace CentOps.Api.Services
 {
     public class ApiUserClaimsProvider : IApiUserClaimsProvider
     {
-        private readonly IApiUserStore _userStore;
+        private readonly IModelStore<IModel> _entityStore;
 
-        public ApiUserClaimsProvider(IApiUserStore userStore)
+        public ApiUserClaimsProvider(IModelStore<IModel> userStore)
         {
-            _userStore = userStore;
+            _entityStore = userStore;
         }
 
         public async Task<ApiUser?> GetUserClaimsAsync(string apiKey)
         {
-            var user = await _userStore.GetByKeyAsync(apiKey).ConfigureAwait(false);
+            var user = await _entityStore.GetByApiKeyAsync(apiKey).ConfigureAwait(false);
 
             ApiUser? result = null;
 

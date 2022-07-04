@@ -104,7 +104,7 @@ namespace CentOps.UnitTests
 
             // Act & Assert
             _ = await Assert
-                .ThrowsAsync<ArgumentException>(
+                .ThrowsAsync<ArgumentNullException>(
                     async () => await sut.DeleteById(null).ConfigureAwait(false))
                 .ConfigureAwait(false);
         }
@@ -287,6 +287,43 @@ namespace CentOps.UnitTests
                 .ConfigureAwait(false);
         }
 
+        [Fact]
+        public async Task GetByApiKeyShouldReturnInstitutionWhenInstitutionWithApiKeyExists()
+        {
+            var institution = GetInstitution();
+            var sut = GetInstitutionStore(institution);
+            SetupInstitutionQuery(x => x.ApiKey == "supersecret_123");
+
+            var fetchedInstitution = await sut.GetByApiKeyAsync("supersecret_123").ConfigureAwait(false);
+
+            Assert.Equal(institution.Id, fetchedInstitution.Id);
+            Assert.Equal("supersecret_123", fetchedInstitution.ApiKey);
+        }
+
+        [Fact]
+        public async Task GetByApiKeyShouldReturnNullWhenApiKeyDoesNotExist()
+        {
+            var institution = GetInstitution();
+            var sut = GetInstitutionStore(institution);
+            SetupInstitutionQuery(x => x.ApiKey == "doesnt_exist");
+
+            var fetchedInstitution = await sut.GetByApiKeyAsync("doesnt_exist").ConfigureAwait(false);
+
+            Assert.Null(fetchedInstitution);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public async Task GetByApiKeyShouldThrowWhenApiKeyIsNullOrEmpty(string apiKey)
+        {
+            var institution = GetInstitution();
+            var sut = GetInstitutionStore(institution);
+
+            _ = await Assert.ThrowsAsync<ArgumentNullException>(() => sut.GetByApiKeyAsync(apiKey))
+                .ConfigureAwait(false);
+        }
+
         private static InstitutionDto GetInstitution(
             string id = "123",
             string name = "Test",
@@ -298,6 +335,7 @@ namespace CentOps.UnitTests
                 PartitionKey = $"institution::{id}",
                 Name = name,
                 Status = status,
+                ApiKey = $"supersecret_{id}"
             };
         }
     }

@@ -2,10 +2,8 @@ using CentOps.Api.Authentication;
 using CentOps.Api.Services;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using CentOps.Api.Services;
-using CentOps.Api.Services.ModelStore.Interfaces;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Azure.Cosmos;
-using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api.Extensions
 {
@@ -13,6 +11,8 @@ namespace CentOps.Api.Extensions
     {
         public static void AddAuthorizationPolicies(this IServiceCollection services)
         {
+            _ = services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
+
             _ = services.AddAuthorization(options =>
             {
                 var builder = new AuthorizationPolicyBuilder()
@@ -38,7 +38,6 @@ namespace CentOps.Api.Extensions
             var inMemoryStore = new InMemoryStore();
             _ = services.AddSingleton<IInstitutionStore>(provider => inMemoryStore);
             _ = services.AddSingleton<IParticipantStore>(provider => inMemoryStore);
-            _ = services.AddSingleton<IApiUserStore>(provider => inMemoryStore);
         }
 
         public static void AddCosmosDbServices(this IServiceCollection services, IConfigurationSection configurationSection)

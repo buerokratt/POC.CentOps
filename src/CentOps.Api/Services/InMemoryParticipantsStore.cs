@@ -46,7 +46,7 @@ namespace CentOps.Api.Services
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentException($"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id), $"{nameof(id)} not specified.");
             }
 
             if (_participants.ContainsKey(id))
@@ -110,6 +110,17 @@ namespace CentOps.Api.Services
             _participants[model.Id] = model;
 
             return model;
+        }
+
+        Task<ParticipantDto?> IModelStore<ParticipantDto>.GetByApiKeyAsync(string apiKey)
+        {
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                throw new ArgumentNullException(nameof(apiKey));
+            }
+
+            var participant = _participants.Values.FirstOrDefault(p => p.ApiKey == apiKey);
+            return Task.FromResult(participant);
         }
     }
 }

@@ -9,11 +9,11 @@ namespace CentOps.UnitTests.Services
     public class ApiUserClaimsProviderTests
     {
         private readonly ApiUserClaimsProvider provider;
-        private readonly Mock<IApiUserStore> mockUserStore;
+        private readonly Mock<IModelStore<IModel>> mockUserStore;
 
         public ApiUserClaimsProviderTests()
         {
-            mockUserStore = new Mock<IApiUserStore>();
+            mockUserStore = new Mock<IModelStore<IModel>>();
 
             provider = new ApiUserClaimsProvider(mockUserStore.Object);
         }
@@ -88,10 +88,10 @@ namespace CentOps.UnitTests.Services
             _ = adminClaim.Value.Should().Be(expectedIsAdminClaimValue);
         }
 
-        private void SetupUserStore(params ApiUserDto[] users)
+        private void SetupUserStore(params IModel[] users)
         {
             _ = mockUserStore
-                .Setup(m => m.GetByKeyAsync(It.IsAny<string>()))
+                .Setup(m => m.GetByApiKeyAsync(It.IsAny<string>()))
                 .Returns<string>(apiKey =>
                 {
                     var apiUser = users.FirstOrDefault(x => x.ApiKey == apiKey);
@@ -100,9 +100,9 @@ namespace CentOps.UnitTests.Services
                 });
         }
 
-        private static ApiUserDto SetupApiUser(string id = null, string name = "nlib", string apiKey = "xyz", bool isAdmin = false)
+        private static IModel SetupApiUser(string id = null, string name = "nlib", string apiKey = "xyz", bool isAdmin = false)
         {
-            return new ApiUserDto
+            return new InstitutionDto
             {
                 Id = id ?? Guid.NewGuid().ToString(),
                 Name = name,

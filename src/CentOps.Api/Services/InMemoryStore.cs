@@ -6,9 +6,6 @@ namespace CentOps.Api.Services
 {
     public sealed partial class InMemoryStore : IParticipantStore, IInstitutionStore
     {
-        private readonly ConcurrentDictionary<string, ParticipantDto> _participants = new();
-        private readonly ConcurrentDictionary<string, InstitutionDto> _institutions = new();
-
         public void SeedParticipants(params ParticipantDto[] seed)
         {
             if (seed == null)
@@ -39,11 +36,6 @@ namespace CentOps.Api.Services
                     _ = _institutions.TryAdd(institution.Id, institution);
                 }
             }
-        }
-
-        async Task<ParticipantDto> IModelStore<ParticipantDto>.Create(ParticipantDto model)
-        {
-            _ = _apiUsers.TryAdd(DefaultAdminUser.Id ?? string.Empty, DefaultAdminUser);
         }
 
         private async Task CheckInstitution(string institutionId)

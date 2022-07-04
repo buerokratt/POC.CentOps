@@ -18,7 +18,6 @@ namespace CentOps.UnitTests.Extensions
 
             var interfaces = services.Select(d => d.ServiceType);
 
-            _ = interfaces.Should().Contain(typeof(IApiUserStore));
             _ = interfaces.Should().Contain(typeof(IInstitutionStore));
             _ = interfaces.Should().Contain(typeof(IParticipantStore));
         }

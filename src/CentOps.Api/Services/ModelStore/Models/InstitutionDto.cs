@@ -14,5 +14,9 @@ namespace CentOps.Api.Services.ModelStore.Models
         public string? PartitionKey { get; set; }
 
         public InstitutionStatusDto Status { get; set; }
+
+        public string? ApiKey { get; set; }
+
+        public bool IsAdmin { get; set; }
     }
 }

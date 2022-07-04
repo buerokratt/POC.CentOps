@@ -20,5 +20,9 @@ namespace CentOps.Api.Services.ModelStore.Models
         public ParticipantTypeDto Type { get; set; }
 
         public ParticipantStatusDto Status { get; set; }
+
+        public string? ApiKey { get; set; }
+
+        public bool IsAdmin { get; set; }
     }
 }
