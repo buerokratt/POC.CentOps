@@ -1,5 +1,4 @@
-using CentOps.Api.Services;
-using CentOps.Api.Services.ModelStore.Interfaces;
+using CentOps.Api.Extensions;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
@@ -23,9 +22,8 @@ namespace CentOps.Api
             _ = builder.Services.AddEndpointsApiExplorer();
             _ = builder.Services.AddSwaggerGen();
 
-            var inMemoryStore = new InMemoryStore();
-            _ = builder.Services.AddSingleton<IInstitutionStore>(provider => inMemoryStore);
-            _ = builder.Services.AddSingleton<IParticipantStore>(provider => inMemoryStore);
+            var section = builder.Configuration.GetSection("CosmosDb");
+            builder.Services.AddCosmosDbServices(section);
 
             var app = builder.Build();
 

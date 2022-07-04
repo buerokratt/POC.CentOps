@@ -51,7 +51,7 @@ namespace CentOps.Api.Controllers
                 var institutionDTO = _mapper.Map<InstitutionDto>(institution);
                 var createdInstitution = await _store.Create(institutionDTO).ConfigureAwait(false);
                 return Created(
-                    new Uri($"/admin/institutions/{createdInstitution.Name}", UriKind.Relative),
+                    new Uri($"/admin/institutions/{createdInstitution.Id}", UriKind.Relative),
                     _mapper.Map<InstitutionResponseModel>(createdInstitution));
             }
             catch (ArgumentException argEx)
