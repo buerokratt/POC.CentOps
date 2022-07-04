@@ -1,7 +1,11 @@
-﻿using CentOps.Api.Authentication;
+using CentOps.Api.Authentication;
 using CentOps.Api.Services;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using CentOps.Api.Services;
+using CentOps.Api.Services.ModelStore.Interfaces;
+using Microsoft.Azure.Cosmos;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api.Extensions
 {
@@ -35,6 +39,28 @@ namespace CentOps.Api.Extensions
             _ = services.AddSingleton<IInstitutionStore>(provider => inMemoryStore);
             _ = services.AddSingleton<IParticipantStore>(provider => inMemoryStore);
             _ = services.AddSingleton<IApiUserStore>(provider => inMemoryStore);
+        }
+
+        public static void AddCosmosDbServices(this IServiceCollection services, IConfigurationSection configurationSection)
+        {
+            if (configurationSection == null)
+            {
+                throw new ArgumentNullException(nameof(configurationSection));
+            }
+
+            _ = services.AddSingleton(_ =>
+            {
+                var databaseName = configurationSection["DatabaseName"];
+                var containerName = configurationSection["ContainerName"];
+                var account = configurationSection["Account"];
+                var key = configurationSection["Key"];
+
+                var cosmosClient = new CosmosClient(account, key);
+                return new CosmosDbService(cosmosClient, databaseName, containerName);
+            });
+
+            _ = services.AddSingleton<IInstitutionStore>(provider => provider.GetRequiredService<CosmosDbService>());
+            _ = services.AddSingleton<IParticipantStore>(provider => provider.GetRequiredService<CosmosDbService>());
         }
     }
 }

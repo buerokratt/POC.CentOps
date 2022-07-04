@@ -11,6 +11,8 @@ namespace CentOps.Api.Services.ModelStore.Models
 
         public string? Name { get; set; }
 
+        public string? PartitionKey { get; set; }
+
         public string? InstitutionId { get; set; }
 
         public string? Host { get; set; }

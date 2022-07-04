@@ -6,7 +6,42 @@ namespace CentOps.Api.Services
 {
     public sealed partial class InMemoryStore : IParticipantStore, IInstitutionStore
     {
-        public InMemoryStore()
+        private readonly ConcurrentDictionary<string, ParticipantDto> _participants = new();
+        private readonly ConcurrentDictionary<string, InstitutionDto> _institutions = new();
+
+        public void SeedParticipants(params ParticipantDto[] seed)
+        {
+            if (seed == null)
+            {
+                return;
+            }
+
+            foreach (var participant in seed)
+            {
+                if (participant.Id != null)
+                {
+                    _ = _participants.TryAdd(participant.Id, participant);
+                }
+            }
+        }
+
+        public void SeedInstitutions(params InstitutionDto[] seed)
+        {
+            if (seed == null)
+            {
+                return;
+            }
+
+            foreach (var institution in seed)
+            {
+                if (institution.Id != null)
+                {
+                    _ = _institutions.TryAdd(institution.Id, institution);
+                }
+            }
+        }
+
+        async Task<ParticipantDto> IModelStore<ParticipantDto>.Create(ParticipantDto model)
         {
             _ = _apiUsers.TryAdd(DefaultAdminUser.Id ?? string.Empty, DefaultAdminUser);
         }
