@@ -106,6 +106,21 @@ namespace CentOps.UnitTests
             var values = Assert.IsAssignableFrom<IEnumerable<ParticipantResponseModel>>(okay.Value);
             _ = values.Should().BeEquivalentTo(Array.Empty<object>());
         }
+
+        [Fact]
+        public async Task GetParticipantsByInstitutionIdReturnsNotFoundwhenInstitutionDoesntExist()
+        {
+            // Arrange
+            var mockInstitutions = new Mock<IInstitutionStore>();
+            var sut = new PublicInstitutionController(mockInstitutions.Object, _mapper.CreateMapper());
+
+            // Act
+            var response = await sut.GetParticipantsByInstitutionId("doesnt_exist").ConfigureAwait(false);
+
+            // Assert
+            var notFound = Assert.IsType<NotFoundObjectResult>(response.Result);
+            _ = notFound.Value.Should().Be("doesnt_exist");
+        }
     }
 }
 

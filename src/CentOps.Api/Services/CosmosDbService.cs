@@ -55,7 +55,7 @@ namespace CentOps.Api.Services
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentNullException(nameof(id), $"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id));
             }
 
             using (ResponseMessage responseMessage = await _container.ReadItemStreamAsync(
@@ -96,7 +96,7 @@ namespace CentOps.Api.Services
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentNullException(nameof(id), $"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id));
             }
 
             try
@@ -206,7 +206,7 @@ namespace CentOps.Api.Services
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentNullException(nameof(id), $"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id));
             }
 
             using (ResponseMessage responseMessage = await _container.ReadItemStreamAsync(
@@ -247,7 +247,7 @@ namespace CentOps.Api.Services
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentNullException(nameof(id), $"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id));
             }
 
             try

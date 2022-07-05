@@ -11,7 +11,7 @@ using CentOps.Api.Services.ModelStore.Exceptions;
 
 namespace CentOps.UnitTests
 {
-    public class ParticipantControllerTests
+    public class AdminParticipantControllerTests
     {
         private readonly MapperConfiguration _mapper;
 
@@ -27,7 +27,7 @@ namespace CentOps.UnitTests
                 new ParticipantResponseModel { Id = "2", Name = "Test2", InstitutionId = "2", Status = ParticipantStatus.Disabled }
             };
 
-        public ParticipantControllerTests()
+        public AdminParticipantControllerTests()
         {
             _mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AutoMapperProfile()));
         }

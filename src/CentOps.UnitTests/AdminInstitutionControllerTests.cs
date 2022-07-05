@@ -11,7 +11,7 @@ using Moq;
 
 namespace CentOps.UnitTests
 {
-    public class InstitutionControllerTests
+    public class AdminInstitutionControllerTests
     {
         private readonly MapperConfiguration _mapper;
         private readonly InstitutionDto[] _institutionsDtos = new[]
@@ -25,7 +25,7 @@ namespace CentOps.UnitTests
                 new InstitutionResponseModel { Id = "2", Name = "Test2", Status = InstitutionStatus.Disabled }
             };
 
-        public InstitutionControllerTests()
+        public AdminInstitutionControllerTests()
         {
             _mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AutoMapperProfile()));
         }
@@ -110,6 +110,7 @@ namespace CentOps.UnitTests
             // Assert
             var created = Assert.IsType<CreatedResult>(response.Result);
             _ = _institutionsResponseModels[0].Should().BeEquivalentTo(created.Value);
+            Assert.Equal("/admin/institutions/1", created.Location);
         }
 
         [Fact]

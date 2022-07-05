@@ -116,13 +116,5 @@ namespace CentOps.Api.Controllers
                 return BadRequest(argEx.Message);
             }
         }
-
-        [HttpPost("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        //[Authorize(Policy = "UserPolicy")]
-        public Task<IActionResult> Post(string id)
-        {
-            return Task.FromResult<IActionResult>(Ok(id));
-        }
     }
 }

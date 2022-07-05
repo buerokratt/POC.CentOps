@@ -46,7 +46,7 @@ namespace CentOps.Api.Services
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentNullException(nameof(id), $"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id));
             }
 
             if (_participants.ContainsKey(id))
@@ -66,7 +66,7 @@ namespace CentOps.Api.Services
         public Task<ParticipantDto?> GetById(string id)
         {
             return string.IsNullOrEmpty(id)
-                ? throw new ArgumentException($"{nameof(id)} not specified.")
+                ? throw new ArgumentNullException(nameof(id))
                 : _participants.ContainsKey(id)
                     ? Task.FromResult<ParticipantDto?>(_participants[id])
                     : Task.FromResult<ParticipantDto?>(null);
