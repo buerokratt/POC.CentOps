@@ -20,11 +20,11 @@ namespace CentOps.Api.Services
 
             ApiUser? result = null;
 
-            if (user != null && !string.IsNullOrEmpty(user.Id)) // Code analysis requires the 'Id' null check
+            if (user != null)
             {
                 result = new ApiUser(new[]
                 {
-                    new Claim("id", user.Id),
+                    new Claim("id", user.Id!),
                     new Claim("isAdmin", user.IsAdmin.ToString().ToUpperInvariant())
                 });
             }

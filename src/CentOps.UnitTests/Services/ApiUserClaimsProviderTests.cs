@@ -9,13 +9,13 @@ namespace CentOps.UnitTests.Services
     public class ApiUserClaimsProviderTests
     {
         private readonly ApiUserClaimsProvider provider;
-        private readonly Mock<IModelStore<IModel>> mockUserStore;
+        private readonly Mock<IModelStore<IModel>> mockModelStore;
 
         public ApiUserClaimsProviderTests()
         {
-            mockUserStore = new Mock<IModelStore<IModel>>();
+            mockModelStore = new Mock<IModelStore<IModel>>();
 
-            provider = new ApiUserClaimsProvider(mockUserStore.Object);
+            provider = new ApiUserClaimsProvider(mockModelStore.Object);
         }
 
         [Fact]
@@ -24,7 +24,7 @@ namespace CentOps.UnitTests.Services
             // Arrange
             var user1 = SetupApiUser(apiKey: "qwerty");
             var user2 = SetupApiUser(name: "social", apiKey: "asdfg");
-            SetupUserStore(user1, user2);
+            SetModelStore(user1, user2);
 
             // Act
             var apiUser = await provider.GetUserClaimsAsync("non-existing-key").ConfigureAwait(false);
@@ -39,7 +39,7 @@ namespace CentOps.UnitTests.Services
             // Arrange
             var user1 = SetupApiUser(apiKey: "qwerty", isAdmin: true);
             var user2 = SetupApiUser(name: "social", apiKey: "asdfg");
-            SetupUserStore(user1, user2);
+            SetModelStore(user1, user2);
 
             // Act
             var apiUser = await provider.GetUserClaimsAsync("qwerty").ConfigureAwait(false);
@@ -68,7 +68,7 @@ namespace CentOps.UnitTests.Services
             // Arrange
             var user1 = SetupApiUser(apiKey: "qwerty", isAdmin: isAdmin);
             var user2 = SetupApiUser(name: "social", apiKey: "asdfg");
-            SetupUserStore(user1, user2);
+            SetModelStore(user1, user2);
 
             // Act
             var apiUser = await provider.GetUserClaimsAsync("qwerty").ConfigureAwait(false);
@@ -88,9 +88,9 @@ namespace CentOps.UnitTests.Services
             _ = adminClaim.Value.Should().Be(expectedIsAdminClaimValue);
         }
 
-        private void SetupUserStore(params IModel[] users)
+        private void SetModelStore(params IModel[] users)
         {
-            _ = mockUserStore
+            _ = mockModelStore
                 .Setup(m => m.GetByApiKeyAsync(It.IsAny<string>()))
                 .Returns<string>(apiKey =>
                 {
