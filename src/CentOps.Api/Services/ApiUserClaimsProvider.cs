@@ -1,31 +1,34 @@
 ﻿using CentOps.Api.Authentication.Interfaces;
 using CentOps.Api.Authentication.Models;
 using CentOps.Api.Services.ModelStore.Interfaces;
+using CentOps.Api.Services.ModelStore.Models;
 using System.Security.Claims;
 
 namespace CentOps.Api.Services
 {
     public class ApiUserClaimsProvider : IApiUserClaimsProvider
     {
-        private readonly IModelStore<IModel> _entityStore;
+        private readonly IParticipantStore _participantStore;
 
-        public ApiUserClaimsProvider(IModelStore<IModel> userStore)
+        public ApiUserClaimsProvider(IParticipantStore participantStore)
         {
-            _entityStore = userStore;
+            _participantStore = participantStore;
         }
 
         public async Task<ApiUser?> GetUserClaimsAsync(string apiKey)
         {
-            var user = await _entityStore.GetByApiKeyAsync(apiKey).ConfigureAwait(false);
+            var user = await _participantStore.GetByApiKeyAsync(apiKey).ConfigureAwait(false);
 
             ApiUser? result = null;
 
-            if (user != null)
+            if (user != null && user.Status != ParticipantStatusDto.Disabled)
             {
                 result = new ApiUser(new[]
                 {
                     new Claim("id", user.Id!),
-                    new Claim("isAdmin", user.IsAdmin.ToString().ToUpperInvariant())
+                    new Claim("name", user.Name!),
+                    new Claim("institutionId", user.InstitutionId!),
+                    new Claim("status", user.Status.ToString())
                 });
             }
 

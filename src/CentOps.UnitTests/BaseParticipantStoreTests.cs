@@ -466,8 +466,8 @@ namespace CentOps.UnitTests
         [InlineData(null)]
         public async Task GetByApiKeyShouldThrowWhenApiKeyIsNullOrEmpty(string apiKey)
         {
-            var institution = GetInstitution();
-            var sut = GetInstitutionStore(institution);
+            var institution = GetParticipant();
+            var sut = GetParticipantStore(institution);
 
             _ = await Assert.ThrowsAsync<ArgumentNullException>(() => sut.GetByApiKeyAsync(apiKey))
                 .ConfigureAwait(false);
@@ -483,8 +483,7 @@ namespace CentOps.UnitTests
                 Id = id,
                 PartitionKey = $"institution::{id}",
                 Name = name,
-                Status = status,
-                ApiKey = $"supersecret_{id}"
+                Status = status
             };
         }
 

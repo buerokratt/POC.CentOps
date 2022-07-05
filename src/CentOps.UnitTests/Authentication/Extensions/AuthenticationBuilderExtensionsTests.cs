@@ -32,7 +32,7 @@ namespace CentOps.UnitTests.Authentication.Extensions
         private static AuthenticationBuilder GetAuthenticationBuilder()
         {
             var services = new ServiceCollection();
-            _ = services.AddSingleton(new Mock<IModelStore<IModel>>().Object);
+            _ = services.AddSingleton(new Mock<IParticipantStore>().Object);
 
             var logger = new Mock<ILogger<ApiKeyAuthenticationHandler>>();
             var loggerFactory = new Mock<ILoggerFactory>();

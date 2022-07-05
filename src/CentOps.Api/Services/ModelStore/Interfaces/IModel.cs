@@ -12,11 +12,5 @@ namespace CentOps.Api.Services.ModelStore.Interfaces
 
         [JsonProperty(PropertyName = "pk")]
         public string? PartitionKey { get; set; }
-
-        [JsonProperty(PropertyName = "apiKey")]
-        public string? ApiKey { get; set; }
-
-        [JsonProperty(PropertyName = "isAdmin")]
-        public bool IsAdmin { get; set; }
     }
 }

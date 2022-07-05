@@ -22,12 +22,6 @@ namespace CentOps.Api.Extensions
                 var userPolicy = builder.Build();
 
                 options.AddPolicy("UserPolicy", userPolicy);
-                options.AddPolicy("AdminPolicy", options =>
-                {
-                    _ = options
-                        .Combine(userPolicy)
-                        .RequireClaim("isAdmin", bool.TrueString.ToUpperInvariant());
-                });
 
                 options.DefaultPolicy = userPolicy;
             });

@@ -53,35 +53,6 @@ namespace CentOps.UnitTests.Extensions
         }
 
         [Fact]
-        public async Task ShouldSetAdminAuthorizationPolicy()
-        {
-            services.AddAuthorizationPolicies();
-            var provider = services.BuildServiceProvider();
-
-            var policyProvider = provider.GetService<IAuthorizationPolicyProvider>();
-
-            var adminPolicy = await policyProvider.GetPolicyAsync("AdminPolicy").ConfigureAwait(false);
-
-            _ = adminPolicy.AuthenticationSchemes.Should()
-                .HaveCount(1)
-                .And
-                .Contain("ApiKey");
-
-            var requirements = adminPolicy.Requirements;
-            _ = requirements.Should().HaveCount(2);
-
-            var idClaim = requirements[0] as ClaimsAuthorizationRequirement;
-            _ = idClaim.Should().NotBeNull();
-            _ = idClaim.ClaimType.Should().Be("id");
-            _ = idClaim.AllowedValues.Should().BeNullOrEmpty();
-
-            var adminClaim = requirements[1] as ClaimsAuthorizationRequirement;
-            _ = adminClaim.Should().NotBeNull();
-            _ = adminClaim.ClaimType.Should().Be("isAdmin");
-            _ = adminClaim.AllowedValues.Should().BeEquivalentTo("TRUE");
-        }
-
-        [Fact]
         public void AddCosmosDbServicesShouldThrowWhenConfigSectionIsNull()
         {
             Action action = () => services.AddCosmosDbServices(null);

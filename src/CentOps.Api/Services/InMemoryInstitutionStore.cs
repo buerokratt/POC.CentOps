@@ -96,17 +96,6 @@ namespace CentOps.Api.Services
             return Task.FromResult(model);
         }
 
-        Task<InstitutionDto?> IModelStore<InstitutionDto>.GetByApiKeyAsync(string apiKey)
-        {
-            if (string.IsNullOrEmpty(apiKey))
-            {
-                throw new ArgumentNullException(nameof(apiKey));
-            }
-
-            var institution = _institutions.Values.FirstOrDefault(i => i.ApiKey == apiKey);
-            return Task.FromResult(institution);
-        }
-
         public Task<IEnumerable<ParticipantDto>> GetParticipantsByInstitutionId(string id)
         {
             return string.IsNullOrEmpty(id)

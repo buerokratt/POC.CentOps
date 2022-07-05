@@ -303,24 +303,7 @@ namespace CentOps.Api.Services
                 : model;
         }
 
-        async Task<InstitutionDto?> IModelStore<InstitutionDto>.GetByApiKeyAsync(string apiKey)
-        {
-            if (string.IsNullOrEmpty(apiKey))
-            {
-                throw new ArgumentNullException(nameof(apiKey), $"{nameof(apiKey)} not specified.");
-            }
-
-            var query = BuildQueryDefinition(
-                    @"SELECT * FROM c
-                    WHERE c.apiKey = @apiKey
-                    AND STARTSWITH(c.PartitionKey, 'institution', false)",
-                ("@apiKey", apiKey));
-
-            var results = await RunQueryAsync<InstitutionDto>(query).ConfigureAwait(false);
-            return results?.FirstOrDefault();
-        }
-
-        async Task<ParticipantDto?> IModelStore<ParticipantDto>.GetByApiKeyAsync(string apiKey)
+        async Task<ParticipantDto?> IParticipantStore.GetByApiKeyAsync(string apiKey)
         {
             if (string.IsNullOrEmpty(apiKey))
             {
@@ -329,9 +312,11 @@ namespace CentOps.Api.Services
 
             var query = BuildQueryDefinition(
                 @"SELECT * FROM c
-                    WHERE c.apiKey = @apiKey
-                    AND STARTSWITH(c.PartitionKey, 'participant', false)",
-                ("@apiKey", apiKey));
+                    WHERE STARTSWITH(c.PartitionKey, 'participant', false)
+                        AND c.apiKey = @apiKey
+                        AND c.status != @status",
+                ("@apiKey", apiKey),
+                ("@status", ParticipantStatusDto.Disabled.ToString()));
 
             var results = await RunQueryAsync<ParticipantDto>(query).ConfigureAwait(false);
             return results?.FirstOrDefault();

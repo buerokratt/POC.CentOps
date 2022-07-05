@@ -112,7 +112,7 @@ namespace CentOps.Api.Services
             return model;
         }
 
-        Task<ParticipantDto?> IModelStore<ParticipantDto>.GetByApiKeyAsync(string apiKey)
+        Task<ParticipantDto?> IParticipantStore.GetByApiKeyAsync(string apiKey)
         {
             if (string.IsNullOrEmpty(apiKey))
             {

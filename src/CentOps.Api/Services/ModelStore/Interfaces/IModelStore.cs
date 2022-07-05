@@ -11,7 +11,5 @@
         Task<TModel> Update(TModel model);
 
         Task<bool> DeleteById(string id);
-
-        Task<TModel?> GetByApiKeyAsync(string apiKey);
     }
 }
