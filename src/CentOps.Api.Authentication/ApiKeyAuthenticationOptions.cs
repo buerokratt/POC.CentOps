@@ -4,6 +4,6 @@ namespace CentOps.Api.Authentication
 {
     public class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
     {
-        public string ApiKeyHeaderName { get; set; } = ApiKeyAuthenciationDefaults.DefaultApiKeyHeaderName;
+        public string ApiKeyHeaderName { get; set; } = ApiKeyAuthenticationDefaults.DefaultApiKeyHeaderName;
     }
 }

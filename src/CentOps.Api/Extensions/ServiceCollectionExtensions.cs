@@ -15,15 +15,20 @@ namespace CentOps.Api.Extensions
 
             _ = services.AddAuthorization(options =>
             {
-                var builder = new AuthorizationPolicyBuilder()
-                    .AddAuthenticationSchemes(ApiKeyAuthenciationDefaults.AuthenticationScheme)
-                    .RequireClaim("id");
-
-                var userPolicy = builder.Build();
+                var userPolicy = new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(ApiKeyAuthenticationDefaults.AuthenticationScheme)
+                    .RequireClaim("id")
+                    .Build();
 
                 options.AddPolicy("UserPolicy", userPolicy);
-
                 options.DefaultPolicy = userPolicy;
+
+                var adminPolicy = new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(ApiKeyAuthenticationDefaults.AdminAuthenticationScheme)
+                    .RequireRole("Admin")
+                    .Build();
+
+                options.AddPolicy("AdminPolicy", adminPolicy);
             });
         }
 

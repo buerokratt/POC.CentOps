@@ -39,9 +39,9 @@ namespace CentOps.Api.Authentication
                 return AuthenticateResult.Fail($"The '{Options.ApiKeyHeaderName}' header contains an invalid API key.");
             }
 
-            var identity = new ClaimsIdentity(apiUser.Claims, ApiKeyAuthenciationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity(apiUser.Claims, ApiKeyAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, ApiKeyAuthenciationDefaults.AuthenticationScheme);
+            var ticket = new AuthenticationTicket(principal, ApiKeyAuthenticationDefaults.AuthenticationScheme);
 
             return AuthenticateResult.Success(ticket);
         }

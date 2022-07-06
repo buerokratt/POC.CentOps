@@ -15,28 +15,44 @@ namespace CentOps.Api.Authentication.Extensions
 
             if (string.IsNullOrEmpty(apiKeyHeaderName))
             {
-                apiKeyHeaderName = ApiKeyAuthenciationDefaults.DefaultApiKeyHeaderName;
+                apiKeyHeaderName = ApiKeyAuthenticationDefaults.DefaultApiKeyHeaderName;
             }
 
-            var securityScheme = new OpenApiSecurityScheme
+            var adminSecurityScheme = new OpenApiSecurityScheme
             {
-                Scheme = ApiKeyAuthenciationDefaults.AuthenticationScheme,
+                Scheme = ApiKeyAuthenticationDefaults.AdminAuthenticationScheme,
+                Name = apiKeyHeaderName,
+                Type = SecuritySchemeType.ApiKey,
+                In = ParameterLocation.Header,
+                Description = $"API Key authentication for Admin only using key set in the value of the '{apiKeyHeaderName}' header.",
+                Reference = new OpenApiReference
+                {
+                    Id = ApiKeyAuthenticationDefaults.AdminAuthenticationScheme,
+                    Type = ReferenceType.SecurityScheme
+                }
+            };
+
+            var userSecurityScheme = new OpenApiSecurityScheme
+            {
+                Scheme = ApiKeyAuthenticationDefaults.AuthenticationScheme,
                 Name = apiKeyHeaderName,
                 Type = SecuritySchemeType.ApiKey,
                 In = ParameterLocation.Header,
                 Description = $"API Key authentication using key set in the value of the '{apiKeyHeaderName}' header.",
                 Reference = new OpenApiReference
                 {
-                    Id = ApiKeyAuthenciationDefaults.AuthenticationScheme,
+                    Id = ApiKeyAuthenticationDefaults.AuthenticationScheme,
                     Type = ReferenceType.SecurityScheme
                 }
             };
 
-            options.AddSecurityDefinition(securityScheme.Scheme, securityScheme);
+            options.AddSecurityDefinition(adminSecurityScheme.Scheme, adminSecurityScheme);
+            options.AddSecurityDefinition(userSecurityScheme.Scheme, userSecurityScheme);
 
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                { securityScheme, Array.Empty<string>() }
+                { adminSecurityScheme, Array.Empty<string>() },
+                { userSecurityScheme, Array.Empty<string>() }
             });
 
             return options;
