@@ -24,8 +24,7 @@ jobs:
         echo "DOCKER_TAG_SHA=ghcr.io/${LOWER_CASE_GITHUB_REPOSITORY}:${GITHUB_SHA}" >> $GITHUB_ENV
     
     - name: Docker Build
-      working-directory: src/CentOps.Api/
-      run: docker image build --tag $DOCKER_TAG_SHA .
+      run: docker image build -f src/CentOps.Api/Dockerfile --tag $DOCKER_TAG_SHA ./src
 
     - name: Install cosign
       uses: sigstore/cosign-installer@7e0881f8fe90b25e305bbf0309761e9314607e25
