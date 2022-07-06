@@ -25,4 +25,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CentOps.Api.Authentication\CentOps.Api.Authentication.csproj" />
+  </ItemGroup>
+
 </Project>

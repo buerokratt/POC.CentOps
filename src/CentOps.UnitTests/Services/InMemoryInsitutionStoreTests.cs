@@ -2,11 +2,9 @@
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 
-
-namespace CentOps.UnitTests
+namespace CentOps.UnitTests.Services
 {
-
-    public class InMemoryParticipantStoreTests : BaseParticipantStoreTests
+    public class InMemoryInsitutionStoreTests : BaseInstitutionStoreTests
     {
         private readonly InMemoryStore store = new();
 
@@ -20,6 +18,7 @@ namespace CentOps.UnitTests
         protected override IParticipantStore GetParticipantStore(params ParticipantDto[] seed)
         {
             store.SeedParticipants(seed);
+
             return store;
         }
     }

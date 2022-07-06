@@ -1,13 +1,39 @@
-﻿using CentOps.Api.Services;
+using CentOps.Api.Authentication;
+using CentOps.Api.Services;
 using CentOps.Api.Services.ModelStore.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Azure.Cosmos;
-using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api.Extensions
 {
-    [ExcludeFromCodeCoverage] // This is not solution code, no need for unit tests
-    public static class ServiceCollectionExtensions
+    public static partial class ServiceCollectionExtensions
     {
+        public static void AddAuthorizationPolicies(this IServiceCollection services)
+        {
+            _ = services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
+
+            _ = services.AddAuthorization(options =>
+            {
+                var builder = new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(ApiKeyAuthenciationDefaults.AuthenticationScheme)
+                    .RequireClaim("id");
+
+                var userPolicy = builder.Build();
+
+                options.AddPolicy("UserPolicy", userPolicy);
+
+                options.DefaultPolicy = userPolicy;
+            });
+        }
+
+        public static void AddDataStores(this IServiceCollection services)
+        {
+            var inMemoryStore = new InMemoryStore();
+            _ = services.AddSingleton<IInstitutionStore>(provider => inMemoryStore);
+            _ = services.AddSingleton<IParticipantStore>(provider => inMemoryStore);
+        }
+
         public static void AddCosmosDbServices(this IServiceCollection services, IConfigurationSection configurationSection)
         {
             if (configurationSection == null)
@@ -15,16 +41,13 @@ namespace CentOps.Api.Extensions
                 throw new ArgumentNullException(nameof(configurationSection));
             }
 
-            var databaseName = configurationSection["DatabaseName"];
-            var containerName = configurationSection["ContainerName"];
-            var account = configurationSection["Account"];
-            var key = configurationSection["Key"];
-
-            var cosmosClient = new CosmosClient(account, key);
-            var cosmosDbService = new CosmosDbService(cosmosClient, databaseName, containerName);
-
             _ = services.AddSingleton(_ =>
             {
+                var databaseName = configurationSection["DatabaseName"];
+                var containerName = configurationSection["ContainerName"];
+                var account = configurationSection["Account"];
+                var key = configurationSection["Key"];
+
                 var cosmosClient = new CosmosClient(account, key);
                 return new CosmosDbService(cosmosClient, databaseName, containerName);
             });
