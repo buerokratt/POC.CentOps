@@ -2,6 +2,7 @@
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using System.Net;
 
 namespace CentOps.Api.Services
@@ -362,6 +363,29 @@ namespace CentOps.Api.Services
                 catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                 {
                     continue;
+                }
+            }
+
+            return results;
+        }
+
+        async Task<IEnumerable<ParticipantDto>> IParticipantStore.GetAll(ParticipantTypeDto[] types)
+        {
+            var results = new List<ParticipantDto>();
+            var queryable = _container
+                .GetItemLinqQueryable<ParticipantDto>()
+                .Where(p => p.PartitionKey!.StartsWith("participant", StringComparison.OrdinalIgnoreCase))
+                .Where(p => types.Contains(p.Type));
+
+            using (FeedIterator<ParticipantDto> setIterator = queryable.ToFeedIterator())
+            {
+                // Asynchronous query execution
+                while (setIterator.HasMoreResults)
+                {
+                    foreach (var item in await setIterator.ReadNextAsync().ConfigureAwait(false))
+                    {
+                        results.Add(item);
+                    }
                 }
             }
 

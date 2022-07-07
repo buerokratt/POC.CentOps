@@ -262,5 +262,10 @@ namespace CentOps.Api.Services
                 throw new ModelExistsException<ParticipantDto>(associatedParticipant.Id!);
             }
         }
+
+        Task<IEnumerable<ParticipantDto>> IParticipantStore.GetAll(ParticipantTypeDto[] types)
+        {
+            return Task.FromResult(_participants.Values.Where(p => types.Contains(p.Type)).AsEnumerable());
+        }
     }
 }
