@@ -8,20 +8,25 @@ namespace CentOps.Api.Authentication.Extensions
     [ExcludeFromCodeCoverage] // The ApiKeyAuthenticationHandler tests some of the ApiKeyAuthenticationOptions related functionality.
     public static class AuthenticationBuilderExtensions
     {
-        public static void AddApiKeyAuth<TClaimsProvider>(this AuthenticationBuilder builder, string? apiKeyHeaderName = null)
+        public static AuthenticationBuilder AddApiKeyAuth<TClaimsProvider>(
+            this AuthenticationBuilder builder,
+            string authenticationScheme,
+            string? apiKeyHeaderName = null)
             where TClaimsProvider : class, IApiUserClaimsProvider
         {
-            _ = builder.Services.AddSingleton<IApiUserClaimsProvider, TClaimsProvider>();
+            _ = builder.Services.AddSingleton<TClaimsProvider>();
 
             _ = builder
-                .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
-                    ApiKeyAuthenciationDefaults.AuthenticationScheme,
+                .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler<TClaimsProvider>>(
+                    authenticationScheme,
                     options =>
                     {
                         options.ApiKeyHeaderName = string.IsNullOrEmpty(apiKeyHeaderName)
-                            ? ApiKeyAuthenciationDefaults.DefaultApiKeyHeaderName
+                            ? ApiKeyAuthenticationDefaults.DefaultApiKeyHeaderName
                             : apiKeyHeaderName;
                     });
+
+            return builder;
         }
     }
 }

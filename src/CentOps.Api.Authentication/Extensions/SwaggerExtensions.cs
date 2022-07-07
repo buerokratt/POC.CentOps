@@ -15,28 +15,28 @@ namespace CentOps.Api.Authentication.Extensions
 
             if (string.IsNullOrEmpty(apiKeyHeaderName))
             {
-                apiKeyHeaderName = ApiKeyAuthenciationDefaults.DefaultApiKeyHeaderName;
+                apiKeyHeaderName = ApiKeyAuthenticationDefaults.DefaultApiKeyHeaderName;
             }
 
-            var securityScheme = new OpenApiSecurityScheme
+            var userSecurityScheme = new OpenApiSecurityScheme
             {
-                Scheme = ApiKeyAuthenciationDefaults.AuthenticationScheme,
+                Scheme = ApiKeyAuthenticationDefaults.AuthenticationScheme,
                 Name = apiKeyHeaderName,
                 Type = SecuritySchemeType.ApiKey,
                 In = ParameterLocation.Header,
                 Description = $"API Key authentication using key set in the value of the '{apiKeyHeaderName}' header.",
                 Reference = new OpenApiReference
                 {
-                    Id = ApiKeyAuthenciationDefaults.AuthenticationScheme,
+                    Id = ApiKeyAuthenticationDefaults.AuthenticationScheme,
                     Type = ReferenceType.SecurityScheme
                 }
             };
 
-            options.AddSecurityDefinition(securityScheme.Scheme, securityScheme);
+            options.AddSecurityDefinition(userSecurityScheme.Scheme, userSecurityScheme);
 
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                { securityScheme, Array.Empty<string>() }
+                { userSecurityScheme, Array.Empty<string>() }
             });
 
             return options;

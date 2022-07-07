@@ -8,12 +8,13 @@ using System.Text.Encodings.Web;
 
 namespace CentOps.Api.Authentication
 {
-    public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationOptions>
+    public class ApiKeyAuthenticationHandler<TClaimsProvider> : AuthenticationHandler<ApiKeyAuthenticationOptions>
+        where TClaimsProvider : class, IApiUserClaimsProvider
     {
-        private readonly IApiUserClaimsProvider _claimsProvider;
+        private readonly TClaimsProvider _claimsProvider;
 
         public ApiKeyAuthenticationHandler(
-            IApiUserClaimsProvider claimsProvider,
+            TClaimsProvider claimsProvider,
             IOptionsMonitor<ApiKeyAuthenticationOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
@@ -39,9 +40,9 @@ namespace CentOps.Api.Authentication
                 return AuthenticateResult.Fail($"The '{Options.ApiKeyHeaderName}' header contains an invalid API key.");
             }
 
-            var identity = new ClaimsIdentity(apiUser.Claims, ApiKeyAuthenciationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity(apiUser.Claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, ApiKeyAuthenciationDefaults.AuthenticationScheme);
+            var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
             return AuthenticateResult.Success(ticket);
         }
