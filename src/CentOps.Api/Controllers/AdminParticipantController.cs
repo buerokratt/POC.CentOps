@@ -3,18 +3,20 @@ using CentOps.Api.Models;
 using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentOps.Api.Controllers
 {
     [Route("admin/participants")]
     [ApiController]
-    public class ParticipantController : ControllerBase
+    [Authorize(Policy = "AdminPolicy")]
+    public class AdminParticipantController : ControllerBase
     {
         private readonly IParticipantStore _store;
         private readonly IMapper _mapper;
 
-        public ParticipantController(IParticipantStore store, IMapper mapper)
+        public AdminParticipantController(IParticipantStore store, IMapper mapper)
         {
             _store = store;
             _mapper = mapper;

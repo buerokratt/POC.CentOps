@@ -1,6 +1,6 @@
 ﻿namespace CentOps.Api.Services.ModelStore.Interfaces
 {
-    public interface IModelStore<TModel> where TModel : IModel
+    public interface IModelStore<TModel> where TModel : class, IModel
     {
         Task<TModel> Create(TModel model);
 

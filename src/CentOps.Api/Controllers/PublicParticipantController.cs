@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using CentOps.Api.Models;
 using CentOps.Api.Services.ModelStore.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentOps.Api.Controllers
 {
     [Route("public/participants")]
     [ApiController]
+    [Authorize]
     public class PublicParticipantController : ControllerBase
     {
         private readonly IParticipantStore _store;

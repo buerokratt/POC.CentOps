@@ -3,18 +3,20 @@ using CentOps.Api.Models;
 using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CentOps.Api.Controllers
 {
     [Route("admin/institutions")]
     [ApiController]
-    public class InstitutionController : ControllerBase
+    [Authorize(Policy = "AdminPolicy")]
+    public class AdminInstitutionController : ControllerBase
     {
         private readonly IInstitutionStore _store;
         private readonly IMapper _mapper;
 
-        public InstitutionController(IInstitutionStore store, IMapper mapper)
+        public AdminInstitutionController(IInstitutionStore store, IMapper mapper)
         {
             _store = store;
             _mapper = mapper;

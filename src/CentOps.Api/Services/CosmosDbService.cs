@@ -40,7 +40,7 @@ namespace CentOps.Api.Services
 
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name);
-            var existingName = await GetExistingInstitutions(query).ConfigureAwait(false);
+            var existingName = await RunQueryAsync<InstitutionDto>(query).ConfigureAwait(false);
             if (existingName != null && existingName.Any())
             {
                 throw new ModelExistsException<InstitutionDto>(model.Name);
@@ -52,12 +52,11 @@ namespace CentOps.Api.Services
             return model;
         }
 
-
         async Task<bool> IModelStore<InstitutionDto>.DeleteById(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentException($"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id));
             }
 
             using (ResponseMessage responseMessage = await _container.ReadItemStreamAsync(
@@ -98,7 +97,7 @@ namespace CentOps.Api.Services
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentException($"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id));
             }
 
             try
@@ -116,7 +115,7 @@ namespace CentOps.Api.Services
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentException($"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id), $"{nameof(id)} not specified.");
             }
             else
             {
@@ -126,7 +125,7 @@ namespace CentOps.Api.Services
                               AND STARTSWITH(c.PartitionKey, 'participant', false)";
                 var query = new QueryDefinition(queryString)
                     .WithParameter("@id", id);
-                return await GetExistingParticipants(query).ConfigureAwait(false);
+                return await RunQueryAsync<ParticipantDto>(query).ConfigureAwait(false);
             }
         }
 
@@ -154,7 +153,7 @@ namespace CentOps.Api.Services
                 .WithParameter("@name", model.Name)
                 .WithParameter("@id", model.Id);
 
-            var existingName = await GetExistingInstitutions(query).ConfigureAwait(false);
+            var existingName = await RunQueryAsync<InstitutionDto>(query).ConfigureAwait(false);
             if (existingName != null && existingName.Any())
             {
                 throw new ModelExistsException<InstitutionDto>(model.Name);
@@ -192,7 +191,7 @@ namespace CentOps.Api.Services
                               AND STARTSWITH(c.PartitionKey, 'participant', false)";
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name);
-            var existingName = await GetExistingParticipants(query).ConfigureAwait(false);
+            var existingName = await RunQueryAsync<ParticipantDto>(query).ConfigureAwait(false);
             if (existingName != null && existingName.Any())
             {
                 throw new ModelExistsException<ParticipantDto>(model.Name);
@@ -208,7 +207,7 @@ namespace CentOps.Api.Services
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentException($"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id));
             }
 
             using (ResponseMessage responseMessage = await _container.ReadItemStreamAsync(
@@ -249,7 +248,7 @@ namespace CentOps.Api.Services
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentException($"{nameof(id)} not specified.");
+                throw new ArgumentNullException(nameof(id));
             }
 
             try
@@ -292,7 +291,7 @@ namespace CentOps.Api.Services
                               WHERE c.name = @name AND NOT c.id = @id";
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name);
-            var existingName = await GetExistingParticipants(query).ConfigureAwait(false);
+            var existingName = await RunQueryAsync<ParticipantDto>(query).ConfigureAwait(false);
             if (existingName != null && existingName.Any())
             {
                 throw new ModelExistsException<ParticipantDto>(model.Name);
@@ -303,6 +302,25 @@ namespace CentOps.Api.Services
             return response.StatusCode == HttpStatusCode.NotFound
                 ? throw new ModelNotFoundException<ParticipantDto>(model.Id)
                 : model;
+        }
+
+        async Task<ParticipantDto?> IParticipantStore.GetByApiKeyAsync(string apiKey)
+        {
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                throw new ArgumentNullException(nameof(apiKey), $"{nameof(apiKey)} not specified.");
+            }
+
+            var query = BuildQueryDefinition(
+                @"SELECT * FROM c
+                    WHERE STARTSWITH(c.PartitionKey, 'participant', false)
+                        AND c.apiKey = @apiKey
+                        AND c.status != @status",
+                ("@apiKey", apiKey),
+                ("@status", ParticipantStatusDto.Disabled.ToString()));
+
+            var results = await RunQueryAsync<ParticipantDto>(query).ConfigureAwait(false);
+            return results?.FirstOrDefault();
         }
 
         private async Task CheckInstitution(string institutionId)
@@ -329,10 +347,11 @@ namespace CentOps.Api.Services
             }
         }
 
-        private async Task<IEnumerable<InstitutionDto>> GetExistingInstitutions(QueryDefinition queryString)
+        private async Task<IEnumerable<TModel>> RunQueryAsync<TModel>(QueryDefinition queryString)
+            where TModel : class, IModel
         {
-            var query = _container.GetItemQueryIterator<InstitutionDto>(queryString);
-            List<InstitutionDto> results = new();
+            var query = _container.GetItemQueryIterator<TModel>(queryString);
+            List<TModel> results = new();
             while (query.HasMoreResults)
             {
                 try
@@ -349,24 +368,16 @@ namespace CentOps.Api.Services
             return results;
         }
 
-        private async Task<IEnumerable<ParticipantDto>> GetExistingParticipants(QueryDefinition queryString)
+        private static QueryDefinition BuildQueryDefinition(string queryString, params (string paramName, object paramValue)[] parameters)
         {
-            var query = _container.GetItemQueryIterator<ParticipantDto>(queryString);
-            List<ParticipantDto> results = new();
-            while (query.HasMoreResults)
+            var query = new QueryDefinition(queryString);
+
+            foreach (var (paramName, paramValue) in parameters)
             {
-                try
-                {
-                    var response = await query.ReadNextAsync().ConfigureAwait(false);
-                    results.AddRange(response.ToList());
-                }
-                catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
-                {
-                    continue;
-                }
+                query = query.WithParameter(paramName, paramValue);
             }
 
-            return results;
+            return query;
         }
 
         async Task<IEnumerable<ParticipantDto>> IParticipantStore.GetAll(ParticipantTypeDto[] types)

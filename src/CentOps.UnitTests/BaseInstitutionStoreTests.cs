@@ -104,7 +104,7 @@ namespace CentOps.UnitTests
 
             // Act & Assert
             _ = await Assert
-                .ThrowsAsync<ArgumentException>(
+                .ThrowsAsync<ArgumentNullException>(
                     async () => await sut.DeleteById(null).ConfigureAwait(false))
                 .ConfigureAwait(false);
         }
@@ -297,7 +297,7 @@ namespace CentOps.UnitTests
                 Id = id,
                 PartitionKey = $"institution::{id}",
                 Name = name,
-                Status = status,
+                Status = status
             };
         }
     }

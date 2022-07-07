@@ -68,7 +68,7 @@ jobs:
   
     - name: Mutation Test
       working-directory: src
-      run: dotnet stryker
+      run: dotnet stryker --project CentOps.Api.csproj && dotnet stryker --project CentOps.Api.Authentication.csproj
     
     - name: Upload Mutation Report
       uses: actions/upload-artifact@v3.0.0
@@ -87,4 +87,4 @@ jobs:
       uses: docker/setup-buildx-action@v2
     
     - name: Docker Build
-      run: docker image build src/CentOps.Api/
+      run: docker image build -f src/CentOps.Api/Dockerfile ./src

@@ -10,6 +10,7 @@ namespace CentOps.Api.Services.ModelStore.Interfaces
         [JsonProperty(PropertyName = "name")]
         public string? Name { get; set; }
 
+        [JsonProperty(PropertyName = "pk")]
         public string? PartitionKey { get; set; }
     }
 }

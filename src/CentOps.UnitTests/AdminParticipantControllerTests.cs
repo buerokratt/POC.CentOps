@@ -11,7 +11,7 @@ using CentOps.Api.Services.ModelStore.Exceptions;
 
 namespace CentOps.UnitTests
 {
-    public class ParticipantControllerTests
+    public class AdminParticipantControllerTests
     {
         private readonly MapperConfiguration _mapper;
 
@@ -27,7 +27,7 @@ namespace CentOps.UnitTests
                 new ParticipantResponseModel { Id = "2", Name = "Test2", InstitutionId = "2", Status = ParticipantStatus.Disabled }
             };
 
-        public ParticipantControllerTests()
+        public AdminParticipantControllerTests()
         {
             _mapper = new MapperConfiguration(cfg => cfg.AddProfile(new AutoMapperProfile()));
         }
@@ -35,7 +35,7 @@ namespace CentOps.UnitTests
         [Fact]
         public void CreatesParticipantControllerWithoutThrowing()
         {
-            _ = new ParticipantController(new Mock<IParticipantStore>().Object, new Mock<IMapper>().Object);
+            _ = new AdminParticipantController(new Mock<IParticipantStore>().Object, new Mock<IMapper>().Object);
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace CentOps.UnitTests
             var mockParticipantStore = new Mock<IParticipantStore>();
             _ = mockParticipantStore.Setup(m => m.GetAll()).ReturnsAsync(_participantDtos.AsEnumerable());
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get().ConfigureAwait(false);
@@ -65,7 +65,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);
@@ -85,7 +85,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);
@@ -101,7 +101,7 @@ namespace CentOps.UnitTests
             var mockParticipantStore = new Mock<IParticipantStore>();
             _ = mockParticipantStore.Setup(m => m.Create(It.IsAny<ParticipantDto>())).ReturnsAsync(_participantDtos[0]);
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             var createParticipantModel = new CreateUpdateParticipantModel
             {
@@ -129,7 +129,7 @@ namespace CentOps.UnitTests
             var mockParticipantStore = new Mock<IParticipantStore>();
             _ = mockParticipantStore.Setup(m => m.Create(It.IsAny<ParticipantDto>())).ThrowsAsync(new ModelExistsException<ParticipantDto>());
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             var createParticipantModel = new CreateUpdateParticipantModel
             {
@@ -154,7 +154,7 @@ namespace CentOps.UnitTests
             var mockParticipantStore = new Mock<IParticipantStore>();
             _ = mockParticipantStore.Setup(m => m.Create(It.IsAny<ParticipantDto>())).ThrowsAsync(new ArgumentException());
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             var createParticipantModel = new CreateUpdateParticipantModel
             {
@@ -179,7 +179,7 @@ namespace CentOps.UnitTests
             var mockParticipantStore = new Mock<IParticipantStore>();
             _ = mockParticipantStore.Setup(m => m.Create(It.IsAny<ParticipantDto>())).ThrowsAsync(new ModelNotFoundException<InstitutionDto>());
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             var createParticipantModel = new CreateUpdateParticipantModel
             {
@@ -204,7 +204,7 @@ namespace CentOps.UnitTests
             var mockParticipantStore = new Mock<IParticipantStore>();
             _ = mockParticipantStore.Setup(m => m.Update(It.IsAny<ParticipantDto>())).ReturnsAsync(_participantDtos[0]);
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Put(_participantDtos[0].Id!, new CreateUpdateParticipantModel()).ConfigureAwait(false);
@@ -223,7 +223,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             var updateParticipantModel = new CreateUpdateParticipantModel
             {
@@ -251,7 +251,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             var updateParticipantModel = new CreateUpdateParticipantModel
             {
@@ -279,7 +279,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             var updateParticipantModel = new CreateUpdateParticipantModel
             {
@@ -304,7 +304,7 @@ namespace CentOps.UnitTests
             var mockParticipantStore = new Mock<IParticipantStore>();
             _ = mockParticipantStore.Setup(m => m.DeleteById(_participantDtos[0].Id!)).ReturnsAsync(true);
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Delete(_participantDtos[0].Id!).ConfigureAwait(false);
@@ -320,7 +320,7 @@ namespace CentOps.UnitTests
             var mockParticipantStore = new Mock<IParticipantStore>();
             _ = mockParticipantStore.Setup(m => m.DeleteById(_participantDtos[0].Id!)).ReturnsAsync(false);
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Delete(_participantDtos[0].Id!).ConfigureAwait(false);
@@ -336,7 +336,7 @@ namespace CentOps.UnitTests
             var mockParticipantStore = new Mock<IParticipantStore>();
             _ = mockParticipantStore.Setup(m => m.DeleteById(_participantDtos[0].Id!)).ThrowsAsync(new ArgumentException());
 
-            var sut = new ParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = new AdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Delete(_participantDtos[0].Id!).ConfigureAwait(false);
