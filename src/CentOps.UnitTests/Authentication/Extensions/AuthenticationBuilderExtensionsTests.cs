@@ -1,7 +1,5 @@
 ﻿using CentOps.Api.Authentication;
 using CentOps.Api.Authentication.Extensions;
-using CentOps.Api.Authentication.Interfaces;
-using CentOps.Api.Services;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authentication;
@@ -13,6 +11,8 @@ namespace CentOps.UnitTests.Authentication.Extensions
 {
     public class AuthenticationBuilderExtensionsTests
     {
+        private const string TestAuthScheme = "TestAuth";
+
         [Fact]
         public void ServiceCollectionShouldContainApiUserClaimsProvider()
         {
@@ -20,11 +20,11 @@ namespace CentOps.UnitTests.Authentication.Extensions
             var builder = GetAuthenticationBuilder();
 
             // Act
-            builder.AddApiKeyAuth<ApiUserClaimsProvider>();
+            _ = builder.AddApiKeyAuth<TestApiUserClaimsProvider>(TestAuthScheme);
 
             // Assert
             var provider = builder.Services.BuildServiceProvider();
-            var claimsProvider = provider.GetService<IApiUserClaimsProvider>();
+            var claimsProvider = provider.GetService<TestApiUserClaimsProvider>();
 
             _ = claimsProvider.Should().NotBeNull();
         }
@@ -34,7 +34,7 @@ namespace CentOps.UnitTests.Authentication.Extensions
             var services = new ServiceCollection();
             _ = services.AddSingleton(new Mock<IParticipantStore>().Object);
 
-            var logger = new Mock<ILogger<ApiKeyAuthenticationHandler>>();
+            var logger = new Mock<ILogger<ApiKeyAuthenticationHandler<TestApiUserClaimsProvider>>>();
             var loggerFactory = new Mock<ILoggerFactory>();
             _ = loggerFactory
                 .Setup(m => m.CreateLogger(It.IsAny<string>()))

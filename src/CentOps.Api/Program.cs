@@ -1,6 +1,5 @@
 using CentOps.Api.Authentication.Extensions;
 using CentOps.Api.Extensions;
-using CentOps.Api.Services;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
@@ -32,9 +31,8 @@ namespace CentOps.Api
                 _ = options.AddApiKeyOpenApiSecurity();
             });
 
-            services.AddAuthentication()
-                .AddApiKeyAuth<ApiUserClaimsProvider>();
 
+            services.AddApiKeyAuthentication(builder.Configuration);
             services.AddAuthorizationPolicies();
 
             var section = builder.Configuration.GetSection("CosmosDb");

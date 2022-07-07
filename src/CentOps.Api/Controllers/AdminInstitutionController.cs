@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CentOps.Api.Configuration;
 using CentOps.Api.Models;
 using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
@@ -10,7 +11,7 @@ namespace CentOps.Api.Controllers
 {
     [Route("admin/institutions")]
     [ApiController]
-    [Authorize(Policy = "AdminPolicy")]
+    [Authorize(Policy = AuthConfig.AdminPolicy)]
     public class AdminInstitutionController : ControllerBase
     {
         private readonly IInstitutionStore _store;
