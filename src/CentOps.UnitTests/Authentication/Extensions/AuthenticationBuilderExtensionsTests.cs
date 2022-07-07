@@ -1,7 +1,5 @@
 ﻿using CentOps.Api.Authentication;
 using CentOps.Api.Authentication.Extensions;
-using CentOps.Api.Authentication.Interfaces;
-using CentOps.Api.Services;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authentication;
