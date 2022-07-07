@@ -1,4 +1,6 @@
 using CentOps.Api.Authentication;
+using CentOps.Api.Authentication.Extensions;
+using CentOps.Api.Configuration;
 using CentOps.Api.Services;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -9,26 +11,37 @@ namespace CentOps.Api.Extensions
 {
     public static partial class ServiceCollectionExtensions
     {
+        public static void AddApiKeyAuthentication(this IServiceCollection services, IConfiguration configuration)
+        {
+            _ = services.AddSingleton(new AuthConfig
+            {
+                AdminApiKey = configuration.GetConnectionString("AdminApiKey")
+            });
+
+            _ = services.AddAuthentication()
+                .AddApiKeyAuth<AdminApiUserClaimsProvider>(ApiKeyAuthenticationDefaults.AdminAuthenticationScheme)
+                .AddApiKeyAuth<ApiUserClaimsProvider>(ApiKeyAuthenticationDefaults.AuthenticationScheme);
+        }
+
         public static void AddAuthorizationPolicies(this IServiceCollection services)
         {
             _ = services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
 
             _ = services.AddAuthorization(options =>
             {
-                var userPolicy = new AuthorizationPolicyBuilder()
+                var adminPolicy = new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes(ApiKeyAuthenticationDefaults.AdminAuthenticationScheme)
+                    .RequireClaim("admin", bool.TrueString)
+                    .Build();
+
+                options.AddPolicy(AuthConfig.AdminPolicy, adminPolicy);
+
+                var participantPolicy = new AuthorizationPolicyBuilder()
                     .AddAuthenticationSchemes(ApiKeyAuthenticationDefaults.AuthenticationScheme)
                     .RequireClaim("id")
                     .Build();
 
-                options.AddPolicy("UserPolicy", userPolicy);
-                options.DefaultPolicy = userPolicy;
-
-                var adminPolicy = new AuthorizationPolicyBuilder()
-                    .AddAuthenticationSchemes(ApiKeyAuthenticationDefaults.AdminAuthenticationScheme)
-                    .RequireRole("Admin")
-                    .Build();
-
-                options.AddPolicy("AdminPolicy", adminPolicy);
+                options.AddPolicy(AuthConfig.ParticipantPolicy, participantPolicy);
             });
         }
 

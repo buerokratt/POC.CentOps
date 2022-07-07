@@ -1,16 +1,15 @@
 ﻿using CentOps.Api.Authentication.Interfaces;
 using CentOps.Api.Authentication.Models;
 using CentOps.Api.Configuration;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 
 namespace CentOps.Api.Services
 {
     public class AdminApiUserClaimsProvider : IApiUserClaimsProvider
     {
-        private readonly AdminAuthConfig _config;
+        private readonly AuthConfig _config;
 
-        public AdminApiUserClaimsProvider(AdminAuthConfig config)
+        public AdminApiUserClaimsProvider(AuthConfig config)
         {
             _config = config;
         }
@@ -22,10 +21,7 @@ namespace CentOps.Api.Services
             {
                 user = new ApiUser(new[]
                 {
-                    new Claim("id", user.Id!),
-                    new Claim("name", user.Name!),
-                    new Claim("institutionId", user.InstitutionId!),
-                    new Claim("status", user.Status.ToString())
+                    new Claim("admin", bool.TrueString)
                 });
             }
 

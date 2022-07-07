@@ -18,20 +18,6 @@ namespace CentOps.Api.Authentication.Extensions
                 apiKeyHeaderName = ApiKeyAuthenticationDefaults.DefaultApiKeyHeaderName;
             }
 
-            var adminSecurityScheme = new OpenApiSecurityScheme
-            {
-                Scheme = ApiKeyAuthenticationDefaults.AdminAuthenticationScheme,
-                Name = apiKeyHeaderName,
-                Type = SecuritySchemeType.ApiKey,
-                In = ParameterLocation.Header,
-                Description = $"API Key authentication for Admin only using key set in the value of the '{apiKeyHeaderName}' header.",
-                Reference = new OpenApiReference
-                {
-                    Id = ApiKeyAuthenticationDefaults.AdminAuthenticationScheme,
-                    Type = ReferenceType.SecurityScheme
-                }
-            };
-
             var userSecurityScheme = new OpenApiSecurityScheme
             {
                 Scheme = ApiKeyAuthenticationDefaults.AuthenticationScheme,
@@ -46,12 +32,10 @@ namespace CentOps.Api.Authentication.Extensions
                 }
             };
 
-            options.AddSecurityDefinition(adminSecurityScheme.Scheme, adminSecurityScheme);
             options.AddSecurityDefinition(userSecurityScheme.Scheme, userSecurityScheme);
 
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                { adminSecurityScheme, Array.Empty<string>() },
                 { userSecurityScheme, Array.Empty<string>() }
             });
 

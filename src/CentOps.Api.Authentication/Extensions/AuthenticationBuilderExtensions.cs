@@ -14,10 +14,10 @@ namespace CentOps.Api.Authentication.Extensions
             string? apiKeyHeaderName = null)
             where TClaimsProvider : class, IApiUserClaimsProvider
         {
-            _ = builder.Services.AddSingleton<IApiUserClaimsProvider, TClaimsProvider>();
+            _ = builder.Services.AddSingleton<TClaimsProvider>();
 
             _ = builder
-                .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
+                .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler<TClaimsProvider>>(
                     authenticationScheme,
                     options =>
                     {
