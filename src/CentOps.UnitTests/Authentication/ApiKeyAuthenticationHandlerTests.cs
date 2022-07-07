@@ -1,5 +1,4 @@
 ﻿using CentOps.Api.Authentication;
-using CentOps.Api.Authentication.Interfaces;
 using CentOps.Api.Authentication.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authentication;
@@ -18,18 +17,18 @@ namespace CentOps.UnitTests.Authentication
         private static readonly AuthenticationScheme AuthScheme = new(
             "ApiKey",
             null,
-            typeof(ApiKeyAuthenticationHandler).BaseType);
+            typeof(ApiKeyAuthenticationHandler<TestApiUserClaimsProvider>).BaseType);
 
-        private readonly ApiKeyAuthenticationHandler handler;
+        private readonly ApiKeyAuthenticationHandler<TestApiUserClaimsProvider> handler;
 
-        private readonly Mock<IApiUserClaimsProvider> mockProvider;
+        private readonly TestApiUserClaimsProvider mockProvider;
         private readonly Mock<IOptionsMonitor<ApiKeyAuthenticationOptions>> mockOptions;
         private readonly Mock<ILoggerFactory> mockLoggerFactory;
         private readonly Mock<ISystemClock> mockSystemClock;
 
         public ApiKeyAuthenticationHandlerTests()
         {
-            mockProvider = new Mock<IApiUserClaimsProvider>();
+            mockProvider = new TestApiUserClaimsProvider();
             mockOptions = new Mock<IOptionsMonitor<ApiKeyAuthenticationOptions>>();
             mockLoggerFactory = new Mock<ILoggerFactory>();
             mockSystemClock = new Mock<ISystemClock>();
@@ -37,8 +36,8 @@ namespace CentOps.UnitTests.Authentication
             SetupOptions();
             SetupLogger();
 
-            handler = new ApiKeyAuthenticationHandler(
-                mockProvider.Object,
+            handler = new ApiKeyAuthenticationHandler<TestApiUserClaimsProvider>(
+                mockProvider,
                 mockOptions.Object,
                 mockLoggerFactory.Object,
                 UrlEncoder.Default,
@@ -73,7 +72,7 @@ namespace CentOps.UnitTests.Authentication
             // Arrange
             var httpContext = GetHttpContext("non-existing-key");
 
-            SetupClaimsProvider(new Dictionary<string, ApiUser>
+            mockProvider.Setup(new Dictionary<string, ApiUser>
             {
                 { "apikey1", new ApiUser(new[] { new Claim("type1", "value1") }) }
             });
@@ -99,7 +98,7 @@ namespace CentOps.UnitTests.Authentication
             // Arrange
             var httpContext = GetHttpContext("validkey1");
 
-            SetupClaimsProvider(new Dictionary<string, ApiUser>
+            mockProvider.Setup(new Dictionary<string, ApiUser>
             {
                 { "validkey1", new ApiUser(new[] { new Claim("type1", "value1") }) },
                 { "validkey2", new ApiUser(new[] { new Claim("type2", "value2") }) }
@@ -136,30 +135,11 @@ namespace CentOps.UnitTests.Authentication
 
         private void SetupLogger()
         {
-            var logger = new Mock<ILogger<ApiKeyAuthenticationHandler>>();
+            var logger = new Mock<ILogger<ApiKeyAuthenticationHandler<TestApiUserClaimsProvider>>>();
 
             _ = mockLoggerFactory
                 .Setup(m => m.CreateLogger(It.IsAny<string>()))
                 .Returns(logger.Object);
-        }
-
-        private void SetupClaimsProvider(IDictionary<string, ApiUser> users)
-        {
-            if (mockProvider == null)
-            {
-                return;
-            }
-
-#nullable enable
-            _ = mockProvider
-                .Setup(m => m.GetUserClaimsAsync(It.IsAny<string>()))
-                .Returns<string>(apiKey =>
-                {
-                    return users.ContainsKey(apiKey)
-                        ? Task.FromResult<ApiUser?>(users[apiKey])
-                        : Task.FromResult<ApiUser?>(null);
-                });
-#nullable disable
         }
 
         private HttpContext GetHttpContext(string apiKeyValue)

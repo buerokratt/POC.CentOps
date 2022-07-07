@@ -26,22 +26,22 @@ namespace CentOps.UnitTests.Extensions
         }
 
         [Fact]
-        public async Task ShouldSetUserAndDefaultAuthorizationPolicy()
+        public async Task ShouldSetParticipantAndAdminAuthorizationPolicies()
         {
             services.AddAuthorizationPolicies();
             var provider = services.BuildServiceProvider();
 
             var policyProvider = provider.GetService<IAuthorizationPolicyProvider>();
 
-            var userPolicy = await policyProvider.GetPolicyAsync("UserPolicy").ConfigureAwait(false);
-            var defaultPolicy = await policyProvider.GetDefaultPolicyAsync().ConfigureAwait(false);
+            // Assert participany policy
+            var participantPolicy = await policyProvider.GetPolicyAsync("ParticipantPolicy").ConfigureAwait(false);
 
-            _ = userPolicy.AuthenticationSchemes.Should()
+            _ = participantPolicy.AuthenticationSchemes.Should()
                 .HaveCount(1)
                 .And
                 .Contain("ApiKey");
 
-            var requirements = userPolicy.Requirements;
+            var requirements = participantPolicy.Requirements;
             _ = requirements.Should().HaveCount(1);
 
             var idClaim = requirements[0] as ClaimsAuthorizationRequirement;
@@ -49,7 +49,21 @@ namespace CentOps.UnitTests.Extensions
             _ = idClaim.ClaimType.Should().Be("id");
             _ = idClaim.AllowedValues.Should().BeNullOrEmpty();
 
-            _ = defaultPolicy.Should().BeSameAs(userPolicy);
+            // Assert admin policy
+            var adminPolicy = await policyProvider.GetPolicyAsync("AdminPolicy").ConfigureAwait(false);
+
+            _ = adminPolicy.AuthenticationSchemes.Should()
+                .HaveCount(1)
+                .And
+                .Contain("AdminApiKey");
+
+            requirements = adminPolicy.Requirements;
+            _ = requirements.Should().HaveCount(1);
+
+            var adminClaim = requirements[0] as ClaimsAuthorizationRequirement;
+            _ = adminClaim.Should().NotBeNull();
+            _ = adminClaim.ClaimType.Should().Be("admin");
+            _ = adminClaim.AllowedValues.Should().BeEquivalentTo(bool.TrueString);
         }
 
         [Fact]

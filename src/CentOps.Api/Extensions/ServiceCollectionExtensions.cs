@@ -6,11 +6,13 @@ using CentOps.Api.Services.ModelStore.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Azure.Cosmos;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api.Extensions
 {
     public static partial class ServiceCollectionExtensions
     {
+        [ExcludeFromCodeCoverage]
         public static void AddApiKeyAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             _ = services.AddSingleton(new AuthConfig
