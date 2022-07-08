@@ -11,9 +11,9 @@ namespace CentOps.Api.Controllers
                 throw new ArgumentNullException(nameof(query));
             }
 
-            if (query.ContainsKey("types"))
+            if (query.ContainsKey("type"))
             {
-                var types = query["types"];
+                var types = query["type"];
 
                 var correctTypes = types.Select(s =>
                 {

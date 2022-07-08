@@ -31,10 +31,7 @@ namespace CentOps.Api.Controllers
         public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> Get()
         {
             var participantTypeFilter = QueryStringUtils.GetParticipantTypeFilter(Request.Query);
-            var participants = participantTypeFilter.Any() == false
-                ? await _store.GetAll(participantTypeFilter, false).ConfigureAwait(false)
-                : await _store.GetAll(Enumerable.Empty<ParticipantTypeDto>(), false).ConfigureAwait(false);
-
+            var participants = await _store.GetAll(participantTypeFilter, false).ConfigureAwait(false);
             return Ok(_mapper.Map<IEnumerable<ParticipantResponseModel>>(participants));
         }
 
