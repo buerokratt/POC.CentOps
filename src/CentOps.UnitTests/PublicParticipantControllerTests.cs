@@ -44,9 +44,11 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.GetAll()).ReturnsAsync(_participantDtos.AsEnumerable());
+            _ = mockParticipantStore
+               .Setup(m => m.GetAll(It.IsAny<IEnumerable<ParticipantTypeDto>>(), false))
+               .ReturnsAsync(_participantDtos.Where(p => p.Status == ParticipantStatusDto.Active).AsEnumerable());
 
-            var sut = new PublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get().ConfigureAwait(false);
@@ -54,7 +56,7 @@ namespace CentOps.UnitTests
             // Assert
             var okay = Assert.IsType<OkObjectResult>(response.Result);
             var values = Assert.IsAssignableFrom<IEnumerable<ParticipantResponseModel>>(okay.Value);
-            _ = values.Should().BeEquivalentTo(_participantResponseModels);
+            _ = values.Should().BeEquivalentTo(_participantResponseModels.Where(p => p.Status == ParticipantStatus.Active));
         }
 
         [Fact]
@@ -66,7 +68,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = new PublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);
@@ -86,7 +88,7 @@ namespace CentOps.UnitTests
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = new PublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
             // Act
             var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);

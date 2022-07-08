@@ -45,7 +45,9 @@ namespace CentOps.UnitTests
         {
             // Arrange
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.GetAll()).ReturnsAsync(_participantDtos.AsEnumerable());
+            _ = mockParticipantStore
+                .Setup(m => m.GetAll(It.IsAny<IEnumerable<ParticipantTypeDto>>(), true))
+                .ReturnsAsync(_participantDtos.AsEnumerable());
 
             var sut = CreateAdminParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
 
