@@ -83,11 +83,6 @@ namespace CentOps.UnitTests
             where TModel : class, IModel
         {
             _ = mockContainer
-                .Setup(c => c.GetItemLinqQueryable<TModel>(
-                    )
-                )
-
-            _ = mockContainer
                 .Setup(c => c.GetItemQueryIterator<TModel>(
                     It.IsAny<QueryDefinition>(),
                     It.IsAny<string>(),
