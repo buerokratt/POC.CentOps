@@ -329,33 +329,35 @@ namespace CentOps.UnitTests
             _ = retrievedParticipants.Should().AllBeEquivalentTo(participant);
         }
 
-        //[Fact]
-        //public async Task GetParticipantsByInsitutionIdReturnsEmptyIfNoParticipants()
-        //{
-        //    // Arrange
-        //    var institution1 = GetInstitution(id: "123", name: "Test1");
-        //    var institution2 = GetInstitution(id: "456", name: "Test2");
-        //    var sut = GetInstitutionStore(institution1, institution2);
+        [Fact]
+        public async Task GetParticipantsByInsitutionIdReturnsEmptyIfNoParticipants()
+        {
+            // Arrange
+            var institution1 = GetInstitution(id: "123", name: "Test1");
+            var institution2 = GetInstitution(id: "456", name: "Test2");
+            var sut = GetInstitutionStore(institution1, institution2);
 
-        //    var participant = new ParticipantDto
-        //    {
-        //        Id = "234",
-        //        PartitionKey = "participant::234",
-        //        Name = "Test participant",
-        //        Host = "https://participant:8080",
-        //        InstitutionId = institution1.Id,
-        //        Status = ParticipantStatusDto.Active,
-        //        Type = ParticipantTypeDto.Chatbot
-        //    };
+            var participant = new ParticipantDto
+            {
+                Id = "234",
+                PartitionKey = "participant::234",
+                Name = "Test participant",
+                Host = "https://participant:8080",
+                InstitutionId = institution1.Id,
+                Status = ParticipantStatusDto.Active,
+                Type = ParticipantTypeDto.Chatbot
+            };
 
-        //    _ = GetParticipantStore(participant);
+            _ = GetParticipantStore(participant);
 
-        //    // Act 
-        //    var retrievedParticipants = await sut.GetParticipantsByInstitutionId(institution2.Id).ConfigureAwait(false);
+            SetupParticipantQuery(m => m.InstitutionId == institution2.Id);
 
-        //    // Assert
-        //    _ = retrievedParticipants.Should().BeEmpty();
-        //}
+            // Act 
+            var retrievedParticipants = await sut.GetParticipantsByInstitutionId(institution2.Id).ConfigureAwait(false);
+
+            // Assert
+            _ = retrievedParticipants.Should().BeEmpty();
+        }
 
         private static InstitutionDto GetInstitution(
             string id = "123",

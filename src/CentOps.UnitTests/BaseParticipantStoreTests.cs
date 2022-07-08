@@ -203,6 +203,23 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
+        public async Task GetAllWithFiltersReturnsParticipants()
+        {
+            // Arrange
+
+            var participant1 = GetParticipant("1", "bot1");
+            var participant2 = GetParticipant("2", "Dmr", type: ParticipantTypeDto.Dmr);
+
+            var sut = GetParticipantStore(participant1, participant2);
+
+            // Act
+            var storedItems = await sut.GetAll(new[] { ParticipantTypeDto.Chatbot }, true).ConfigureAwait(false);
+
+            // Assert
+            _ = storedItems.Should().BeEquivalentTo(new[] { participant1 });
+        }
+
+        [Fact]
         public async Task DeleteSuccessfullyRemovesParticipants()
         {
             // Arrange
