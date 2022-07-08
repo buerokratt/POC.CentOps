@@ -47,7 +47,7 @@ namespace CentOps.Api
                 _ = app.UseSwaggerUI();
             }
 
-            _ = app.UseHttpsRedirection();
+            // _ = app.UseHttpsRedirection();
 
             _ = app.UseAuthentication();
             _ = app.UseAuthorization();
