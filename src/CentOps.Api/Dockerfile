@@ -5,10 +5,10 @@ WORKDIR /app
 COPY . .
 
 # Restore as distinct layers
-RUN dotnet restore ./src/CentOps.Api
+RUN dotnet restore CentOps.Api.csproj
 
 # Build and publish a release
-RUN dotnet publish -c Release -o out ./src/CentOps.Api
+RUN dotnet publish -c Release -o out CentOps.Api.csproj
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
