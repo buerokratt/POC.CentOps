@@ -25,7 +25,10 @@ namespace CentOps.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> Get()
         {
-            var participants = await _store.GetAll().ConfigureAwait(false);
+            var participantTypeFilter = QueryStringUtils.GetParticipantTypeFilter(Request.Query);
+            var participants = participantTypeFilter.Any()
+                ? await _store.GetAll(participantTypeFilter.ToArray()).ConfigureAwait(false)
+                : await _store.GetAll().ConfigureAwait(false);
 
             return Ok(_mapper.Map<IEnumerable<ParticipantResponseModel>>(participants));
         }
