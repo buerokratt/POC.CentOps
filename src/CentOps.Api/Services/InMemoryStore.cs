@@ -62,9 +62,13 @@ namespace CentOps.Api.Services
             }
         }
 
-        Task<IEnumerable<ParticipantDto>> IParticipantStore.GetAll(ParticipantTypeDto[] types)
+        Task<IEnumerable<ParticipantDto>> IParticipantStore.GetAll(IEnumerable<ParticipantTypeDto> types, bool includeInactive)
         {
-            return Task.FromResult(_participants.Values.Where(p => types.Contains(p.Type)).AsEnumerable());
+            return Task.FromResult(
+                _participants.Values
+                .Where(p => types.Contains(p.Type))
+                .Where(p => { return includeInactive || p.Status == ParticipantStatusDto.Active; })
+                .AsEnumerable());
         }
     }
 }

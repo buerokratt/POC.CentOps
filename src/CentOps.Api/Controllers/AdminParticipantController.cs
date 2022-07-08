@@ -29,8 +29,8 @@ namespace CentOps.Api.Controllers
         {
             var participantTypeFilter = QueryStringUtils.GetParticipantTypeFilter(Request.Query);
             var participants = participantTypeFilter.Any()
-                ? await _store.GetAll(participantTypeFilter.ToArray()).ConfigureAwait(false)
-                : await _store.GetAll().ConfigureAwait(false);
+                ? await _store.GetAll(participantTypeFilter, true).ConfigureAwait(false)
+                : await _store.GetAll(Enumerable.Empty<ParticipantTypeDto>(), true).ConfigureAwait(false);
 
             return Ok(_mapper.Map<IEnumerable<AdminParticipantResponseModel>>(participants));
         }

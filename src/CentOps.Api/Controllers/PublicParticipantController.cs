@@ -2,6 +2,7 @@
 using CentOps.Api.Configuration;
 using CentOps.Api.Models;
 using CentOps.Api.Services.ModelStore.Interfaces;
+using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,14 +22,18 @@ namespace CentOps.Api.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Return only Active <see cref="ParticipantResponseModel"/> optionally filtered by <see cref="ParticipantType"/>Participant type.
+        /// </summary>
+        /// <returns>An async <see cref="Task"/> wrapping the operation.</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> Get()
         {
             var participantTypeFilter = QueryStringUtils.GetParticipantTypeFilter(Request.Query);
-            var participants = participantTypeFilter.Any()
-                ? await _store.GetAll(participantTypeFilter.ToArray()).ConfigureAwait(false)
-                : await _store.GetAll().ConfigureAwait(false);
+            var participants = participantTypeFilter.Any() == false
+                ? await _store.GetAll(participantTypeFilter, false).ConfigureAwait(false)
+                : await _store.GetAll(Enumerable.Empty<ParticipantTypeDto>(), false).ConfigureAwait(false);
 
             return Ok(_mapper.Map<IEnumerable<ParticipantResponseModel>>(participants));
         }

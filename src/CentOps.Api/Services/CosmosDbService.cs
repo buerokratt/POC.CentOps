@@ -380,13 +380,22 @@ namespace CentOps.Api.Services
             return query;
         }
 
-        async Task<IEnumerable<ParticipantDto>> IParticipantStore.GetAll(ParticipantTypeDto[] types)
+        async Task<IEnumerable<ParticipantDto>> IParticipantStore.GetAll(IEnumerable<ParticipantTypeDto> types, bool includeInactive)
         {
             var results = new List<ParticipantDto>();
             var queryable = _container
                 .GetItemLinqQueryable<ParticipantDto>()
-                .Where(p => p.PartitionKey!.StartsWith("participant", StringComparison.OrdinalIgnoreCase))
-                .Where(p => types.Contains(p.Type));
+                .Where(p => p.PartitionKey!.StartsWith("participant", StringComparison.OrdinalIgnoreCase));
+
+            if (types != null && types.Any())
+            {
+                queryable = queryable.Where(p => types.Contains(p.Type));
+            }
+
+            if (includeInactive == false)
+            {
+                queryable = queryable.Where(p => p.Status == ParticipantStatusDto.Active);
+            }
 
             using (FeedIterator<ParticipantDto> setIterator = queryable.ToFeedIterator())
             {

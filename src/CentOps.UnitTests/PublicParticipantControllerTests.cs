@@ -5,8 +5,10 @@ using CentOps.Api.Models;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Text;
 
 namespace CentOps.UnitTests
 {
@@ -91,6 +93,27 @@ namespace CentOps.UnitTests
 
             // Assert
             _ = Assert.IsType<NotFoundObjectResult>(response.Result);
+        }
+
+        private static PublicParticipantController CreatePublicParticipantController(
+           IParticipantStore store,
+           IMapper mapper,
+           string queryString = "")
+        {
+            return new PublicParticipantController(store, mapper)
+            {
+                ControllerContext = new ControllerContext() { HttpContext = GetContext(queryString) }
+            };
+        }
+
+        private static DefaultHttpContext GetContext(string queryString)
+        {
+            var httpContext = new DefaultHttpContext();
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
+            httpContext.Request.Body = stream;
+            httpContext.Request.ContentLength = stream.Length;
+            httpContext.Request.QueryString = new QueryString(queryString);
+            return httpContext;
         }
     }
 }
