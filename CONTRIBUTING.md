@@ -4,7 +4,7 @@
 
 ### Feature Toggles
 
-| Feature Toggle    | Purpose                       |  appSettings.json | yaml environment|
+| Feature Toggle    | Purpose                       |  appSettings.json | yaml environment |
 |:------------------|:------------------------------| ------------------|--------|
 | InMemoryDataStore | Enables an In-memory data store which can be used for testing purposes only | "FeatureToggles" : { "InMemoryStore": true } | FEATURETOGGLES__INMEMORYSTORE=true
 
