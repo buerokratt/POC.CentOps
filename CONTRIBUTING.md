@@ -6,7 +6,7 @@
 
 | Feature Toggle    | Purpose                       |  appSettings.json | yaml environment |
 |:------------------|:------------------------------| ------------------|--------|
-| InMemoryDataStore | Enables an In-memory data store which can be used for testing purposes only | "FeatureToggles" : { "InMemoryStore": true } | FEATURETOGGLES__INMEMORYSTORE=true
+| UseInMemoryDataStore | Enables an In-memory data store which can be used for testing purposes only | "FeatureToggles" : { "UseInMemoryStore": true } | FEATURETOGGLES__USEINMEMORYSTORE=true
 
 ### Detect-Secrets Pre-commit Hook
 

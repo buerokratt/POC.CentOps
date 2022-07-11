@@ -32,17 +32,7 @@ namespace CentOps.Api
 
             services.AddApiKeyAuthentication(builder.Configuration);
             services.AddAuthorizationPolicies();
-
-            var features = builder.Configuration.GetSection("FeatureToggles").Get<FeatureToggles>();
-            if (features != null && features.InMemoryStore)
-            {
-                services.AddInMemoryDataStores();
-            }
-            else
-            {
-                var section = builder.Configuration.GetSection("CosmosDb");
-                services.AddCosmosDbServices(section);
-            }
+            services.AddDataStore(builder.Configuration);
 
             var app = builder.Build();
 

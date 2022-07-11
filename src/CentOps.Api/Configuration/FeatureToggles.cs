@@ -2,6 +2,6 @@
 {
     public class FeatureToggles
     {
-        public bool InMemoryStore { get; set; }
+        public bool UseInMemoryStore { get; set; }
     }
 }

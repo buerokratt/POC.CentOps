@@ -48,6 +48,25 @@ namespace CentOps.Api.Extensions
             });
         }
 
+        public static void AddDataStore(this IServiceCollection services, ConfigurationManager configurationManager)
+        {
+            if (configurationManager == null)
+            {
+                throw new ArgumentNullException(nameof(configurationManager));
+            }
+
+            var features = configurationManager.GetSection("FeatureToggles").Get<FeatureToggles>();
+            if (features != null && features.UseInMemoryStore)
+            {
+                services.AddInMemoryDataStores();
+            }
+            else
+            {
+                var section = configurationManager.GetSection("CosmosDb");
+                services.AddCosmosDbServices(section);
+            }
+        }
+
         public static void AddInMemoryDataStores(this IServiceCollection services)
         {
             Trace.WriteLine("Using InMemory DataStore.");
