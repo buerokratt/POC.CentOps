@@ -21,12 +21,16 @@ namespace CentOps.Api.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Return only Active <see cref="ParticipantResponseModel"/> optionally filtered by <see cref="ParticipantType"/>Participant type.
+        /// </summary>
+        /// <returns>An async <see cref="Task"/> wrapping the operation.</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> Get()
         {
-            var participants = await _store.GetAll().ConfigureAwait(false);
-
+            var participantTypeFilter = QueryStringUtils.GetParticipantTypeFilter(Request.Query);
+            var participants = await _store.GetAll(participantTypeFilter, false).ConfigureAwait(false);
             return Ok(_mapper.Map<IEnumerable<ParticipantResponseModel>>(participants));
         }
 

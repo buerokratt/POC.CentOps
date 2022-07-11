@@ -2,6 +2,7 @@
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using System.Net;
 
 namespace CentOps.Api.Services
@@ -80,7 +81,7 @@ namespace CentOps.Api.Services
 
         async Task<IEnumerable<InstitutionDto>> IModelStore<InstitutionDto>.GetAll()
         {
-            var query = _container.GetItemQueryIterator<InstitutionDto>(new QueryDefinition("SELECT * FROM c WHERE STARTSWITH(c.PartitionKey, \"institution\", false)"));
+            var query = _container.GetItemQueryIterator<InstitutionDto>(new QueryDefinition("SELECT * FROM c WHERE STARTSWITH(c.pk, \"institution\", false)"));
             List<InstitutionDto> results = new();
             while (query.HasMoreResults)
             {
@@ -121,7 +122,7 @@ namespace CentOps.Api.Services
                 var queryString = @"SELECT *
                               FROM c
                               WHERE c.institutionId = @id
-                              AND STARTSWITH(c.PartitionKey, 'participant', false)";
+                              AND STARTSWITH(c.pk, 'participant', false)";
                 var query = new QueryDefinition(queryString)
                     .WithParameter("@id", id);
                 return await RunQueryAsync<ParticipantDto>(query).ConfigureAwait(false);
@@ -187,7 +188,7 @@ namespace CentOps.Api.Services
             var queryString = @"SELECT *
                               FROM c
                               WHERE c.name = @name
-                              AND STARTSWITH(c.PartitionKey, 'participant', false)";
+                              AND STARTSWITH(c.pk, 'participant', false)";
             var query = new QueryDefinition(queryString)
                 .WithParameter("@name", model.Name);
             var existingName = await RunQueryAsync<ParticipantDto>(query).ConfigureAwait(false);
@@ -231,7 +232,7 @@ namespace CentOps.Api.Services
 
         async Task<IEnumerable<ParticipantDto>> IModelStore<ParticipantDto>.GetAll()
         {
-            var query = _container.GetItemQueryIterator<ParticipantDto>(new QueryDefinition("SELECT * FROM c WHERE STARTSWITH(c.PartitionKey, \"participant\", false)"));
+            var query = _container.GetItemQueryIterator<ParticipantDto>(new QueryDefinition("SELECT * FROM c WHERE STARTSWITH(c.pk, \"participant\", false)"));
             List<ParticipantDto> results = new();
             while (query.HasMoreResults)
             {
@@ -312,11 +313,11 @@ namespace CentOps.Api.Services
 
             var query = BuildQueryDefinition(
                 @"SELECT * FROM c
-                    WHERE STARTSWITH(c.PartitionKey, 'participant', false)
+                    WHERE STARTSWITH(c.pk, 'participant', false)
                         AND c.apiKey = @apiKey
                         AND c.status != @status",
                 ("@apiKey", apiKey),
-                ("@status", ParticipantStatusDto.Disabled.ToString()));
+                ("@status", ParticipantStatusDto.Disabled));
 
             var results = await RunQueryAsync<ParticipantDto>(query).ConfigureAwait(false);
             return results?.FirstOrDefault();
@@ -377,6 +378,38 @@ namespace CentOps.Api.Services
             }
 
             return query;
+        }
+
+        async Task<IEnumerable<ParticipantDto>> IParticipantStore.GetAll(IEnumerable<ParticipantTypeDto> types, bool includeInactive)
+        {
+            var results = new List<ParticipantDto>();
+            var queryable = _container
+                .GetItemLinqQueryable<ParticipantDto>()
+                .Where(p => p.PartitionKey!.StartsWith("participant", StringComparison.OrdinalIgnoreCase));
+
+            if (types != null && types.Any())
+            {
+                queryable = queryable.Where(p => types.Contains(p.Type));
+            }
+
+            if (includeInactive == false)
+            {
+                queryable = queryable.Where(p => p.Status == ParticipantStatusDto.Active);
+            }
+
+            using (FeedIterator<ParticipantDto> setIterator = queryable.ToFeedIterator())
+            {
+                // Asynchronous query execution
+                while (setIterator.HasMoreResults)
+                {
+                    foreach (var item in await setIterator.ReadNextAsync().ConfigureAwait(false))
+                    {
+                        results.Add(item);
+                    }
+                }
+            }
+
+            return results;
         }
     }
 }

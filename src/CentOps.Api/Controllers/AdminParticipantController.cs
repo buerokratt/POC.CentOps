@@ -25,21 +25,22 @@ namespace CentOps.Api.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<ParticipantResponseModel>>> Get()
+        public async Task<ActionResult<IEnumerable<AdminParticipantResponseModel>>> Get()
         {
-            var participants = await _store.GetAll().ConfigureAwait(false);
-            return Ok(_mapper.Map<IEnumerable<ParticipantResponseModel>>(participants));
+            var participantTypeFilter = QueryStringUtils.GetParticipantTypeFilter(Request.Query);
+            var participants = await _store.GetAll(participantTypeFilter, true).ConfigureAwait(false);
+            return Ok(_mapper.Map<IEnumerable<AdminParticipantResponseModel>>(participants));
         }
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ParticipantResponseModel>> Get(string id)
+        public async Task<ActionResult<AdminParticipantResponseModel>> Get(string id)
         {
             var participant = await _store.GetById(id).ConfigureAwait(false);
 
             return participant != null
-                ? Ok(_mapper.Map<ParticipantResponseModel>(participant))
+                ? Ok(_mapper.Map<AdminParticipantResponseModel>(participant))
                 : NotFound(id);
         }
 
@@ -47,7 +48,7 @@ namespace CentOps.Api.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ParticipantResponseModel>> Post(CreateUpdateParticipantModel participant)
+        public async Task<ActionResult<AdminParticipantResponseModel>> Post(CreateUpdateParticipantModel participant)
         {
             try
             {
@@ -56,7 +57,7 @@ namespace CentOps.Api.Controllers
                 var createdParticipant = await _store.Create(participantDTO).ConfigureAwait(false);
                 return Created(
                     new Uri($"/admin/participants/{createdParticipant.Id}", UriKind.Relative),
-                    _mapper.Map<ParticipantResponseModel>(createdParticipant));
+                    _mapper.Map<AdminParticipantResponseModel>(createdParticipant));
             }
             catch (ArgumentException argEx)
             {
@@ -76,14 +77,14 @@ namespace CentOps.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ParticipantResponseModel>> Put(string id, CreateUpdateParticipantModel participant)
+        public async Task<ActionResult<AdminParticipantResponseModel>> Put(string id, CreateUpdateParticipantModel participant)
         {
             try
             {
                 ParticipantDto participantDTO = _mapper.Map<ParticipantDto>(participant);
                 participantDTO.Id = id;
                 var updatedParticipant = await _store.Update(participantDTO).ConfigureAwait(false);
-                return Ok(_mapper.Map<ParticipantResponseModel>(updatedParticipant));
+                return Ok(_mapper.Map<AdminParticipantResponseModel>(updatedParticipant));
             }
             catch (ArgumentException argEx)
             {

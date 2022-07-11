@@ -99,7 +99,7 @@ namespace CentOps.Api.Services
         public Task<IEnumerable<ParticipantDto>> GetParticipantsByInstitutionId(string id)
         {
             return string.IsNullOrEmpty(id)
-                ? throw new ArgumentException($"{nameof(id)} not specified.")
+                ? throw new ArgumentNullException(nameof(id))
                 : Task.FromResult(_participants.Values.Where(key => id.Equals(key.InstitutionId, StringComparison.Ordinal)).AsEnumerable());
         }
     }

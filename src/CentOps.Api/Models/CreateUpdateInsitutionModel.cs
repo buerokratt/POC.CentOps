@@ -9,7 +9,7 @@ namespace CentOps.Api.Models
     public class CreateUpdateInsitutionModel
     {
         [Required]
-        [StringLength(50, MinimumLength = 5)]
+        [StringLength(50, MinimumLength = 4)]
         [JsonProperty(PropertyName = "name")]
         public string? Name { get; set; }
 
