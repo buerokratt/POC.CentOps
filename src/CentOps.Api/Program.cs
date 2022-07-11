@@ -1,4 +1,5 @@
 using CentOps.Api.Authentication.Extensions;
+using CentOps.Api.Configuration;
 using CentOps.Api.Extensions;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
@@ -11,8 +12,6 @@ namespace CentOps.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
             var services = builder.Services;
 
             _ = services
@@ -31,12 +30,19 @@ namespace CentOps.Api
                 _ = options.AddApiKeyOpenApiSecurity();
             });
 
-
             services.AddApiKeyAuthentication(builder.Configuration);
             services.AddAuthorizationPolicies();
 
-            var section = builder.Configuration.GetSection("CosmosDb");
-            services.AddCosmosDbServices(section);
+            var features = builder.Configuration.GetSection("FeatureToggles").Get<FeatureToggles>();
+            if (features != null && features.InMemoryStore)
+            {
+                services.AddInMemoryDataStores();
+            }
+            else
+            {
+                var section = builder.Configuration.GetSection("CosmosDb");
+                services.AddCosmosDbServices(section);
+            }
 
             var app = builder.Build();
 

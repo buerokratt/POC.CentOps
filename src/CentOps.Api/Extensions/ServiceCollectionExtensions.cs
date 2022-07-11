@@ -6,6 +6,7 @@ using CentOps.Api.Services.ModelStore.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Azure.Cosmos;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace CentOps.Api.Extensions
@@ -47,8 +48,9 @@ namespace CentOps.Api.Extensions
             });
         }
 
-        public static void AddDataStores(this IServiceCollection services)
+        public static void AddInMemoryDataStores(this IServiceCollection services)
         {
+            Trace.WriteLine("Using InMemory DataStore.");
             var inMemoryStore = new InMemoryStore();
             _ = services.AddSingleton<IInstitutionStore>(provider => inMemoryStore);
             _ = services.AddSingleton<IParticipantStore>(provider => inMemoryStore);
@@ -61,6 +63,7 @@ namespace CentOps.Api.Extensions
                 throw new ArgumentNullException(nameof(configurationSection));
             }
 
+            Trace.WriteLine("Using CosmosDb DataStore.");
             _ = services.AddSingleton(_ =>
             {
                 var databaseName = configurationSection["DatabaseName"];
