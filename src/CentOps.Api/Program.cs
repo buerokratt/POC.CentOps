@@ -11,8 +11,6 @@ namespace CentOps.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
             var services = builder.Services;
 
             _ = services
@@ -31,12 +29,9 @@ namespace CentOps.Api
                 _ = options.AddApiKeyOpenApiSecurity();
             });
 
-
             services.AddApiKeyAuthentication(builder.Configuration);
             services.AddAuthorizationPolicies();
-
-            var section = builder.Configuration.GetSection("CosmosDb");
-            services.AddCosmosDbServices(section);
+            services.AddDataStore(builder.Configuration);
 
             var app = builder.Build();
 

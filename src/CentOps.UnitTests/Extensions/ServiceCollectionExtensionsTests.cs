@@ -17,7 +17,7 @@ namespace CentOps.UnitTests.Extensions
         [Fact]
         public void ShouldAddDataStoreDependencies()
         {
-            services.AddDataStores();
+            services.AddInMemoryDataStores();
 
             var interfaces = services.Select(d => d.ServiceType);
 
