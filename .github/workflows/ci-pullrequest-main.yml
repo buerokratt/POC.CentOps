@@ -76,7 +76,7 @@ jobs:
         name: mutation-report
         path: src/StrykerOutput
 
-  PackageDeploy:
+  PublishPackage:
     runs-on: ubuntu-latest
     needs: BuildTest
 
