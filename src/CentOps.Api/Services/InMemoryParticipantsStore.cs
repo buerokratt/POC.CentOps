@@ -122,5 +122,22 @@ namespace CentOps.Api.Services
             var participant = _participants.Values.FirstOrDefault(p => p.ApiKey == apiKey);
             return Task.FromResult(participant);
         }
+
+        Task<IEnumerable<ParticipantDto>> IParticipantStore.GetAll(IEnumerable<ParticipantTypeDto> types, bool includeInactive)
+        {
+            var queryable = _participants.Values.AsEnumerable();
+
+            if (types != null && types.Any())
+            {
+                queryable = queryable.Where(p => types.Contains(p.Type));
+            }
+
+            if (includeInactive == false)
+            {
+                queryable = queryable.Where(p => p.Status == ParticipantStatusDto.Active);
+            }
+
+            return Task.FromResult(queryable.AsEnumerable());
+        }
     }
 }

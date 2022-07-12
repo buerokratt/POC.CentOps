@@ -10,7 +10,7 @@ namespace CentOps.Api.Models
     public class CreateUpdateParticipantModel
     {
         [Required]
-        [StringLength(50, MinimumLength = 5)]
+        [StringLength(50, MinimumLength = 4)]
         [JsonProperty(PropertyName = "name")]
         public string? Name { get; set; }
 
@@ -28,5 +28,9 @@ namespace CentOps.Api.Models
 
         [JsonProperty(PropertyName = "status")]
         public ParticipantStatus Status { get; set; }
+
+        [StringLength(50, MinimumLength = 12)]
+        [JsonProperty(PropertyName = "apiKey")]
+        public string? ApiKey { get; set; }
     }
 }

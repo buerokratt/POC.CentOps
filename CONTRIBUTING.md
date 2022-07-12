@@ -2,6 +2,12 @@
 
 ## Developer Setup For This Repository
 
+### Feature Toggles
+
+| Feature Toggle    | Purpose                       |  appSettings.json | yaml environment |
+|:------------------|:------------------------------| ------------------|--------|
+| UseInMemoryDataStore | Enables an In-memory data store which can be used for testing purposes only | "FeatureToggles" : { "UseInMemoryStore": true } | FEATURETOGGLES__USEINMEMORYSTORE=true
+
 ### Detect-Secrets Pre-commit Hook
 
 This repo uses the [Yelp detect-secrets](https://github.com/Yelp/detect-secrets) tool to scan commits and ensure they don't accidentally contain secrets which should never be persisted in source control.
