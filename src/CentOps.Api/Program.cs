@@ -1,4 +1,4 @@
-using CentOps.Api.Authentication.Extensions;
+﻿using CentOps.Api.Authentication.Extensions;
 using CentOps.Api.Extensions;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
