@@ -7,21 +7,10 @@ namespace CentOps.Api.Controllers
     [AllowAnonymous]
     public class VersionController : ControllerBase
     {
-        private readonly string _version;
-
-        public VersionController(IConfiguration configuration)
-        {
-            ArgumentNullException.ThrowIfNull(argument: configuration);
-
-            _version = configuration
-                .GetSection("Settings")
-                .GetValue<string>("Version");
-        }
-
         [HttpGet]
-        public Task<string> GetVersion()
+        public IActionResult GetVersion()
         {
-            return Task.FromResult(_version);
+            return Ok("Yes");
         }
     }
 }
