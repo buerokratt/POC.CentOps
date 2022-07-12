@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CentOps.Api.Controllers
 {
-    [Route("/version")]
+    [Route("version")]
+    [ApiController]
     [AllowAnonymous]
     public class VersionController : ControllerBase
     {
