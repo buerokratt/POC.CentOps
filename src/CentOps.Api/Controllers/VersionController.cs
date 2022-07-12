@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CentOps.Api.Controllers
 {
     [Route("/version")]
+    [AllowAnonymous]
     public class VersionController : ControllerBase
     {
         private readonly string _version;
