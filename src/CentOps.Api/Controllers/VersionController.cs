@@ -9,7 +9,9 @@ namespace CentOps.Api.Controllers
 
         public VersionController(IConfiguration configuration)
         {
-            _version = configuration!
+            ArgumentNullException.ThrowIfNull(argument: configuration);
+
+            _version = configuration
                 .GetSection("Settings")
                 .GetValue<string>("Version");
         }
