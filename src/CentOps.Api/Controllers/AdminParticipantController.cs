@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using CentOps.Api.Configuration;
+//using CentOps.Api.Configuration;
 using CentOps.Api.Models;
 using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
@@ -11,7 +11,8 @@ namespace CentOps.Api.Controllers
 {
     [Route("admin/participants")]
     [ApiController]
-    [Authorize(Policy = AuthConfig.AdminPolicy)]
+    //[Authorize(Policy = AuthConfig.AdminPolicy)]
+    [AllowAnonymous]
     public class AdminParticipantController : ControllerBase
     {
         private readonly IParticipantStore _store;
