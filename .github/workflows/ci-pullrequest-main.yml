@@ -87,10 +87,13 @@ jobs:
       uses: docker/setup-buildx-action@v2
     
     - name: Docker Build
-      run: docker image build -f src/CentOps.Api/Dockerfile --tag centops:pr${{ github.event.number }}-${{ github.sha }} ./src
+      run: |
+        DOCKER_TAG=ghcr.io/centops:pr${{ github.event.number }}-${{ github.sha }}
+        echo "DOCKER_TAG=${DOCKER_TAG}" >> $GITHUB_ENV
+        docker image build -f src/CentOps.Api/Dockerfile --tag ${DOCKER_TAG} ./src
       
     - name: Log in to GitHub container registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
     - name: Push Docker image to ghcr
-      run: docker push $DOCKER_TAG_SHA
+      run: docker push $DOCKER_TAG
