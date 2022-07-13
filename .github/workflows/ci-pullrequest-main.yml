@@ -87,11 +87,7 @@ jobs:
       uses: docker/setup-buildx-action@v2
     
     - name: Docker Build
-      run: |
-        $(echo '${{ github.sha }}' | cut -d- -f2) >> GITHUB_SHORTSHA
-        $(echo 'centops:pr${{ github.event.number }}-${GITHUB_SHORTSHA}' | cut -d- -f2) >> IMAGE_TAG
-        echo 'Setting IMAGE_TAG to "$IMAGE_TAG"'
-        docker image build -f src/CentOps.Api/Dockerfile --tag centops:${IMAGE_TAG} ./src
+      run: docker image build -f src/CentOps.Api/Dockerfile --tag centops:pr${{ github.event.number }}-${{ github.sha }} ./src
       
     - name: Log in to GitHub container registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
