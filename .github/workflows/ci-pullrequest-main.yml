@@ -88,8 +88,9 @@ jobs:
     
     - name: Docker Build
       run: |
-        $(echo ${{ github.sha }} | cut -d- -f2) >> GITHUB_SHORTSHA
-        $(echo centops:pr${{ github.event.number }}-${GITHUB_SHORTSHA} | cut -d- -f2) >> IMAGE_TAG
+        $(echo '${{ github.sha }}' | cut -d- -f2) >> GITHUB_SHORTSHA
+        $(echo 'centops:pr${{ github.event.number }}-${GITHUB_SHORTSHA}' | cut -d- -f2) >> IMAGE_TAG
+        echo 'Setting IMAGE_TAG to "$IMAGE_TAG"'
         docker image build -f src/CentOps.Api/Dockerfile --tag centops:${IMAGE_TAG} ./src
       
     - name: Log in to GitHub container registry
