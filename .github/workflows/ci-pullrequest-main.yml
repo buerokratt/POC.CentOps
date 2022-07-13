@@ -88,7 +88,7 @@ jobs:
     
     - name: Docker Build
       run: |
-        DOCKER_TAG=ghcr.io/centops:pr${{ github.event.number }}-${{ github.sha }}
+        DOCKER_TAG=ghcr.io/buerokratt/centops:pr${{ github.event.number }}-${{ github.sha }}
         echo "DOCKER_TAG=${DOCKER_TAG}" >> $GITHUB_ENV
         docker image build -f src/CentOps.Api/Dockerfile --tag ${DOCKER_TAG} ./src
       
