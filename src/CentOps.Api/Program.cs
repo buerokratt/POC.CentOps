@@ -36,11 +36,8 @@ namespace CentOps.Api
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                _ = app.UseSwagger();
-                _ = app.UseSwaggerUI();
-            }
+            _ = app.UseSwagger();
+            _ = app.UseSwaggerUI();
 
             _ = app.UseAuthentication();
             _ = app.UseAuthorization();
