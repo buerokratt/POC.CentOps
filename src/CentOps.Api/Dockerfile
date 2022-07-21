@@ -20,4 +20,6 @@ USER app
 
 WORKDIR /app
 COPY --from=build-env /app/out .
+ENV ASPNETCORE_URLS=http://+:80
+
 ENTRYPOINT ["dotnet", "CentOps.Api.dll"]
