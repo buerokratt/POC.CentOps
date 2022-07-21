@@ -1,0 +1,34 @@
+pk: participant::123
+id: 123
+name: nlib
+
+
+pk: participant::12423453245
+id: 234
+name: nlib
+status: deleted
+id: 234
+name: nlib
+status: active
+
+
+pk: participant::nlib
+id: 123
+name: nlib
+
+pk: participant::nlib2
+id: 123
+name: nlib2
+
+pk: participant::nlib2
+id: 123
+name: nlib2
+state: deleted
+id: 345
+name: nlib2
+state: active
+
+GET /admin/institution/nlib
+GET /admin/institution/nlib2
+GET /admin/institution/social
+GET /admin/institution/internal-affairs
