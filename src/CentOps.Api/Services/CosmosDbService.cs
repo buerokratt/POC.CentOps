@@ -1,4 +1,5 @@
-﻿using CentOps.Api.Services.ModelStore.Exceptions;
+﻿using CentOps.Api.Models;
+using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.Azure.Cosmos;
@@ -410,6 +411,40 @@ namespace CentOps.Api.Services
             }
 
             return results;
+        }
+
+        public async Task<ParticipantDto> UpdateState(string id, ParticipantState newState)
+        {
+            ArgumentNullException.ThrowIfNull(id);
+            ArgumentNullException.ThrowIfNull(newState);
+
+            var store = this as IParticipantStore;
+            var participant = await store.GetById(id).ConfigureAwait(false);
+
+            if (participant == null)
+            {
+                throw new ModelNotFoundException<ParticipantDto>(id);
+            }
+
+            var validStateChanges = new List<ParticipantState>() { ParticipantState.Online, ParticipantState.Offline };
+            if (!validStateChanges.Contains(newState))
+            {
+                throw new ArgumentException($"Invalid new state value: {newState}");
+            }
+
+            if (participant.State == ParticipantState.Deleted)
+            {
+                throw new InvalidOperationException($"Participant has status {ParticipantState.Deleted}");
+            }
+
+            ItemResponse<ParticipantDto> response = await _container.PatchItemAsync<ParticipantDto>(
+                id: id,
+                partitionKey: new PartitionKey($"participant::{id}"),
+                patchOperations: new[] {
+                PatchOperation.Replace($"/{nameof(participant.State)}", newState)
+                }).ConfigureAwait(false);
+
+            return response.Resource;
         }
     }
 }

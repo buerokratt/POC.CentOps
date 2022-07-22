@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using CentOps.Api.Configuration;
 using CentOps.Api.Models;
+using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
+using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,6 +46,27 @@ namespace CentOps.Api.Controllers
             return participant != null
                 ? Ok(_mapper.Map<ParticipantResponseModel>(participant))
                 : NotFound(id);
+        }
+
+        [HttpPut("state/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ParticipantResponseModel>> Put(string id, [FromBody] ParticipantState newState)
+        {
+            try
+            {
+                var response = await _store.UpdateState(id, newState).ConfigureAwait(false);
+                return Ok(_mapper.Map<ParticipantStateReponseModel>(response));
+            }
+            catch (ModelNotFoundException<ParticipantDto> ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex) when (ex is ModelNotFoundException<ParticipantDto> or ArgumentException or ArgumentNullException)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

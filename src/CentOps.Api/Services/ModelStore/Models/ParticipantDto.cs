@@ -1,4 +1,5 @@
-﻿using CentOps.Api.Services.ModelStore.Interfaces;
+﻿using CentOps.Api.Models;
+using CentOps.Api.Services.ModelStore.Interfaces;
 using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
 
@@ -31,5 +32,8 @@ namespace CentOps.Api.Services.ModelStore.Models
 
         [JsonProperty(PropertyName = "apiKey")]
         public string? ApiKey { get; set; }
+
+        [JsonProperty(PropertyName = "state")]
+        public ParticipantState State { get; set; }
     }
 }
