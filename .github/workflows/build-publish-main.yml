@@ -29,7 +29,7 @@ jobs:
     - name: Scan for vulnerabilities
       uses: crazy-max/ghaction-container-scan@v1
       with:
-        image: user/app:latest
+        image: $DOCKER_TAG_SHA
         annotations: true
 
     - name: Install cosign
