@@ -146,4 +146,10 @@ jobs:
       uses: docker/setup-buildx-action@v2
     
     - name: Docker Build
-      run: docker image build -f src/CentOps.Api/Dockerfile ./src
+      run: docker image build -f src/CentOps.Api/Dockerfile ./src -t centOps
+
+    - name: Scan for vulnerabilities
+      uses: crazy-max/ghaction-container-scan@v1
+      with:
+        image: $DOCKER_TAG_SHA
+        annotations: true
