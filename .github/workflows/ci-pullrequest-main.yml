@@ -146,7 +146,7 @@ jobs:
       uses: docker/setup-buildx-action@v2
     
     - name: Docker Build
-      run: docker image build -f src/CentOps.Api/Dockerfile ./src -t centOps
+      run: docker image build -f src/CentOps.Api/Dockerfile ./src -t centops
 
     - name: Scan for vulnerabilities
       uses: crazy-max/ghaction-container-scan@v1
