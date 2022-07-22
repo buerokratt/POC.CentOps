@@ -1,5 +1,4 @@
-﻿using CentOps.Api.Models;
-using CentOps.Api.Services.ModelStore.Interfaces;
+﻿using CentOps.Api.Services.ModelStore.Interfaces;
 using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
 

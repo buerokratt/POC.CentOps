@@ -1,5 +1,4 @@
-﻿using AutoMapper.Internal.Mappers;
-using CentOps.Api.Services;
+﻿using CentOps.Api.Services;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.Azure.Cosmos;
