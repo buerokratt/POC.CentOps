@@ -21,11 +21,12 @@ namespace CentOps.Api.Services
 
             ApiUser? result = null;
 
-            if (user != null && user.Status != ParticipantStatusDto.Disabled)
+            if (user != null && user.Status != ParticipantStatusDto.Deleted)
             {
                 result = new ApiUser(new[]
                 {
                     new Claim("id", user.Id!),
+                    new Claim("pk", user.PartitionKey!),
                     new Claim("name", user.Name!),
                     new Claim("institutionId", user.InstitutionId!),
                     new Claim("status", user.Status.ToString())

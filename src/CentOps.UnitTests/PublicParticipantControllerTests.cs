@@ -9,6 +9,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Security.Claims;
 using System.Text;
 
 namespace CentOps.UnitTests
@@ -19,30 +20,24 @@ namespace CentOps.UnitTests
 
         private readonly ParticipantDto[] _participantDtos = new[]
             {
-                new ParticipantDto
-                {
-                    Id = "1",
-                    Name = "Test1",
-                    InstitutionId = "1",
-                    Type = ParticipantTypeDto.Chatbot,
-                    Status = ParticipantStatusDto.Active
-                },
-                new ParticipantDto
-                {
-                    Id = "2",
-                    Name = "Test2",
-                    InstitutionId = "2",
-                    Type = ParticipantTypeDto.Chatbot,
-                    Status = ParticipantStatusDto.Disabled
-                },
-                new ParticipantDto
-                {
-                    Id = "3",
-                    Name = "TestDmr1",
-                    InstitutionId = "1",
-                    Type = ParticipantTypeDto.Dmr,
-                    Status = ParticipantStatusDto.Active,
-                }
+                DtoBuilder.GetParticipant(
+                    id: "1",
+                    name: "Test1",
+                    institutionId: "1",
+                    type: ParticipantTypeDto.Chatbot,
+                    status: ParticipantStatusDto.Active),
+                DtoBuilder.GetParticipant(
+                    id: "2",
+                    name: "Test2",
+                    institutionId: "2",
+                    type: ParticipantTypeDto.Chatbot,
+                    status: ParticipantStatusDto.Disabled),
+                DtoBuilder.GetParticipant(
+                    id: "3",
+                    name: "TestDmr1",
+                    institutionId: "1",
+                    type: ParticipantTypeDto.Dmr,
+                    status: ParticipantStatusDto.Active)
             };
 
         private readonly ParticipantResponseModel[] _participantResponseModels = new[]
@@ -52,6 +47,7 @@ namespace CentOps.UnitTests
                     Id = "1",
                     Name = "Test1",
                     InstitutionId = "1",
+                    Host = "https://host:8080",
                     Type = ParticipantType.Chatbot,
                     Status = ParticipantStatus.Active
                 },
@@ -60,6 +56,7 @@ namespace CentOps.UnitTests
                     Id = "2",
                     Name = "Test2",
                     InstitutionId = "2",
+                    Host = "https://host:8080",
                     Type = ParticipantType.Chatbot,
                     Status = ParticipantStatus.Disabled
                 },
@@ -68,6 +65,7 @@ namespace CentOps.UnitTests
                     Id = "3",
                     Name = "TestDmr1",
                     InstitutionId = "1",
+                    Host = "https://host:8080",
                     Type = ParticipantType.Dmr,
                     Status = ParticipantStatus.Active
                 },
@@ -92,14 +90,15 @@ namespace CentOps.UnitTests
             _ = mockParticipantStore
                .Setup(m => m.GetAll(It.Is<IEnumerable<ParticipantTypeDto>>(t => t.Any() == false), false))
                .ReturnsAsync(
-                _participantDtos
-                    .Where(p => p.Status == ParticipantStatusDto.Active)
-                    .AsEnumerable());
+                    _participantDtos
+                        .Where(p => p.Status == ParticipantStatusDto.Active)
+                        .AsEnumerable());
 
             var sut = CreatePublicParticipantController(
                 mockParticipantStore.Object,
                 _mapper.CreateMapper(),
-                string.Empty);
+                string.Empty,
+                _participantDtos[1]);
 
             // Act
             var response = await sut.Get().ConfigureAwait(false);
@@ -125,7 +124,8 @@ namespace CentOps.UnitTests
             var sut = CreatePublicParticipantController(
                 mockParticipantStore.Object,
                 _mapper.CreateMapper(),
-                "?type=Dmr");
+                "?type=Dmr",
+                _participantDtos[0]);
 
             // Act
             var response = await sut.Get().ConfigureAwait(false);
@@ -142,15 +142,19 @@ namespace CentOps.UnitTests
         public async Task GetReturnsASpecificParticipant()
         {
             // Arrange
+            var participant = _participantDtos[0];
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.GetById(_participantDtos[0].Id!)).ReturnsAsync(_participantDtos[0]);
+            _ = mockParticipantStore.Setup(m => m.GetById(participant.Id!)).ReturnsAsync(_participantDtos[0]);
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = CreatePublicParticipantController(
+                mockParticipantStore.Object,
+                _mapper.CreateMapper(),
+                participant: participant);
 
             // Act
-            var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);
+            var response = await sut.Get(participant.Id!).ConfigureAwait(false);
 
             // Assert
             var okay = Assert.IsType<OkObjectResult>(response.Result);
@@ -162,12 +166,17 @@ namespace CentOps.UnitTests
         public async Task GetReturns404ForParticipantNotFound()
         {
             // Arrange
+            var participant = _participantDtos[0];
+
             var mockParticipantStore = new Mock<IParticipantStore>();
-            _ = mockParticipantStore.Setup(m => m.GetById(_participantDtos[0].Id!)).ReturnsAsync((ParticipantDto)null);
+            _ = mockParticipantStore.Setup(m => m.GetById(participant.Id!)).ReturnsAsync((ParticipantDto)null);
 
             var expectedParticipant = new ParticipantResponseModel { Id = "1", Name = "Test1", Status = ParticipantStatus.Active };
 
-            var sut = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var sut = CreatePublicParticipantController(
+                mockParticipantStore.Object,
+                _mapper.CreateMapper(),
+                participant: participant);
 
             // Act
             var response = await sut.Get(_participantDtos[0].Id!).ConfigureAwait(false);
@@ -180,35 +189,42 @@ namespace CentOps.UnitTests
         public async Task PutParticipantStateReturnsParticipantWithUpdatedState()
         {
             var id = Guid.NewGuid().ToString();
-            var participant = CreateParticipant(id, ParticipantState.Online);
-            var updatedParticipant = CreateParticipant(id, ParticipantState.Offline);
+            var participant = DtoBuilder.GetParticipant(id, status: ParticipantStatusDto.Active);
+            var updatedParticipant = DtoBuilder.GetParticipant(id, status: ParticipantStatusDto.Disabled);
 
             Mock<IParticipantStore> mockParticipantStore = new();
-            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, ParticipantState.Offline)).ReturnsAsync(updatedParticipant);
+            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled)).ReturnsAsync(updatedParticipant);
 
+            var controller = CreatePublicParticipantController(
+                mockParticipantStore.Object,
+                _mapper.CreateMapper(),
+                participant: participant);
 
-            var controller = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
-            var response = await controller.Put(participant.Id, ParticipantState.Offline).ConfigureAwait(false);
+            var response = await controller.Put(ParticipantStatus.Disabled).ConfigureAwait(false);
 
             var okay = Assert.IsType<OkObjectResult>(response.Result);
             Assert.Equal(okay.StatusCode, StatusCodes.Status200OK);
             var value = Assert.IsType<ParticipantStateReponseModel>(okay.Value);
             Assert.NotNull(value);
             Assert.Equal(value.Id, updatedParticipant.Id);
-            Assert.Equal(value.State, updatedParticipant.State);
+            Assert.Equal(value.Status.ToString(), updatedParticipant.Status.ToString());
         }
 
         [Fact]
         public async Task PutParticipantStateReturns404NotFound()
         {
             var id = Guid.NewGuid().ToString();
-            var participant = CreateParticipant(id, ParticipantState.Online);
+            var participant = DtoBuilder.GetParticipant(id, status: ParticipantStatusDto.Active);
 
             Mock<IParticipantStore> mockParticipantStore = new();
-            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, ParticipantState.Offline)).ThrowsAsync(new ModelNotFoundException<ParticipantDto>());
+            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled)).ThrowsAsync(new ModelNotFoundException<ParticipantDto>());
 
-            var controller = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
-            var response = await controller.Put(participant.Id, ParticipantState.Offline).ConfigureAwait(false);
+            var controller = CreatePublicParticipantController(
+                mockParticipantStore.Object,
+                _mapper.CreateMapper(),
+                participant: participant);
+
+            var response = await controller.Put(ParticipantStatus.Disabled).ConfigureAwait(false);
 
             var notFound = Assert.IsType<NotFoundObjectResult>(response.Result);
             Assert.Equal(notFound.StatusCode, StatusCodes.Status404NotFound);
@@ -218,41 +234,53 @@ namespace CentOps.UnitTests
         public async Task PutParticipantStateReturns400BadRequest()
         {
             var id = Guid.NewGuid().ToString();
-            var participant = CreateParticipant(id, ParticipantState.Online);
+            var participant = DtoBuilder.GetParticipant(id: id, status: ParticipantStatusDto.Active);
 
             Mock<IParticipantStore> mockParticipantStore = new();
-            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, ParticipantState.Deleted)).ThrowsAsync(new ArgumentException());
+            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, participant.PartitionKey, ParticipantStatusDto.Deleted)).ThrowsAsync(new ArgumentException());
 
-            var controller = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
-            var response = await controller.Put(participant.Id, ParticipantState.Deleted).ConfigureAwait(false);
+            var controller = CreatePublicParticipantController(
+                mockParticipantStore.Object,
+                _mapper.CreateMapper(),
+                participant: participant);
+
+            var response = await controller.Put(ParticipantStatus.Deleted).ConfigureAwait(false);
 
             var badRequest = Assert.IsType<BadRequestObjectResult>(response.Result);
             Assert.Equal(badRequest.StatusCode, StatusCodes.Status400BadRequest);
         }
 
-        private static ParticipantDto CreateParticipant(string id, ParticipantState state)
-        {
-            return new ParticipantDto { Id = id, State = state };
-        }
-
         private static PublicParticipantController CreatePublicParticipantController(
            IParticipantStore store,
            IMapper mapper,
-           string queryString = "")
+           string queryString = "",
+           ParticipantDto participant = null)
         {
             return new PublicParticipantController(store, mapper)
             {
-                ControllerContext = new ControllerContext() { HttpContext = GetContext(queryString) }
+                ControllerContext = new ControllerContext() { HttpContext = GetContext(queryString, participant) }
             };
         }
 
-        private static DefaultHttpContext GetContext(string queryString)
+        private static DefaultHttpContext GetContext(string queryString, ParticipantDto participant)
         {
             var httpContext = new DefaultHttpContext();
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(string.Empty));
             httpContext.Request.Body = stream;
             httpContext.Request.ContentLength = stream.Length;
             httpContext.Request.QueryString = new QueryString(queryString);
+
+            var claims = new[]
+            {
+                new Claim("id", participant.Id!),
+                new Claim("pk", participant.PartitionKey!),
+                new Claim("name", participant.Name!),
+                new Claim("institutionId", participant.InstitutionId!),
+                new Claim("status", participant.Status.ToString())
+            };
+            var identity = new ClaimsIdentity(claims);
+            httpContext.User.AddIdentity(identity);
+
             return httpContext;
         }
     }

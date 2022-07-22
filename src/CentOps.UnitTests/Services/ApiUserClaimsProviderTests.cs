@@ -48,35 +48,39 @@ namespace CentOps.UnitTests.Services
             _ = apiUser.Should().NotBeNull();
 
             var claims = apiUser.Claims;
-            _ = claims.Should().HaveCount(4);
+            _ = claims.Should().HaveCount(5);
 
             var idClaim = claims.ElementAt(0);
             _ = idClaim.Type.Should().Be("id");
             _ = idClaim.Value.Should().Be("123");
 
-            var nameClaim = claims.ElementAt(1);
+            var partitionKeyClaim = claims.ElementAt(1);
+            _ = partitionKeyClaim.Type.Should().Be("pk");
+            _ = partitionKeyClaim.Value.Should().Be("pk:123");
+
+            var nameClaim = claims.ElementAt(2);
             _ = nameClaim.Type.Should().Be("name");
             _ = nameClaim.Value.Should().Be("health");
 
-            var institutionClaim = claims.ElementAt(2);
+            var institutionClaim = claims.ElementAt(3);
             _ = institutionClaim.Type.Should().Be("institutionId");
             _ = institutionClaim.Value.Should().Be("inst:765");
 
-            var statusClaim = claims.ElementAt(3);
+            var statusClaim = claims.ElementAt(4);
             _ = statusClaim.Type.Should().Be("status");
             _ = statusClaim.Value.Should().Be(ParticipantStatusDto.Active.ToString());
         }
 
         [Fact]
-        public async Task ShouldReturnNullIfParticipantIsDisabled()
+        public async Task ShouldReturnNullIfParticipantIsDeleted()
         {
             // Arrange
-            var user1 = SetupApiUser(id: "123", name: "health", status: ParticipantStatusDto.Disabled, apiKey: "disabled");
+            var user1 = SetupApiUser(id: "123", name: "health", status: ParticipantStatusDto.Deleted, apiKey: "deleted");
             var user2 = SetupApiUser(id: "234", name: "social", apiKey: "qazwsx");
             SetupParticipantStore(user1, user2);
 
             // Act
-            var apiUser = await provider.GetUserClaimsAsync("disabled").ConfigureAwait(false);
+            var apiUser = await provider.GetUserClaimsAsync("deleted").ConfigureAwait(false);
 
             // Assert
             _ = apiUser.Should().BeNull();
@@ -101,9 +105,12 @@ namespace CentOps.UnitTests.Services
             string apiKey = "xyz",
             ParticipantStatusDto status = ParticipantStatusDto.Active)
         {
+            id ??= Guid.NewGuid().ToString();
+
             return new ParticipantDto
             {
-                Id = id ?? Guid.NewGuid().ToString(),
+                Id = id,
+                PartitionKey = $"pk:{id}",
                 Name = name,
                 InstitutionId = institutionId ?? Guid.NewGuid().ToString(),
                 ApiKey = apiKey,

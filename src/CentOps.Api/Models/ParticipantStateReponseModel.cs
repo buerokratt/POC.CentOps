@@ -3,6 +3,6 @@
     public class ParticipantStateReponseModel
     {
         public string? Id { get; set; }
-        public ParticipantState State { get; set; }
+        public ParticipantStatus Status { get; set; }
     }
 }

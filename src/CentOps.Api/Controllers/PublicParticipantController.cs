@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CentOps.Api.Configuration;
+using CentOps.Api.Extensions;
 using CentOps.Api.Models;
 using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
@@ -48,16 +49,21 @@ namespace CentOps.Api.Controllers
                 : NotFound(id);
         }
 
-        [HttpPut("state/{id}")]
+        [HttpPut("my/state")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ParticipantResponseModel>> Put(string id, [FromBody] ParticipantState newState)
+        public async Task<ActionResult<ParticipantResponseModel>> Put([FromBody] ParticipantStatus newStatus)
         {
             try
             {
-                var response = await _store.UpdateState(id, newState).ConfigureAwait(false);
-                return Ok(_mapper.Map<ParticipantStateReponseModel>(response));
+                (string id, string partitionKey) = HttpContext.GetApiUser();
+                var status = _mapper.Map<ParticipantStatusDto>(newStatus);
+
+                var participant = await _store.UpdateState(id, partitionKey, status).ConfigureAwait(false);
+
+                var response = _mapper.Map<ParticipantStateReponseModel>(participant);
+                return Ok(response);
             }
             catch (ModelNotFoundException<ParticipantDto> ex)
             {

@@ -32,8 +32,5 @@ namespace CentOps.Api.Services.ModelStore.Models
 
         [JsonProperty(PropertyName = "apiKey")]
         public string? ApiKey { get; set; }
-
-        [JsonProperty(PropertyName = "state")]
-        public ParticipantState State { get; set; }
     }
 }

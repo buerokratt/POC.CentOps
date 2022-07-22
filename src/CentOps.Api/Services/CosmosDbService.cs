@@ -1,5 +1,4 @@
-﻿using CentOps.Api.Models;
-using CentOps.Api.Services.ModelStore.Exceptions;
+﻿using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using Microsoft.Azure.Cosmos;
@@ -318,7 +317,7 @@ namespace CentOps.Api.Services
                         AND c.apiKey = @apiKey
                         AND c.status != @status",
                 ("@apiKey", apiKey),
-                ("@status", ParticipantStatusDto.Disabled));
+                ("@status", ParticipantStatusDto.Deleted));
 
             var results = await RunQueryAsync<ParticipantDto>(query).ConfigureAwait(false);
             return results?.FirstOrDefault();
@@ -413,35 +412,25 @@ namespace CentOps.Api.Services
             return results;
         }
 
-        public async Task<ParticipantDto> UpdateState(string id, ParticipantState newState)
+        public async Task<ParticipantDto> UpdateState(string id, string partitionKey, ParticipantStatusDto newStatus)
         {
             ArgumentNullException.ThrowIfNull(id);
-            ArgumentNullException.ThrowIfNull(newState);
 
-            var store = this as IParticipantStore;
-            var participant = await store.GetById(id).ConfigureAwait(false);
-
-            if (participant == null)
+            if (newStatus is not ParticipantStatusDto.Active and not ParticipantStatusDto.Disabled)
             {
-                throw new ModelNotFoundException<ParticipantDto>(id);
+                throw new ArgumentException($"Invalid new state value: {newStatus}");
             }
 
-            var validStateChanges = new List<ParticipantState>() { ParticipantState.Online, ParticipantState.Offline };
-            if (!validStateChanges.Contains(newState))
-            {
-                throw new ArgumentException($"Invalid new state value: {newState}");
-            }
+            var patch = new[] { PatchOperation.Replace("/status", newStatus) };
 
-            if (participant.State == ParticipantState.Deleted)
-            {
-                throw new InvalidOperationException($"Participant has status {ParticipantState.Deleted}");
-            }
+            var response = await _container.PatchItemAsync<ParticipantDto>(
+                id: id,
+                partitionKey: new PartitionKey(partitionKey),
+                patchOperations: patch).ConfigureAwait(false);
 
-            participant.State = newState;
-
-            var response = await store.Update(participant).ConfigureAwait(false);
-
-            return response;
+            return response.StatusCode == HttpStatusCode.NotFound
+                ? throw new ModelNotFoundException<ParticipantDto>(id)
+                : response.Resource;
         }
     }
 }

@@ -17,7 +17,5 @@ namespace CentOps.Api.Models
         public ParticipantType Type { get; set; }
 
         public ParticipantStatus Status { get; set; }
-
-        public ParticipantState State { get; set; }
     }
 }
