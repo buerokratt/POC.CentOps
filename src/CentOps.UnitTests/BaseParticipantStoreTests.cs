@@ -1,4 +1,5 @@
-﻿using CentOps.Api.Services.ModelStore.Exceptions;
+﻿using CentOps.Api.Models;
+using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using FluentAssertions;
@@ -54,6 +55,7 @@ namespace CentOps.UnitTests
             Assert.Equal(participant.Status, createdParticipant.Status);
             Assert.Equal(participant.Type, createdParticipant.Type);
             Assert.Equal(participant.InstitutionId, createdParticipant.InstitutionId);
+            Assert.Equal(participant.State, createdParticipant.State);
         }
 
         [Fact]
@@ -168,6 +170,7 @@ namespace CentOps.UnitTests
             Assert.Equal(storedItem?.Status, createdParticipant.Status);
             Assert.Equal(storedItem?.Type, createdParticipant.Type);
             Assert.Equal(storedItem?.InstitutionId, createdParticipant.InstitutionId);
+            Assert.Equal(storedItem?.State, createdParticipant.State);
         }
 
         [Fact]
@@ -490,6 +493,60 @@ namespace CentOps.UnitTests
                 .ConfigureAwait(false);
         }
 
+        [Fact]
+        public async Task UpdateParticipantStateFromOfflineToOnlineShouldReturnParticipant()
+        {
+            var participant = GetParticipant(state: ParticipantState.Offline);
+            var sut = GetParticipantStore(participant);
+
+            var updatedParticipant = await sut.UpdateState(participant.Id, ParticipantState.Online).ConfigureAwait(false);
+
+            Assert.NotNull(updatedParticipant);
+            Assert.Equal(participant.Id, updatedParticipant.Id);
+            Assert.Equal(ParticipantState.Online, updatedParticipant.State);
+        }
+
+        [Fact]
+        public async Task UpdateParticipantStateFromOnlineToOfflineShouldReturnParticipant()
+        {
+            var participant = GetParticipant(state: ParticipantState.Online);
+            var sut = GetParticipantStore(participant);
+
+            var updatedParticipant = await sut.UpdateState(participant.Id, ParticipantState.Offline).ConfigureAwait(false);
+
+            Assert.NotNull(updatedParticipant);
+            Assert.Equal(participant.Id, updatedParticipant.Id);
+            Assert.Equal(ParticipantState.Offline, updatedParticipant.State);
+        }
+
+        [Fact]
+        public async Task UpdateParticipantStateShouldFailWithDeletedState()
+        {
+            var participant = GetParticipant(state: ParticipantState.Deleted);
+            var sut = GetParticipantStore(participant);
+
+            _ = await Assert.ThrowsAnyAsync<InvalidOperationException>(() => sut.UpdateState(participant.Id, ParticipantState.Online)).ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task UpdateParticipantStateShouldFailWithInvalidNewState()
+        {
+            var participant = GetParticipant(state: ParticipantState.Online);
+            var sut = GetParticipantStore(participant);
+
+            _ = await Assert.ThrowsAnyAsync<ArgumentException>(() => sut.UpdateState(participant.Id, ParticipantState.Deleted)).ConfigureAwait(false);
+        }
+
+        [Fact]
+        public async Task UpdateParticipantStateShouldFailWithNonExistingId()
+        {
+            var participant = GetParticipant();
+            var sut = GetParticipantStore(participant);
+            var nonExistingId = "543";
+
+            _ = await Assert.ThrowsAnyAsync<ModelNotFoundException<ParticipantDto>>(() => sut.UpdateState(nonExistingId, ParticipantState.Offline)).ConfigureAwait(false);
+        }
+
         private static InstitutionDto GetInstitution(
             string id = "1234",
             string name = "DefaultInstitution",
@@ -509,7 +566,8 @@ namespace CentOps.UnitTests
             string name = "Test",
             string host = "https://host:8080",
             ParticipantStatusDto status = ParticipantStatusDto.Active,
-            ParticipantTypeDto type = ParticipantTypeDto.Chatbot)
+            ParticipantTypeDto type = ParticipantTypeDto.Chatbot,
+            ParticipantState state = ParticipantState.Online)
         {
             var institution = GetInstitution();
             return new ParticipantDto
@@ -521,7 +579,8 @@ namespace CentOps.UnitTests
                 Status = status,
                 Type = type,
                 InstitutionId = institution.Id,
-                ApiKey = $"supersecret_{id}"
+                ApiKey = $"supersecret_{id}",
+                State = state
             };
         }
     }

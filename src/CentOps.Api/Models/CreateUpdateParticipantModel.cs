@@ -32,5 +32,8 @@ namespace CentOps.Api.Models
         [StringLength(50, MinimumLength = 12)]
         [JsonProperty(PropertyName = "apiKey")]
         public string? ApiKey { get; set; }
+
+        [JsonProperty(PropertyName = "state")]
+        public ParticipantState State { get; set; }
     }
 }

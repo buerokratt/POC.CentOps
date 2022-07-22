@@ -48,6 +48,8 @@ namespace CentOps.Api
             _ = app.UseAuthorization();
 
             _ = app.MapControllers();
+            _ = app.UseDeveloperExceptionPage();
+
 
             app.Run();
         }

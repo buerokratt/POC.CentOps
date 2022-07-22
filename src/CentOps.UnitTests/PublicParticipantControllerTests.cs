@@ -2,6 +2,7 @@
 using CentOps.Api;
 using CentOps.Api.Controllers;
 using CentOps.Api.Models;
+using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using FluentAssertions;
@@ -173,6 +174,65 @@ namespace CentOps.UnitTests
 
             // Assert
             _ = Assert.IsType<NotFoundObjectResult>(response.Result);
+        }
+
+        [Fact]
+        public async Task PutParticipantStateReturnsParticipantWithUpdatedState()
+        {
+            var id = Guid.NewGuid().ToString();
+            var participant = CreateParticipant(id, ParticipantState.Online);
+            var updatedParticipant = CreateParticipant(id, ParticipantState.Offline);
+
+            Mock<IParticipantStore> mockParticipantStore = new();
+            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, ParticipantState.Offline)).ReturnsAsync(updatedParticipant);
+
+
+            var controller = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var response = await controller.Put(participant.Id, ParticipantState.Offline).ConfigureAwait(false);
+
+            var okay = Assert.IsType<OkObjectResult>(response.Result);
+            Assert.Equal(okay.StatusCode, StatusCodes.Status200OK);
+            var value = Assert.IsType<ParticipantStateReponseModel>(okay.Value);
+            Assert.NotNull(value);
+            Assert.Equal(value.Id, updatedParticipant.Id);
+            Assert.Equal(value.State, updatedParticipant.State);
+        }
+
+        [Fact]
+        public async Task PutParticipantStateReturns404NotFound()
+        {
+            var id = Guid.NewGuid().ToString();
+            var participant = CreateParticipant(id, ParticipantState.Online);
+
+            Mock<IParticipantStore> mockParticipantStore = new();
+            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, ParticipantState.Offline)).ThrowsAsync(new ModelNotFoundException<ParticipantDto>());
+
+            var controller = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var response = await controller.Put(participant.Id, ParticipantState.Offline).ConfigureAwait(false);
+
+            var notFound = Assert.IsType<NotFoundObjectResult>(response.Result);
+            Assert.Equal(notFound.StatusCode, StatusCodes.Status404NotFound);
+        }
+
+        [Fact]
+        public async Task PutParticipantStateReturns400BadRequest()
+        {
+            var id = Guid.NewGuid().ToString();
+            var participant = CreateParticipant(id, ParticipantState.Online);
+
+            Mock<IParticipantStore> mockParticipantStore = new();
+            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, ParticipantState.Deleted)).ThrowsAsync(new ArgumentException());
+
+            var controller = CreatePublicParticipantController(mockParticipantStore.Object, _mapper.CreateMapper());
+            var response = await controller.Put(participant.Id, ParticipantState.Deleted).ConfigureAwait(false);
+
+            var badRequest = Assert.IsType<BadRequestObjectResult>(response.Result);
+            Assert.Equal(badRequest.StatusCode, StatusCodes.Status400BadRequest);
+        }
+
+        private static ParticipantDto CreateParticipant(string id, ParticipantState state)
+        {
+            return new ParticipantDto { Id = id, State = state };
         }
 
         private static PublicParticipantController CreatePublicParticipantController(

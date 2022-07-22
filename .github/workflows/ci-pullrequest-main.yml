@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  BuildUnitTest:
+  BuildTest:
     runs-on: ubuntu-latest
 
     steps:
@@ -75,69 +75,10 @@ jobs:
       with:
         name: mutation-report
         path: src/StrykerOutput
-        
-  IntegrationTest:
-    runs-on: ubuntu-latest   
-    needs: BuildUnitTest
-
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
-        
-    - name: Checkout Test repo
-      uses: actions/checkout@v3
-      with:
-        repository: buerokratt/Tests
-        path: Tests
-        
-    - name: Checkout Mock Classifier repo
-      uses: actions/checkout@v3
-      with:
-        repository: buerokratt/Mock-Classifier
-        path: Mock-Classifier
-        
-    - name: Checkout DMR repo
-      uses: actions/checkout@v3
-      with:
-        repository: buerokratt/DMR
-        path: DMR
-        
-    - name: Checkout Mock Bot repo
-      uses: actions/checkout@v3
-      with:
-        repository: buerokratt/Mock-Bot
-        path: Mock-Bot
-      
-    - name: Create Docker network bridge
-      run: docker network create -d bridge my-network
-      
-    - name: Run Docker Compose Up to start containers
-      run: docker compose --file Tests/docker-compose.yml up --build --detach
-
-    - name: Restore dependencies for Test repo
-      run: dotnet restore Tests/src/Tests.IntegrationTests/*.csproj
-      
-    - name: Build Test repo
-      run: dotnet build Tests/src/Tests.IntegrationTests/*.csproj --no-restore
-       
-    - name: Test Test repo
-      run: dotnet test Tests/src/Tests.IntegrationTests/*.csproj --no-build
-      
-    - name: Dump Docker Logs
-      if: always()
-      uses: jwalton/gh-docker-logs@a8cb5301950dd4d2b86619cd487b3b281526b178
-      
-    - name: Run Docker Compose Down to stop containers
-      if: always()
-      run: docker compose --file Tests/docker-compose.yml down
 
   PackageDeploy:
     runs-on: ubuntu-latest
-    needs: IntegrationTest
+    needs: BuildTest
 
     steps:
     - uses: actions/checkout@v3

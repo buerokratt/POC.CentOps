@@ -1,4 +1,5 @@
-﻿using CentOps.Api.Services.ModelStore.Exceptions;
+﻿using CentOps.Api.Models;
+using CentOps.Api.Services.ModelStore.Exceptions;
 using CentOps.Api.Services.ModelStore.Interfaces;
 using CentOps.Api.Services.ModelStore.Models;
 using System.Collections.Concurrent;
@@ -138,6 +139,33 @@ namespace CentOps.Api.Services
             }
 
             return Task.FromResult(queryable.AsEnumerable());
+        }
+
+        public Task<ParticipantDto> UpdateState(string id, ParticipantState newState)
+        {
+            ArgumentNullException.ThrowIfNull(id);
+            ArgumentNullException.ThrowIfNull(newState);
+
+            if (!_participants.TryGetValue(id, out var participant))
+            {
+                throw new ModelNotFoundException<ParticipantDto>(id);
+            }
+
+            var validStateChanges = new List<ParticipantState>() { ParticipantState.Online, ParticipantState.Offline };
+            if (!validStateChanges.Contains(newState))
+            {
+                throw new ArgumentException($"Invalid new state value: {newState}");
+            }
+
+            if (participant.State == ParticipantState.Deleted)
+            {
+                throw new InvalidOperationException($"Participant has status {ParticipantState.Deleted}");
+            }
+
+            participant.State = newState;
+
+            return Task.FromResult(participant);
+
         }
     }
 }
