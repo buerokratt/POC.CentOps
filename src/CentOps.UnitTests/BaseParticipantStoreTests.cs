@@ -496,8 +496,13 @@ namespace CentOps.UnitTests
         [Fact]
         public async Task UpdateParticipantStateFromOfflineToOnlineShouldReturnParticipant()
         {
-            var participant = GetParticipant(state: ParticipantState.Offline);
+            var institution = GetInstitution();
+            _ = GetInstitutionStore(institution);
+
+            var participant = GetParticipant();
             var sut = GetParticipantStore(participant);
+
+            SetupParticipantQuery(m => m.Id == participant.Id && m.Name == "Test2");
 
             var updatedParticipant = await sut.UpdateState(participant.Id, ParticipantState.Online).ConfigureAwait(false);
 
@@ -509,8 +514,13 @@ namespace CentOps.UnitTests
         [Fact]
         public async Task UpdateParticipantStateFromOnlineToOfflineShouldReturnParticipant()
         {
-            var participant = GetParticipant(state: ParticipantState.Online);
+            var institution = GetInstitution();
+            _ = GetInstitutionStore(institution);
+
+            var participant = GetParticipant(name: "test12345", state: ParticipantState.Online);
             var sut = GetParticipantStore(participant);
+
+            SetupParticipantQuery(m => m.Id == participant.Id && m.Name == "Test2");
 
             var updatedParticipant = await sut.UpdateState(participant.Id, ParticipantState.Offline).ConfigureAwait(false);
 
@@ -522,6 +532,9 @@ namespace CentOps.UnitTests
         [Fact]
         public async Task UpdateParticipantStateShouldFailWithDeletedState()
         {
+            var institution = GetInstitution();
+            _ = GetInstitutionStore(institution);
+
             var participant = GetParticipant(state: ParticipantState.Deleted);
             var sut = GetParticipantStore(participant);
 
@@ -531,6 +544,9 @@ namespace CentOps.UnitTests
         [Fact]
         public async Task UpdateParticipantStateShouldFailWithInvalidNewState()
         {
+            var institution = GetInstitution();
+            _ = GetInstitutionStore(institution);
+
             var participant = GetParticipant(state: ParticipantState.Online);
             var sut = GetParticipantStore(participant);
 
@@ -540,6 +556,9 @@ namespace CentOps.UnitTests
         [Fact]
         public async Task UpdateParticipantStateShouldFailWithNonExistingId()
         {
+            var institution = GetInstitution();
+            _ = GetInstitutionStore(institution);
+
             var participant = GetParticipant();
             var sut = GetParticipantStore(participant);
             var nonExistingId = "543";

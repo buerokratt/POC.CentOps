@@ -437,14 +437,11 @@ namespace CentOps.Api.Services
                 throw new InvalidOperationException($"Participant has status {ParticipantState.Deleted}");
             }
 
-            ItemResponse<ParticipantDto> response = await _container.PatchItemAsync<ParticipantDto>(
-                id: id,
-                partitionKey: new PartitionKey($"participant::{id}"),
-                patchOperations: new[] {
-                PatchOperation.Replace($"/{nameof(participant.State)}", newState)
-                }).ConfigureAwait(false);
+            participant.State = newState;
 
-            return response.Resource;
+            var response = await store.Update(participant).ConfigureAwait(false);
+
+            return response;
         }
     }
 }
