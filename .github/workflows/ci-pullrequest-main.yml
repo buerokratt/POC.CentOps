@@ -151,5 +151,5 @@ jobs:
     - name: Scan for vulnerabilities
       uses: crazy-max/ghaction-container-scan@v1
       with:
-        image: buerokratt/centops
+        image: centops
         annotations: true
