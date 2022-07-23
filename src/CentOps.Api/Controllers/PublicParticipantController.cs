@@ -69,7 +69,7 @@ namespace CentOps.Api.Controllers
             {
                 return NotFound(ex.Message);
             }
-            catch (Exception ex) when (ex is ModelNotFoundException<ParticipantDto> or ArgumentException or ArgumentNullException)
+            catch (Exception ex) when (ex is ArgumentException or ArgumentNullException)
             {
                 return BadRequest(ex.Message);
             }

@@ -49,7 +49,6 @@ namespace CentOps.Api
 
             _ = app.MapControllers();
 
-
             app.Run();
         }
     }
