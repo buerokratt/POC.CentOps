@@ -23,10 +23,7 @@ jobs:
       run: dotnet restore src/*.sln
         
     - name: Check Dependency Health
-      run: | 
-        dotnet list src/*.sln package --vulnerable --include-transitive | tee vulnerable.out \
-        ls \
-        test `grep -cm 1 'has the following vulnerable packages' ./vulnerable.out` = 0
+      run: dotnet list src/*.sln package --vulnerable --include-transitive | grep -c 'has the following vulnerable packages'
 
     - name: Dotnet Format
       run: dotnet format src/*.sln --no-restore --verify-no-changes
