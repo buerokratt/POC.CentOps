@@ -25,9 +25,11 @@ jobs:
     - name: Check Dependency Health
       run: | 
         if dotnet list src/*.sln package --vulnerable --include-transitive | grep 'has the following vulnerable packages'; then
-          echo 'No vulnerable Packages Found'
+          echo 'Vulnerable packages found.  Check locally and fix.';
+          exit 1;
         else
-          echo 'Vulnerable packages found.  Check locally and fix.'
+          echo 'No vulnerable Packages Found';
+          exit 0;
         fi
 
     - name: Dotnet Format
