@@ -25,7 +25,7 @@ jobs:
     
     - name: Docker Build
       run: docker image build -f src/CentOps.Api/Dockerfile --tag $DOCKER_TAG_SHA ./src
-
+    
     - name: Install cosign
       uses: sigstore/cosign-installer@7e0881f8fe90b25e305bbf0309761e9314607e25
 
