@@ -60,9 +60,9 @@ namespace CentOps.Api.Controllers
                 (string id, string partitionKey) = HttpContext.GetApiUser();
                 var status = _mapper.Map<ParticipantStatusDto>(newStatus);
 
-                var participant = await _store.UpdateState(id, partitionKey, status).ConfigureAwait(false);
+                var participant = await _store.UpdateStatus(id, partitionKey, status).ConfigureAwait(false);
 
-                var response = _mapper.Map<ParticipantStateReponseModel>(participant);
+                var response = _mapper.Map<ParticipantStatusReponseModel>(participant);
                 return Ok(response);
             }
             catch (ModelNotFoundException<ParticipantDto> ex)

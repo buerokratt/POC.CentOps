@@ -141,13 +141,13 @@ namespace CentOps.Api.Services
             return Task.FromResult(queryable.AsEnumerable());
         }
 
-        public Task<ParticipantDto> UpdateState(string id, string partitionKey, ParticipantStatusDto newStatus)
+        public Task<ParticipantDto> UpdateStatus(string id, string partitionKey, ParticipantStatusDto newStatus)
         {
             ArgumentNullException.ThrowIfNull(id);
 
             if (newStatus is not ParticipantStatusDto.Active and not ParticipantStatusDto.Disabled)
             {
-                throw new ArgumentException($"Invalid new state value: {newStatus}");
+                throw new ArgumentException($"Invalid new status value: {newStatus}");
             }
 
             if (!_participants.TryGetValue(id, out var participant))

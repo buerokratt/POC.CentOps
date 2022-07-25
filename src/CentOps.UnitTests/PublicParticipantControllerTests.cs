@@ -186,14 +186,14 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task PutParticipantStateReturnsParticipantWithUpdatedState()
+        public async Task PutParticipantStatusReturnsParticipantWithUpdatedStatus()
         {
             var id = Guid.NewGuid().ToString();
             var participant = DtoBuilder.GetParticipant(id, status: ParticipantStatusDto.Active);
             var updatedParticipant = DtoBuilder.GetParticipant(id, status: ParticipantStatusDto.Disabled);
 
             Mock<IParticipantStore> mockParticipantStore = new();
-            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled)).ReturnsAsync(updatedParticipant);
+            _ = mockParticipantStore.Setup(x => x.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled)).ReturnsAsync(updatedParticipant);
 
             var controller = CreatePublicParticipantController(
                 mockParticipantStore.Object,
@@ -204,20 +204,20 @@ namespace CentOps.UnitTests
 
             var okay = Assert.IsType<OkObjectResult>(response.Result);
             Assert.Equal(okay.StatusCode, StatusCodes.Status200OK);
-            var value = Assert.IsType<ParticipantStateReponseModel>(okay.Value);
+            var value = Assert.IsType<ParticipantStatusReponseModel>(okay.Value);
             Assert.NotNull(value);
             Assert.Equal(value.Id, updatedParticipant.Id);
             Assert.Equal(value.Status.ToString(), updatedParticipant.Status.ToString());
         }
 
         [Fact]
-        public async Task PutParticipantStateReturns404NotFound()
+        public async Task PutParticipantStatusReturns404NotFound()
         {
             var id = Guid.NewGuid().ToString();
             var participant = DtoBuilder.GetParticipant(id, status: ParticipantStatusDto.Active);
 
             Mock<IParticipantStore> mockParticipantStore = new();
-            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled)).ThrowsAsync(new ModelNotFoundException<ParticipantDto>());
+            _ = mockParticipantStore.Setup(x => x.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled)).ThrowsAsync(new ModelNotFoundException<ParticipantDto>());
 
             var controller = CreatePublicParticipantController(
                 mockParticipantStore.Object,
@@ -231,13 +231,13 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task PutParticipantStateReturns400BadRequest()
+        public async Task PutParticipantStatusReturns400BadRequest()
         {
             var id = Guid.NewGuid().ToString();
             var participant = DtoBuilder.GetParticipant(id: id, status: ParticipantStatusDto.Active);
 
             Mock<IParticipantStore> mockParticipantStore = new();
-            _ = mockParticipantStore.Setup(x => x.UpdateState(participant.Id, participant.PartitionKey, ParticipantStatusDto.Deleted)).ThrowsAsync(new ArgumentException());
+            _ = mockParticipantStore.Setup(x => x.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Deleted)).ThrowsAsync(new ArgumentException());
 
             var controller = CreatePublicParticipantController(
                 mockParticipantStore.Object,

@@ -491,7 +491,7 @@ namespace CentOps.UnitTests
         }
 
         [Fact(Skip = "The PatchOperation list in PatchItemAsync is currently not mockable. Skipping this test until we can mock it.")]
-        public async Task UpdateParticipantStateFromOfflineToOnlineShouldReturnParticipant()
+        public async Task UpdateParticipantStatusFromOfflineToOnlineShouldReturnParticipant()
         {
             var institution = DtoBuilder.GetInstitution();
             _ = GetInstitutionStore(institution);
@@ -501,7 +501,7 @@ namespace CentOps.UnitTests
 
             SetupParticipantQuery(m => m.Id == participant.Id && m.Name == "Test2");
 
-            var updatedParticipant = await sut.UpdateState(participant.Id, participant.PartitionKey, ParticipantStatusDto.Active).ConfigureAwait(false);
+            var updatedParticipant = await sut.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Active).ConfigureAwait(false);
 
             Assert.NotNull(updatedParticipant);
             Assert.Equal(participant.Id, updatedParticipant.Id);
@@ -509,7 +509,7 @@ namespace CentOps.UnitTests
         }
 
         [Fact(Skip = "The PatchOperation list in PatchItemAsync is currently not mockable. Skipping this test until we can mock it.")]
-        public async Task UpdateParticipantStateFromOnlineToOfflineShouldReturnParticipant()
+        public async Task UpdateParticipantStatusFromOnlineToOfflineShouldReturnParticipant()
         {
             var institution = DtoBuilder.GetInstitution();
             _ = GetInstitutionStore(institution);
@@ -519,7 +519,7 @@ namespace CentOps.UnitTests
 
             SetupParticipantQuery(m => m.Id == participant.Id && m.Name == "Test2");
 
-            var updatedParticipant = await sut.UpdateState(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled).ConfigureAwait(false);
+            var updatedParticipant = await sut.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled).ConfigureAwait(false);
 
             Assert.NotNull(updatedParticipant);
             Assert.Equal(participant.Id, updatedParticipant.Id);
@@ -527,7 +527,7 @@ namespace CentOps.UnitTests
         }
 
         [Fact]
-        public async Task UpdateParticipantStateShouldFailWithInvalidNewState()
+        public async Task UpdateParticipantStatusShouldFailWithInvalidNewStatus()
         {
             var institution = DtoBuilder.GetInstitution();
             _ = GetInstitutionStore(institution);
@@ -535,11 +535,11 @@ namespace CentOps.UnitTests
             var participant = DtoBuilder.GetParticipant(status: ParticipantStatusDto.Active);
             var sut = GetParticipantStore(participant);
 
-            _ = await Assert.ThrowsAnyAsync<ArgumentException>(() => sut.UpdateState(participant.Id, participant.PartitionKey, ParticipantStatusDto.Deleted)).ConfigureAwait(false);
+            _ = await Assert.ThrowsAnyAsync<ArgumentException>(() => sut.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Deleted)).ConfigureAwait(false);
         }
 
         [Fact]
-        public async Task UpdateParticipantStateShouldFailWithNonExistingId()
+        public async Task UpdateParticipantStatusShouldFailWithNonExistingId()
         {
             var institution = DtoBuilder.GetInstitution();
             _ = GetInstitutionStore(institution);
@@ -548,7 +548,7 @@ namespace CentOps.UnitTests
             var sut = GetParticipantStore(participant);
             var nonExistingId = "543";
 
-            _ = await Assert.ThrowsAnyAsync<ModelNotFoundException<ParticipantDto>>(() => sut.UpdateState(nonExistingId, participant.PartitionKey, ParticipantStatusDto.Disabled)).ConfigureAwait(false);
+            _ = await Assert.ThrowsAnyAsync<ModelNotFoundException<ParticipantDto>>(() => sut.UpdateStatus(nonExistingId, participant.PartitionKey, ParticipantStatusDto.Disabled)).ConfigureAwait(false);
         }
     }
 }
