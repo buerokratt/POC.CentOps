@@ -23,7 +23,7 @@ jobs:
       run: dotnet restore src/*.sln
         
     - name: Check Dependency Health
-      run: dotnet list package --vulnerable --include-transitive
+      run: dotnet list package src/*.sln --vulnerable --include-transitive
 
     - name: Dotnet Format
       run: dotnet format src/*.sln --no-restore --verify-no-changes
