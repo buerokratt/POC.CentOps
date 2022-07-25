@@ -36,6 +36,7 @@ namespace CentOps.Api.Services
 
             // Create an Id
             model.Id = Guid.NewGuid().ToString();
+            model.PartitionKey = $"participant::{model.Id}";
 
             _ = _participants.TryAdd(model.Id, model);
 

@@ -28,6 +28,8 @@ namespace CentOps.Api.Services
             }
 
             model.Id = Guid.NewGuid().ToString();
+            model.PartitionKey = $"institution::{model.Id}";
+
             _ = _institutions.TryAdd(model.Id, model);
             return Task.FromResult(model);
         }
