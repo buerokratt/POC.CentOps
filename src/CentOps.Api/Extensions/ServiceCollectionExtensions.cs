@@ -97,5 +97,23 @@ namespace CentOps.Api.Extensions
             _ = services.AddSingleton<IInstitutionStore>(provider => provider.GetRequiredService<CosmosDbService>());
             _ = services.AddSingleton<IParticipantStore>(provider => provider.GetRequiredService<CosmosDbService>());
         }
+
+        public static void AddCorsConfiguration(this IServiceCollection services, IConfiguration configurationSection)
+        {
+            if (configurationSection == null)
+            {
+                throw new ArgumentNullException(nameof(configurationSection));
+            }
+
+            var corsConfig = configurationSection.GetSection("Cors").Get<CorsConfig>();
+            _ = services.AddCors(options =>
+                    options.AddDefaultPolicy(builder =>
+                    builder
+                        .WithOrigins(corsConfig.AllowedOrigins.ToArray())
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials())
+            );
+        }
     }
 }

@@ -1,4 +1,5 @@
 using CentOps.Api.Authentication.Extensions;
+using CentOps.Api.Configuration;
 using CentOps.Api.Extensions;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
@@ -32,6 +33,7 @@ namespace CentOps.Api
             services.AddApiKeyAuthentication(builder.Configuration);
             services.AddAuthorizationPolicies();
             services.AddDataStore(builder.Configuration);
+            services.AddCorsConfiguration(builder.Configuration);
 
             var app = builder.Build();
 
@@ -43,6 +45,8 @@ namespace CentOps.Api
             }
 
             _ = app.UseHttpsRedirection();
+
+            _ = app.UseCors();
 
             _ = app.UseAuthentication();
             _ = app.UseAuthorization();
