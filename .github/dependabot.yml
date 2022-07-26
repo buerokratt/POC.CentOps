@@ -17,7 +17,7 @@ updates:
       interval: "daily"
       time: "23:00"
  
-   - package-ecosystem: "nuget" # See documentation for possible values
+  - package-ecosystem: "nuget" # See documentation for possible values
     directory: "/src/CentOps.UnitTests/" # Location of package manifests
     schedule:
       interval: "daily"
