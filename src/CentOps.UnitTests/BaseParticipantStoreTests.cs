@@ -501,7 +501,7 @@ namespace CentOps.UnitTests
 
             SetupParticipantQuery(m => m.Id == participant.Id && m.Name == "Test2");
 
-            var updatedParticipant = await sut.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Active).ConfigureAwait(false);
+            var updatedParticipant = await sut.UpdateStatus(participant.Id, ParticipantStatusDto.Active).ConfigureAwait(false);
 
             Assert.NotNull(updatedParticipant);
             Assert.Equal(participant.Id, updatedParticipant.Id);
@@ -519,7 +519,7 @@ namespace CentOps.UnitTests
 
             SetupParticipantQuery(m => m.Id == participant.Id && m.Name == "Test2");
 
-            var updatedParticipant = await sut.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled).ConfigureAwait(false);
+            var updatedParticipant = await sut.UpdateStatus(participant.Id, ParticipantStatusDto.Disabled).ConfigureAwait(false);
 
             Assert.NotNull(updatedParticipant);
             Assert.Equal(participant.Id, updatedParticipant.Id);
@@ -535,7 +535,7 @@ namespace CentOps.UnitTests
             var participant = DtoBuilder.GetParticipant(status: ParticipantStatusDto.Active);
             var sut = GetParticipantStore(participant);
 
-            _ = await Assert.ThrowsAnyAsync<ArgumentException>(() => sut.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Deleted)).ConfigureAwait(false);
+            _ = await Assert.ThrowsAnyAsync<ArgumentException>(() => sut.UpdateStatus(participant.Id, ParticipantStatusDto.Deleted)).ConfigureAwait(false);
         }
 
         [Fact]
@@ -548,7 +548,7 @@ namespace CentOps.UnitTests
             var sut = GetParticipantStore(participant);
             var nonExistingId = "543";
 
-            _ = await Assert.ThrowsAnyAsync<ModelNotFoundException<ParticipantDto>>(() => sut.UpdateStatus(nonExistingId, participant.PartitionKey, ParticipantStatusDto.Disabled)).ConfigureAwait(false);
+            _ = await Assert.ThrowsAnyAsync<ModelNotFoundException<ParticipantDto>>(() => sut.UpdateStatus(nonExistingId, ParticipantStatusDto.Disabled)).ConfigureAwait(false);
         }
     }
 }

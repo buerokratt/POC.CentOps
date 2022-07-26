@@ -2,7 +2,7 @@
 {
     public static class ClaimsExtensions
     {
-        public static (string id, string partitionKey) GetApiUser(this HttpContext httpContext)
+        public static string GetApiUserId(this HttpContext httpContext)
         {
             if (httpContext == null)
             {
@@ -10,9 +10,8 @@
             }
 
             var id = httpContext.User.Claims.First(c => c.Type == "id").Value;
-            var partitionKey = httpContext.User.Claims.First(c => c.Type == "pk").Value;
 
-            return (id, partitionKey);
+            return id;
         }
     }
 }

@@ -141,7 +141,7 @@ namespace CentOps.Api.Services
             return Task.FromResult(queryable.AsEnumerable());
         }
 
-        public Task<ParticipantDto> UpdateStatus(string id, string partitionKey, ParticipantStatusDto newStatus)
+        public Task<ParticipantDto> UpdateStatus(string id, ParticipantStatusDto newStatus)
         {
             ArgumentNullException.ThrowIfNull(id);
 

@@ -26,7 +26,6 @@ namespace CentOps.Api.Services
                 result = new ApiUser(new[]
                 {
                     new Claim("id", user.Id!),
-                    new Claim("pk", user.PartitionKey!),
                     new Claim("name", user.Name!),
                     new Claim("institutionId", user.InstitutionId!),
                     new Claim("status", user.Status.ToString())

@@ -48,25 +48,21 @@ namespace CentOps.UnitTests.Services
             _ = apiUser.Should().NotBeNull();
 
             var claims = apiUser.Claims;
-            _ = claims.Should().HaveCount(5);
+            _ = claims.Should().HaveCount(4);
 
             var idClaim = claims.ElementAt(0);
             _ = idClaim.Type.Should().Be("id");
             _ = idClaim.Value.Should().Be("123");
 
-            var partitionKeyClaim = claims.ElementAt(1);
-            _ = partitionKeyClaim.Type.Should().Be("pk");
-            _ = partitionKeyClaim.Value.Should().Be("pk:123");
-
-            var nameClaim = claims.ElementAt(2);
+            var nameClaim = claims.ElementAt(1);
             _ = nameClaim.Type.Should().Be("name");
             _ = nameClaim.Value.Should().Be("health");
 
-            var institutionClaim = claims.ElementAt(3);
+            var institutionClaim = claims.ElementAt(2);
             _ = institutionClaim.Type.Should().Be("institutionId");
             _ = institutionClaim.Value.Should().Be("inst:765");
 
-            var statusClaim = claims.ElementAt(4);
+            var statusClaim = claims.ElementAt(3);
             _ = statusClaim.Type.Should().Be("status");
             _ = statusClaim.Value.Should().Be(ParticipantStatusDto.Active.ToString());
         }

@@ -193,7 +193,7 @@ namespace CentOps.UnitTests
             var updatedParticipant = DtoBuilder.GetParticipant(id, status: ParticipantStatusDto.Disabled);
 
             Mock<IParticipantStore> mockParticipantStore = new();
-            _ = mockParticipantStore.Setup(x => x.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled)).ReturnsAsync(updatedParticipant);
+            _ = mockParticipantStore.Setup(x => x.UpdateStatus(participant.Id, ParticipantStatusDto.Disabled)).ReturnsAsync(updatedParticipant);
 
             var controller = CreatePublicParticipantController(
                 mockParticipantStore.Object,
@@ -217,7 +217,7 @@ namespace CentOps.UnitTests
             var participant = DtoBuilder.GetParticipant(id, status: ParticipantStatusDto.Active);
 
             Mock<IParticipantStore> mockParticipantStore = new();
-            _ = mockParticipantStore.Setup(x => x.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Disabled)).ThrowsAsync(new ModelNotFoundException<ParticipantDto>());
+            _ = mockParticipantStore.Setup(x => x.UpdateStatus(participant.Id, ParticipantStatusDto.Disabled)).ThrowsAsync(new ModelNotFoundException<ParticipantDto>());
 
             var controller = CreatePublicParticipantController(
                 mockParticipantStore.Object,
@@ -237,7 +237,7 @@ namespace CentOps.UnitTests
             var participant = DtoBuilder.GetParticipant(id: id, status: ParticipantStatusDto.Active);
 
             Mock<IParticipantStore> mockParticipantStore = new();
-            _ = mockParticipantStore.Setup(x => x.UpdateStatus(participant.Id, participant.PartitionKey, ParticipantStatusDto.Deleted)).ThrowsAsync(new ArgumentException());
+            _ = mockParticipantStore.Setup(x => x.UpdateStatus(participant.Id, ParticipantStatusDto.Deleted)).ThrowsAsync(new ArgumentException());
 
             var controller = CreatePublicParticipantController(
                 mockParticipantStore.Object,

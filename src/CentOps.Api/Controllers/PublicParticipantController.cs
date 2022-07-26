@@ -57,10 +57,10 @@ namespace CentOps.Api.Controllers
         {
             try
             {
-                (string id, string partitionKey) = HttpContext.GetApiUser();
+                var id = HttpContext.GetApiUserId();
                 var status = _mapper.Map<ParticipantStatusDto>(newStatus);
 
-                var participant = await _store.UpdateStatus(id, partitionKey, status).ConfigureAwait(false);
+                var participant = await _store.UpdateStatus(id, status).ConfigureAwait(false);
 
                 var response = _mapper.Map<ParticipantStatusReponseModel>(participant);
                 return Ok(response);

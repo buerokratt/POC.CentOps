@@ -412,7 +412,7 @@ namespace CentOps.Api.Services
             return results;
         }
 
-        public async Task<ParticipantDto> UpdateStatus(string id, string partitionKey, ParticipantStatusDto newStatus)
+        public async Task<ParticipantDto> UpdateStatus(string id, ParticipantStatusDto newStatus)
         {
             ArgumentNullException.ThrowIfNull(id);
 
@@ -423,10 +423,8 @@ namespace CentOps.Api.Services
 
             var patch = new[] { PatchOperation.Replace("/status", newStatus) };
 
-            var response = await _container.PatchItemAsync<ParticipantDto>(
-                id: id,
-                partitionKey: new PartitionKey(partitionKey),
-                patchOperations: patch).ConfigureAwait(false);
+            var partitionKey = new PartitionKey($"participant::{id}");
+            var response = await _container.PatchItemAsync<ParticipantDto>(id, partitionKey, patch).ConfigureAwait(false);
 
             return response.StatusCode == HttpStatusCode.NotFound
                 ? throw new ModelNotFoundException<ParticipantDto>(id)
