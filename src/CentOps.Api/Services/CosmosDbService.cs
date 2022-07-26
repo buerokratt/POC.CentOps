@@ -317,7 +317,7 @@ namespace CentOps.Api.Services
                         AND c.apiKey = @apiKey
                         AND c.status != @status",
                 ("@apiKey", apiKey),
-                ("@status", ParticipantStatusDto.Disabled));
+                ("@status", ParticipantStatusDto.Deleted));
 
             var results = await RunQueryAsync<ParticipantDto>(query).ConfigureAwait(false);
             return results?.FirstOrDefault();
@@ -410,6 +410,25 @@ namespace CentOps.Api.Services
             }
 
             return results;
+        }
+
+        public async Task<ParticipantDto> UpdateStatus(string id, ParticipantStatusDto newStatus)
+        {
+            ArgumentNullException.ThrowIfNull(id);
+
+            if (newStatus is not ParticipantStatusDto.Active and not ParticipantStatusDto.Disabled)
+            {
+                throw new ArgumentException($"Invalid new status value: {newStatus}");
+            }
+
+            var patch = new[] { PatchOperation.Replace("/status", newStatus) };
+
+            var partitionKey = new PartitionKey($"participant::{id}");
+            var response = await _container.PatchItemAsync<ParticipantDto>(id, partitionKey, patch).ConfigureAwait(false);
+
+            return response.StatusCode == HttpStatusCode.NotFound
+                ? throw new ModelNotFoundException<ParticipantDto>(id)
+                : response.Resource;
         }
     }
 }

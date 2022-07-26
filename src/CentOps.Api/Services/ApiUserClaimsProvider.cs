@@ -21,7 +21,7 @@ namespace CentOps.Api.Services
 
             ApiUser? result = null;
 
-            if (user != null && user.Status != ParticipantStatusDto.Disabled)
+            if (user != null && user.Status != ParticipantStatusDto.Deleted)
             {
                 result = new ApiUser(new[]
                 {

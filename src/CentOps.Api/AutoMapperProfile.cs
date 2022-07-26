@@ -13,6 +13,8 @@ namespace CentOps.Api
             _ = CreateMap<ParticipantDto, AdminParticipantResponseModel>();
             _ = CreateMap<CreateUpdateInsitutionModel, InstitutionDto>();
             _ = CreateMap<InstitutionDto, InstitutionResponseModel>();
+            _ = CreateMap<ParticipantDto, ParticipantStatusReponseModel>();
+            _ = CreateMap<ParticipantStatus, ParticipantStatusDto>();
         }
     }
 }

@@ -60,6 +60,7 @@ namespace CentOps.UnitTests
             SetupReadItem(seedParticipantsList);
             SetupDeleteItem(seedParticipantsList);
             SetupUpdateItem(seedParticipantsList);
+            SetupPatchItem(seedParticipantsList);
 
             return sut;
         }
@@ -224,6 +225,37 @@ namespace CentOps.UnitTests
 
                     return Task.FromResult(response.Object);
                 });
+        }
+
+        private void SetupPatchItem(IList<ParticipantDto> models)
+        {
+            _ = mockContainer
+                .Setup(m =>
+                    m.PatchItemAsync<ParticipantDto>(
+                        It.IsAny<string>(),
+                        It.IsAny<PartitionKey>(),
+                        It.IsAny<IReadOnlyList<PatchOperation>>(),
+                        It.IsAny<PatchItemRequestOptions>(),
+                        It.IsAny<CancellationToken>()))
+                .Returns<string, PartitionKey, IReadOnlyList<PatchOperation>, PatchItemRequestOptions, CancellationToken>(
+                    (id, pk, patch, options, cancellationToken) =>
+                    {
+                        var response = new Mock<ItemResponse<ParticipantDto>>();
+
+                        var item = models.FirstOrDefault(m => m.Id == id && new PartitionKey(m.PartitionKey) == pk);
+
+
+
+                        _ = response
+                            .Setup(m => m.StatusCode)
+                            .Returns(item == null ? HttpStatusCode.NotFound : HttpStatusCode.OK);
+
+                        _ = response
+                            .Setup(m => m.Resource)
+                            .Returns(item);
+
+                        return Task.FromResult(response.Object);
+                    });
         }
     }
 }

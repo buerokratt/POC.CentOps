@@ -1,4 +1,4 @@
-name: CentOps CI Pipeline
+name: PR pipeline
 
 on:
   pull_request:

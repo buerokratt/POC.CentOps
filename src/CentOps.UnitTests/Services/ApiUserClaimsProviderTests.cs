@@ -68,15 +68,15 @@ namespace CentOps.UnitTests.Services
         }
 
         [Fact]
-        public async Task ShouldReturnNullIfParticipantIsDisabled()
+        public async Task ShouldReturnNullIfParticipantIsDeleted()
         {
             // Arrange
-            var user1 = SetupApiUser(id: "123", name: "health", status: ParticipantStatusDto.Disabled, apiKey: "disabled");
+            var user1 = SetupApiUser(id: "123", name: "health", status: ParticipantStatusDto.Deleted, apiKey: "deleted");
             var user2 = SetupApiUser(id: "234", name: "social", apiKey: "qazwsx");
             SetupParticipantStore(user1, user2);
 
             // Act
-            var apiUser = await provider.GetUserClaimsAsync("disabled").ConfigureAwait(false);
+            var apiUser = await provider.GetUserClaimsAsync("deleted").ConfigureAwait(false);
 
             // Assert
             _ = apiUser.Should().BeNull();
@@ -101,9 +101,12 @@ namespace CentOps.UnitTests.Services
             string apiKey = "xyz",
             ParticipantStatusDto status = ParticipantStatusDto.Active)
         {
+            id ??= Guid.NewGuid().ToString();
+
             return new ParticipantDto
             {
-                Id = id ?? Guid.NewGuid().ToString(),
+                Id = id,
+                PartitionKey = $"pk:{id}",
                 Name = name,
                 InstitutionId = institutionId ?? Guid.NewGuid().ToString(),
                 ApiKey = apiKey,

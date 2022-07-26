@@ -36,6 +36,7 @@ namespace CentOps.Api.Services
 
             // Create an Id
             model.Id = Guid.NewGuid().ToString();
+            model.PartitionKey = $"participant::{model.Id}";
 
             _ = _participants.TryAdd(model.Id, model);
 
@@ -138,6 +139,26 @@ namespace CentOps.Api.Services
             }
 
             return Task.FromResult(queryable.AsEnumerable());
+        }
+
+        public Task<ParticipantDto> UpdateStatus(string id, ParticipantStatusDto newStatus)
+        {
+            ArgumentNullException.ThrowIfNull(id);
+
+            if (newStatus is not ParticipantStatusDto.Active and not ParticipantStatusDto.Disabled)
+            {
+                throw new ArgumentException($"Invalid new status value: {newStatus}");
+            }
+
+            if (!_participants.TryGetValue(id, out var participant))
+            {
+                throw new ModelNotFoundException<ParticipantDto>(id);
+            }
+
+            participant.Status = newStatus;
+
+            return Task.FromResult(participant);
+
         }
     }
 }

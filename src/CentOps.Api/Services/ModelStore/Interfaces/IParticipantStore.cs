@@ -6,5 +6,6 @@ namespace CentOps.Api.Services.ModelStore.Interfaces
     {
         Task<IEnumerable<ParticipantDto>> GetAll(IEnumerable<ParticipantTypeDto> types, bool includeInactive);
         Task<ParticipantDto?> GetByApiKeyAsync(string apiKey);
+        Task<ParticipantDto> UpdateStatus(string id, ParticipantStatusDto newStatus);
     }
 }
