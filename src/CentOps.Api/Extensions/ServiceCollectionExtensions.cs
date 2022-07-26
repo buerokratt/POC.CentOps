@@ -106,13 +106,14 @@ namespace CentOps.Api.Extensions
             }
 
             var corsConfig = configuration.GetSection("Cors").Get<CorsConfig>();
+            var allowedHosts = corsConfig?.AllowedOrigins != null && corsConfig.AllowedOrigins.Any()
+                            ? corsConfig.AllowedOrigins.ToArray()
+                            : new string[] { "localhost" };
+
             _ = services.AddCors(options =>
                     options.AddDefaultPolicy(builder =>
                     builder
-                        .WithOrigins(
-                            corsConfig?.AllowedOrigins != null && corsConfig.AllowedOrigins.Any()
-                            ? corsConfig.AllowedOrigins.ToArray()
-                            : new string[] { "*" })
+                        .WithOrigins(allowedHosts)
                         .AllowAnyMethod()
                         .AllowAnyHeader())
             );
