@@ -4,6 +4,7 @@ using CentOps.Api.Services.ModelStore.Interfaces;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -102,6 +103,37 @@ namespace CentOps.UnitTests.Extensions
 
             _ = cosmosDbService.Should().BeSameAs(institutionStore);
             _ = cosmosDbService.Should().BeSameAs(participantStore);
+        }
+
+        [Fact]
+        public void AddCorsShouldThrowWhenConfigIsNull()
+        {
+            // Act & Assert
+            Action action = () => services.AddCorsConfiguration(null);
+            _ = action.Should().ThrowExactly<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void AddCorsShouldAddCorrectConfiguration()
+        {
+            // Arrange
+            var inMemorySettings = new Dictionary<string, string> {
+                {"Cors:AllowedOrigins", "*"},
+            };
+
+            IConfiguration configuration = new ConfigurationBuilder()
+               .AddInMemoryCollection(inMemorySettings)
+               .Build();
+
+            IServiceCollection services = new ServiceCollection();
+
+            // Act
+            services.AddCorsConfiguration(configuration);
+
+            // Assert
+            var interfaces = services.Select(s => s.ServiceType).ToArray();
+            _ = interfaces.Should().Contain(typeof(ICorsService));
+            _ = interfaces.Should().Contain(typeof(ICorsPolicyProvider));
         }
     }
 }

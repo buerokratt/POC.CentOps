@@ -13,6 +13,7 @@ namespace CentOps.Api
             var builder = WebApplication.CreateBuilder(args);
             var services = builder.Services;
 
+            services.AddCorsConfiguration(builder.Configuration);
             _ = services
                 .AddControllers()
                 .AddJsonOptions(jo =>
@@ -32,7 +33,6 @@ namespace CentOps.Api
             services.AddApiKeyAuthentication(builder.Configuration);
             services.AddAuthorizationPolicies();
             services.AddDataStore(builder.Configuration);
-            services.AddCorsConfiguration(builder.Configuration);
 
             var app = builder.Build();
 
