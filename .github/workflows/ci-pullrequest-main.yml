@@ -58,13 +58,13 @@ jobs:
         thresholds: '80'
     
     - name: Upload Coverage Markdown Report
-      uses: actions/upload-artifact@v3.0.0
+      uses: actions/upload-artifact@v3.1.0
       with:
         name: coverage-report-markdown
         path: code-coverage-results.md
         
     - name: Upload Coverage XML Report
-      uses: actions/upload-artifact@v3.0.0
+      uses: actions/upload-artifact@v3.1.0
       with:
         name: coverage-report-xml
         path: coverage.cobertura.xml
@@ -81,7 +81,7 @@ jobs:
       run: dotnet stryker --project CentOps.Api.csproj && dotnet stryker --project CentOps.Api.Authentication.csproj
     
     - name: Upload Mutation Report
-      uses: actions/upload-artifact@v3.0.0
+      uses: actions/upload-artifact@v3.1.0
       with:
         name: mutation-report
         path: src/StrykerOutput
