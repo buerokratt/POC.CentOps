@@ -25,7 +25,7 @@ As with any RESTful service, operations are defined by HTTP Verbs, GET to read, 
 
 ## Implementation And Flow
 
-Registered participants have API Keys which they can use to interact with the `public` API.  The public API allows only a subset of the functionality and data provided by the CentOps service.  The public API only returns current active participants
+Registered participants have Participant API Keys which they can use to interact with the `public` API.  The public API allows only a subset of the functionality and data provided by the CentOps service.  For instance, the public API only returns current active participants.
 
 Only CentOps administrators (with a specific API key) can interact with the `admin` API.  This allows Participants to be created (with unique API keys) and removed from the Buerokratt ecosystem.  CentOps can view active/inactive & deleted participants.
 
@@ -38,7 +38,7 @@ Taking the case of an admin user requesting all participants:
 3. The Admin Participant 'Controller' handles the GET request calling the `Get()` function (also decorated with the `[HttpGet]` attribute to indicate it will handle requests with the HTTP GET Verb)
 4. Dependency Injection will give the Admin Participant Controller an implementation of the `IParticpantStore` interface.  At time of writing this will be a CosmosDb backed implementation of this interface.
 5. The CosmosDB implementation will query the configured data store and returned the participants found within.
-6. Internal data types are mapped to external REST interface types using Automapper and returned to the caller.
+6. Internal data types are mapped to external REST interface types using Automapper and returned as a collection to the caller with the HTTP status code 200 (OK).
 
 ## Configuration
 
