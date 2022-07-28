@@ -42,7 +42,7 @@ Taking the case of an admin user requesting all participants:
 
 ## Configuration
 
-Configuration of this service can be done in several ways.  [appsettings.json](../../src/CentOps.Api/appsettings.json) is one approach which will be used in local development.  Another is using specifically named environment variables.  Both approaches are documented below.
+Configuration of this service can be done in many ways.  [appsettings.json](../../src/CentOps.Api/appsettings.json) is one approach which will be used in local development.  Another is using specifically named environment variables.  Both approaches are documented below.
 
 ### CosmosDb
 
