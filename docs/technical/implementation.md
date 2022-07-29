@@ -48,7 +48,7 @@ Configuration of this service can be done in many ways.  [appsettings.json](../.
 
 These settings correspond to the CosmosDb connection used by CentOps.
 
-| Setting    | Purpose                       |  appSettings.json | yaml environment |
+| Setting    | Purpose                       |  appsettings.json | yaml environment |
 |:------------------|:------------------------------| ------------------|--------|
 | Account | Specifies the Cosmos Account to be used. |"Account": "`CosmosAccountName`" | COSMOSDB__ACCOUNT=`CosmosAccountName`
 | Key      | Specifies the read/write key corresponding to the Cosmos Account| "Key": "`CosmosAccountKey`" | COSMOSDB__KEY=`CosmosAccountKey`
