@@ -36,7 +36,7 @@ Taking the case of an admin user requesting all participants:
 1. GET request is issued to the admin version of the participants API.
 2. The API Key is validated and calls without the correct API receive 401 (Unauthorized) as a response.
 3. The Admin Participant 'Controller' handles the GET request calling the `Get()` function (also decorated with the `[HttpGet]` attribute to indicate it will handle requests with the HTTP GET Verb)
-4. Dependency Injection will give the Admin Participant Controller an implementation of the `IParticpantStore` interface.  At time of writing this will be a CosmosDb backed implementation of this interface.
+4. Dependency Injection will give the Admin Participant Controller an implementation of the `IParticipantStore` interface.  At time of writing this will be a CosmosDb backed implementation of this interface.
 5. The CosmosDB implementation will query the configured data store and return the participants found within.
 6. Internal data types are mapped to external REST interface types using Automapper and returned as a collection to the caller with the HTTP status code 200 (OK).
 
