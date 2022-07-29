@@ -44,6 +44,8 @@ Taking the case of an admin user requesting all participants:
 
 Configuration of this service can be done in many ways.  [appsettings.json](../../src/CentOps.Api/appsettings.json) is one approach which will be used in local development.  Another is using specifically named environment variables.  Both approaches are documented below.
 
+> Note. This form of configuration is a part of .Net's configuration and the technique to implement this configuration via environment variables is documented [here](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-6.0#naming-of-environment-variables).
+
 ### CosmosDb
 
 These settings correspond to the CosmosDb connection used by CentOps.
