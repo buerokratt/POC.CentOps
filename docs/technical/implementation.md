@@ -57,7 +57,7 @@ These settings correspond to the CosmosDb connection used by CentOps.
 
 ### ConnectionStrings
 
-Contains the setting for the Admin Api Key.  Current deployment generate a random complex key which is held in Azure Key Vault and piped into CentOps via configuration.
+Contains the setting for the Admin Api Key.  Current deployments generate a random complex key which is held in Azure Key Vault and piped into CentOps via configuration.
 
 | Setting    | Purpose                       |  appsettings.json | yaml environment |
 |:------------------|:------------------------------| ------------------|--------|
