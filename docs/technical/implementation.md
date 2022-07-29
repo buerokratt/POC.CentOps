@@ -1,6 +1,6 @@
 # CentOps Implementation
 
-CentOps implemented in .NET 6.0 with C#
+CentOps is implemented in .NET 6.0 with C#
 
 ## Technologies Used and Their Function
 
