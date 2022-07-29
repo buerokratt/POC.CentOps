@@ -23,7 +23,7 @@ As with any RESTful service, operations are defined by HTTP Verbs, GET to read, 
 
 [Stryker](https://stryker-mutator.io/) is a mutation testing framework used by this project to ensure tests written to meet coverage requirements are covering crucial areas.
 
-## Implementation And Flow
+## Implementation and Flow
 
 Registered participants have Participant API Keys which they can use to interact with the `public` API.  The public API allows only a subset of the functionality and data provided by the CentOps service.  For instance, the public API only returns current active participants.
 
