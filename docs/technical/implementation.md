@@ -75,7 +75,7 @@ Cross Origin Resource Sharing Settings specified here.
 
 Optional functionality is controlled by Feature Toggles.
 
-| Feature Toggle    | Purpose                       |  appSettings.json | yaml environment |
+| Feature Toggle    | Purpose                       |  appsettings.json | yaml environment |
 |:------------------|:------------------------------| ------------------|--------|
 | UseInMemoryDataStore | Enables an In-memory data store which can be used for testing purposes only |"UseInMemoryStore": `true` | FEATURETOGGLES__USEINMEMORYSTORE=`true`
 
