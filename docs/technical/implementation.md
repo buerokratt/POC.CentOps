@@ -67,7 +67,7 @@ Contains the setting for the Admin Api Key.  Current deployment generate a rando
 
 Cross Origin Resource Sharing Settings specified here.
 
-| Setting    | Purpose                       |  appSettings.json | yaml environment |
+| Setting    | Purpose                       |  appsettings.json | yaml environment |
 |:------------------|:------------------------------| ------------------|--------|
 | AllowedOrigins  | A collection of allowed origins which can call this API. | "AllowedOrigins": [`OriginHost`] | CORS__ALLOWEDORIGINS__0=`OriginHost`
 
