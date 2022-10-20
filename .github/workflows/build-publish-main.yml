@@ -27,7 +27,7 @@ jobs:
       run: docker image build -f src/CentOps.Api/Dockerfile --tag $DOCKER_TAG_SHA ./src
     
     - name: Install cosign
-      uses: sigstore/cosign-installer@09a077b27eb1310dcfb21981bee195b30ce09de0
+      uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b
 
     - name: Log in to GitHub container registry
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
