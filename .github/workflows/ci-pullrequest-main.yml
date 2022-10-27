@@ -70,7 +70,7 @@ jobs:
         path: coverage.cobertura.xml
         
     - name: Add Coverage PR Comment
-      uses: marocchino/sticky-pull-request-comment@39c5b5dc7717447d0cba270cd115037d32d28443
+      uses: marocchino/sticky-pull-request-comment@adca94abcaf73c10466a71cc83ae561fd66d1a56
       if: github.event_name == 'pull_request'
       with:
         recreate: true
