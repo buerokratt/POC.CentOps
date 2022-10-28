@@ -159,7 +159,7 @@ jobs:
       run: docker image build -f src/CentOps.Api/Dockerfile ./src -t centops
 
     - name: Scan for vulnerabilities
-      uses: crazy-max/ghaction-container-scan@b5dc796ae2a0ab4338f6db67dd1041a1cf261c2c
+      uses: crazy-max/ghaction-container-scan@f58bb18143ac42b827b11b553b68ec967da4db8d
       with:
         image: centops
         annotations: true
